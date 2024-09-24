@@ -42,6 +42,42 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
+## Database CLI
+
+# To generate a migration script
+
+```bash
+yarn sequelize-cli migration:generate --name migration-NameOfModel
+
+# To run a migration
+
+yarn migrate:up
+
+# To undo a migration
+
+yarn migrate:undo
+
+# To undo all migrations
+
+yarn migrate:undo:all
+
+# To create a seed script
+
+npx sequelize-cli seed:generate --name demo-NameOfModel
+
+# To run a seed script
+
+yarn seed:all
+
+# To undo a specific seed script
+
+yarn sequelize-cli db:seed:undo --seed nameOfSeedScript
+
+# To undo all seed scripts
+
+yarn seed:undo:all
+```
+
 ## Test
 
 ```bash
@@ -58,12 +94,6 @@ $ yarn run test:cov
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 

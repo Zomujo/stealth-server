@@ -1,3 +1,4 @@
+import { UUID } from 'sequelize';
 import {
   Column,
   CreatedAt,
@@ -7,7 +8,15 @@ import {
   UpdatedAt,
 } from 'sequelize-typescript';
 
-export abstract class BaseEntity extends Model {
+export abstract class BaseModel extends Model {
+  @Column({
+    type: UUID,
+    defaultValue: DataType.UUIDV4,
+    allowNull: false,
+    primaryKey: true,
+  })
+  id: string;
+
   @CreatedAt
   @Column({ type: DataType.DATE, field: 'created_at' })
   createdAt: Date;
