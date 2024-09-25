@@ -1,15 +1,14 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 'use strict';
+
+const baseModelColumns = require('../migration-base');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     // Create 'drugs' table with a reference to 'drug_categories'
     await queryInterface.createTable('drugs', {
-      id: {
-        type: Sequelize.UUID,
-        primaryKey: true,
-        defaultValue: Sequelize.UUIDV4,
-      },
+      ...baseModelColumns,
       name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -23,9 +22,7 @@ module.exports = {
         type: Sequelize.DOUBLE,
         allowNull: false,
       },
-      dosage_form: {
-        type: Sequelize.ENUM('SOLIDS', 'LIQUIDS'),
-      },
+      dosage_form: Sequelize.ENUM('SOLIDS', 'LIQUIDS'),
       code: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -34,12 +31,8 @@ module.exports = {
         type: Sequelize.DATEONLY,
         allowNull: false,
       },
-      fda_approval: {
-        type: Sequelize.STRING,
-      },
-      ISO: {
-        type: Sequelize.STRING,
-      },
+      fda_approval: Sequelize.STRING,
+      ISO: Sequelize.STRING,
       batch: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -68,9 +61,7 @@ module.exports = {
         type: Sequelize.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'),
         allowNull: false,
       },
-      storage_req: {
-        type: Sequelize.TEXT,
-      },
+      storage_req: Sequelize.TEXT,
       category_id: {
         type: Sequelize.UUID,
         allowNull: false,

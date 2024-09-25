@@ -1,14 +1,13 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 'use strict';
+
+const baseModelColumns = require('../migration-base');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('suppliers', {
-      id: {
-        type: Sequelize.UUID,
-        primaryKey: true,
-        defaultValue: Sequelize.UUIDV4,
-      },
+      ...baseModelColumns,
       name: {
         type: Sequelize.STRING,
         unique: true,
@@ -25,9 +24,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      info: {
-        type: Sequelize.TEXT,
-      },
+      info: Sequelize.TEXT,
     });
   },
 
