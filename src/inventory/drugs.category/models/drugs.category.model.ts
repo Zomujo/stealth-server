@@ -19,7 +19,7 @@ export class DrugsCategory extends BaseModel {
   drugCount: number;
 }
 
-enum DrugsCategoryStatus {
+export enum DrugsCategoryStatus {
   ACTIVE = "ACTIVE",
   DEACTIVATED = "DEACTIVATED"
 }
