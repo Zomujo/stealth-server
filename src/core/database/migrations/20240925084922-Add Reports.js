@@ -23,6 +23,19 @@ module.exports = {
         type: Sequelize.ENUM('PORTRAIT', 'LANDSCAPE'),
         defaultValue: 'PORTRAIT',
       },
+
+      deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+        field: 'deleted_at',
+      },
+
+      deletedBy: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        field: 'deleted_by',
+      },
+
       ...baseModelColumns,
     });
   },

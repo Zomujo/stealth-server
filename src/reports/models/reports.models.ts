@@ -1,4 +1,4 @@
-import { Column, Table, DataType } from 'sequelize-typescript';
+import { Column, Table, DataType, DeletedAt } from 'sequelize-typescript';
 import { BaseModel } from '../../shared/models/base.model';
 
 export enum ReportLayout {
@@ -24,6 +24,13 @@ export class Report extends BaseModel {
 
   @Column({ type: DataType.DATE, field: 'end_date' })
   endDate: Date;
+
+  @DeletedAt
+  @Column({ type: DataType.DATE, field: 'deleted_at' })
+  deletedAt: Date;
+
+  @Column({ type: DataType.STRING, field: 'deleted_by' })
+  deletedBy: string;
 
   @Column({
     type: DataType.ENUM(...Object.values(ReportLayout)),
