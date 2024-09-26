@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum, IsDate, IsUUID } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsDate, IsUUID, Matches } from 'class-validator';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { Drug } from '../models/drug.model';
@@ -44,7 +44,7 @@ export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
     example: '2022-12-31',
     description: 'The validity of the drug',
   })
-  @IsDate()
+  @Matches(/\d{4}-\d{2}-\d{2}/)
   validity: Date;
 
   @ApiProperty({

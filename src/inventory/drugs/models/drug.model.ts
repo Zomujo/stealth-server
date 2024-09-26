@@ -27,7 +27,7 @@ export class Drug extends BaseModel {
   @Column
   code: string;
 
-  @Column({ type: DataType.DATEONLY, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false })
   validity: Date;
 
   @Column

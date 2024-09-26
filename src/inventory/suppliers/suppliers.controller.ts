@@ -25,7 +25,7 @@ export class SuppliersController {
   @CustomApiResponse(["accepted", "forbidden", "unauthorized", "notfound"], {type: CreateSupplierDto, message: "Supplier retrieved successfully"})
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.suppliersService.findOne(+id);
+    return this.suppliersService.findOne(id);
   }
 
   @CustomApiResponse(["patch", "forbidden", "unauthorized"], { type: String, message: "Supplier updated successfully" })

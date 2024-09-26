@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { CreateSupplierDto } from './dto/create-supplier.dto';
-import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Supplier } from './models/supplier.model';
+import { CreateSupplierDto, UpdateSupplierDto } from './dto';
 
 @Injectable()
 export class SuppliersService {
-  constructor() {}
+  private readonly logger: Logger;
+  constructor(
+    @InjectModel(Supplier) private readonly supplierRepo: typeof Supplier
+  ) { this.logger = new Logger(SuppliersService.name); }
   async create(createSupplierDto: CreateSupplierDto) {
     return 'This action adds a new supplier';
   }
@@ -13,8 +17,21 @@ export class SuppliersService {
     return `This action returns all suppliers`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} supplier`;
+  async findOne(id: string): Promise<Supplier> {
+    try {
+      const found = await this.supplierRepo.findByPk(id);
+      if (!found) {
+        throw new NotFoundException(`Supplier with id ${id} not found`);
+      }
+      return found;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        this.logger.error(`Supplier with id ${id} not found`)
+        throw error;
+      }
+      this.logger.error(error.message, error);
+      throw new InternalServerErrorException(error.message, error);
+    }
   }
 
   update(id: number, updateSupplierDto: UpdateSupplierDto) {

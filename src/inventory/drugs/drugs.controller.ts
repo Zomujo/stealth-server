@@ -16,38 +16,39 @@ import { CreateDrugDto, DrugAnalytics, DrugResponse, GetDrugDto, UpdateDrugDto }
 @ApiTags("Drugs")
 @Controller('drugs')
 export class DrugsController {
-  constructor(private readonly drugsService: DrugsService) {}
+  constructor(private readonly drugsService: DrugsService) { }
 
-  @CustomApiResponse(["created", "forbidden", "unauthorized"], {type: DrugResponse, message: "Drug created successfully"})
+  @CustomApiResponse(["created", "forbidden", "unauthorized"], { type: DrugResponse, message: "Drug created successfully" })
   @Post()
   async create(@Body() createDrugDto: CreateDrugDto) {
-    return this.drugsService.create(createDrugDto);
+    return await this.drugsService.create(createDrugDto);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], {type: DrugResponse, isArray: true, message: "Drugs retrieved successfully"})
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: DrugResponse, isArray: true, message: "Drugs retrieved successfully" })
   @Get()
   findAll(@Query() query: GetDrugDto) {
     return this.drugsService.findAll(query);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], {type: DrugAnalytics, message: "Drug analytics retrieved successfully"})
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: DrugAnalytics, message: "Drug analytics retrieved successfully" })
+  @Get('/analytics')
   async analytics() {
     return await this.drugsService.getAnalytics();
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], {type: DrugResponse, message: "Drug retrieved successfully"})
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: DrugResponse, message: "Drug retrieved successfully" })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.drugsService.findOne(+id);
   }
 
-  @CustomApiResponse(["patch", "forbidden", "unauthorized"], {type: String, message: "Drug updated successfully"})
+  @CustomApiResponse(["patch", "forbidden", "unauthorized"], { type: String, message: "Drug updated successfully" })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDrugDto: UpdateDrugDto) {
     return this.drugsService.update(+id, updateDrugDto);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], {type: PickType<DrugResponse, 'id'>, message: "Drug deleted successfully"})
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: PickType<DrugResponse, 'id'>, message: "Drug deleted successfully" })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.drugsService.remove(+id);
