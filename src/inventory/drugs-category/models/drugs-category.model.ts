@@ -15,7 +15,7 @@ export class DrugsCategory extends BaseModel {
 
   @Column({ type: DataType.INTEGER, field: 'drug_count' })
   get drugCount(): number {
-    return this.drugs.length
+    return this.drugs?.length || 0;
   };
 
   @HasMany(() => Drug)
