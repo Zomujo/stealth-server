@@ -11,7 +11,7 @@ import {
 import { DrugsService } from './drugs.service';
 import { ApiTags, PickType } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { CreateDrugDto, DrugResponse, GetDrugDto, UpdateDrugDto } from './dto';
+import { CreateDrugDto, DrugAnalytics, DrugResponse, GetDrugDto, UpdateDrugDto } from './dto';
 
 @ApiTags("Drugs")
 @Controller('drugs')
@@ -28,6 +28,11 @@ export class DrugsController {
   @Get()
   findAll(@Query() query: GetDrugDto) {
     return this.drugsService.findAll(query);
+  }
+
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], {type: DrugAnalytics, message: "Drug analytics retrieved successfully"})
+  async analytics() {
+    return await this.drugsService.getAnalytics();
   }
 
   @CustomApiResponse(["accepted", "forbidden", "unauthorized"], {type: DrugResponse, message: "Drug retrieved successfully"})

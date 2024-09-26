@@ -24,4 +24,8 @@ export class DrugsService {
   remove(id: number) {
     return `This action removes a #${id} drug`;
   }
+
+  async getAnalytics() {
+    return 'This action returns analytics for drugs';
+  }
 }

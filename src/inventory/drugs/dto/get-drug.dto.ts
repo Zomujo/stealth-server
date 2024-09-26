@@ -4,10 +4,10 @@ import { GenericResponseDto } from "src/shared/docs/dto/base.dto";
 
 @ApiQuery({ name: 'find', required: false, type: Number })
 export class GetDrugDto extends IntersectionType(GenericResponseDto) {
-  @ApiProperty({ example: 10, description: 'The number of items to return',required: false})
+  @ApiProperty({ example: 10, description: 'The number of items to return', required: false })
   limit: number;
 
-  @ApiProperty({ example: 1, description: 'The page number to return', required:false })
+  @ApiProperty({ example: 1, description: 'The page number to return', required: false })
   page: number;
 
   @ApiProperty({ example: 'name', description: 'The field to search by', isArray: true, required: false })
@@ -18,6 +18,29 @@ export class GetDrugDto extends IntersectionType(GenericResponseDto) {
 
   @ApiProperty({ example: 'name=order', description: 'The field to sort by', required: false })
   orderBy: string;
+}
+
+export class DrugAnalytics {
+  @ApiProperty({ example: 100, description: 'The total number of drugs in the system' })
+  totalDrugs: number;
+
+  @ApiProperty({ example: 10, description: 'The number of drug requests' })
+  drugRequests: number;
+
+  @ApiProperty({ example: 5, description: 'The percentage increment of drug requests' })
+  drugIncrement: number;
+
+  @ApiProperty({ example: 10, description: 'The number of drug request increments' })
+  requestIncrement: number;
+
+  @ApiProperty({ example: 20, description: 'The number of drugs that are out of stock' })
+  outOfStock: number;
+
+  @ApiProperty({ example: 50, description: 'The number of drugs that are in stock' })
+  stocked: number;
+
+  @ApiProperty({ example: 80, description: 'The number of drugs that are low in stock' })
+  lowStocked: number;
 }
 
 export class DrugResponse extends IntersectionType(CreateDrugDto) { }
