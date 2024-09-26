@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDrugDto } from './dto/create-drug.dto';
 import { UpdateDrugDto } from './dto/update-drug.dto';
+import { GetDrugDto } from './dto';
 
 @Injectable()
 export class DrugsService {
@@ -8,7 +9,7 @@ export class DrugsService {
     return 'This action adds a new drug';
   }
 
-  findAll() {
+  findAll(query: GetDrugDto) {
     return `This action returns all drugs`;
   }
 

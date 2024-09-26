@@ -28,7 +28,7 @@ export class SuppliersController {
     return this.suppliersService.findOne(+id);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: String, message: "Supplier updated successfully" })
+  @CustomApiResponse(["patch", "forbidden", "unauthorized"], { type: String, message: "Supplier updated successfully" })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSupplierDto: UpdateSupplierDto) {
     return this.suppliersService.update(+id, updateSupplierDto);

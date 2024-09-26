@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum, IsDate } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsDate, IsUUID } from 'class-validator';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { Drug } from '../models/drug.model';
@@ -105,11 +105,17 @@ export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   storageReq: string;
 
   @ApiProperty({
-    example: 'Category ID',
+    example: '44220956-0962-4dd0-9e65-1564c585563c',
     description: 'The category ID of the drug',
   })
-  @IsString()
+  @IsUUID()
   categoryId: string;
+
+  @ApiProperty({
+    example: '44220956-0962-4dd0-9e65-1564c585563c',
+    description: 'The supplier ID of the drug',
+  })
+  @IsUUID()
+  supplierId: string;
 }
 
-export class DrugResponse extends IntersectionType(CreateDrugDto) {}
