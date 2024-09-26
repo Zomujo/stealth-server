@@ -1,4 +1,5 @@
-import { Column, DataType, Table } from 'sequelize-typescript';
+import { Column, DataType, Default, HasMany, Table } from 'sequelize-typescript';
+import { Drug } from 'src/inventory/drugs/models/drug.model';
 import { BaseModel } from 'src/shared/models/base.model';
 
 @Table({
@@ -9,14 +10,16 @@ export class DrugsCategory extends BaseModel {
   @Column
   name: string;
 
-  @Column({ type: DataType.DATEONLY })
-  date: Date;
-
   @Column({ type: DataType.ENUM('ACTIVE', 'DEACTIVATED'), defaultValue: 'ACTIVE' })
   status: DrugsCategoryStatus;
 
   @Column({ type: DataType.INTEGER, field: 'drug_count' })
-  drugCount: number;
+  get drugCount(): number {
+    return this.drugs.length
+  };
+
+  @HasMany(() => Drug)
+  drugs: Drug[]
 }
 
 export enum DrugsCategoryStatus {
