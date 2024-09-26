@@ -52,6 +52,6 @@ export class DrugsController {
   @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: PickType<DrugResponse, 'id'>, message: "Drug deleted successfully" })
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.drugsService.remove(+id);
+    return await this.drugsService.remove(id);
   }
 }

@@ -4,7 +4,6 @@ import { UpdateDrugDto } from './dto/update-drug.dto';
 import { DrugResponse, GetDrugDto } from './dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Drug } from './models/drug.model';
-import { UniqueConstraintError } from 'sequelize';
 import { DrugsCategoryService } from '../drugs-category/drugs-category.service';
 import { SuppliersService } from '../suppliers/suppliers.service';
 import { throwError } from 'src/utils/responses/error.response';
@@ -19,12 +18,12 @@ export class DrugsService {
   ) {
     this.logger = new Logger(DrugsService.name);
   }
-  
+
   async create(createDrugDto: CreateDrugDto): Promise<DrugResponse> {
     try {
       // check if category exists
       this.logger.log(`checking drug category with id: ${createDrugDto.categoryId}`)
-       await this.drugCategoryService.findOne(createDrugDto.categoryId);
+      await this.drugCategoryService.findOne(createDrugDto.categoryId);
 
       // check if supplier exists
       this.logger.log(`checking drug supplier with id: ${createDrugDto.supplierId}`)
@@ -47,7 +46,7 @@ export class DrugsService {
     }
   }
 
-  async findOne(id: string) : Promise<DrugResponse>{
+  async findOne(id: string): Promise<DrugResponse> {
     try {
       this.logger.log(`finding drug with id: ${id}`)
       const drug = await this.drugRepo.findByPk(id)
@@ -61,11 +60,25 @@ export class DrugsService {
   }
 
   async update(id: string, updateDrugDto: UpdateDrugDto) {
-    return `This action updates a #${id} drug`;
+    try {
+      const result = await this.drugRepo.upsert({ id: id, ...updateDrugDto })
+      if (!result[1]) {
+        throw new BadRequestException("No update was done")
+      }
+      return result[0]
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} drug`;
+  async remove(id: string) {
+    try {
+      const result = await this.drugRepo.destroy({ where: { id } })
+      this.logger.log(`Deleted Drug with id: ${id}`)
+      return `Deleted Drug with id: ${id}`
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
   }
 
   async getAnalytics() {
