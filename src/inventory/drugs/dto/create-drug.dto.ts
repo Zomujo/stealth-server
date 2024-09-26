@@ -1,6 +1,7 @@
 import { IsString, IsNumber, IsEnum, IsDate } from 'class-validator';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
+import { Drug } from '../models/drug.model';
 
 export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   @ApiProperty({
@@ -110,3 +111,5 @@ export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   @IsString()
   categoryId: string;
 }
+
+export class DrugResponse extends IntersectionType(CreateDrugDto) {}
