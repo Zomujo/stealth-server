@@ -83,6 +83,21 @@ export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   reorderPoint: number;
 
   @ApiProperty({
+    example: 'strength',
+    description: 'The strength of the drug',
+  })
+  @IsString()
+  strength: string;
+
+  @ApiProperty({
+    example: 'gramms',
+    description: 'The unit of measurement of the drug',
+  })
+  @IsString()
+  unitOfMeasurement: string;
+
+
+  @ApiProperty({
     example: 'Manufacturer Name',
     description: 'The manufacturer of the drug',
   })

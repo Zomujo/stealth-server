@@ -12,6 +12,9 @@ export class Drug extends BaseModel {
   @Column
   name: string;
 
+  @Column({ type: DataType.STRING, field: 'brand_name' })
+  brandName: string
+
   @Column({ type: DataType.DOUBLE, allowNull: false, field: 'cost_price' })
   costPrice: number;
 
@@ -19,7 +22,7 @@ export class Drug extends BaseModel {
   sellingPrice: number;
 
   @Column({ type: DataType.ENUM('SOLIDS', 'LIQUIDS'), field: 'dosage_form' })
-  dosageForm: string;
+  dosageForm: DosageForm;
 
   @Column
   code: string;
@@ -45,8 +48,14 @@ export class Drug extends BaseModel {
   @Column
   manufacturer: string;
 
+  @Column
+  strength: string;
+
+  @Column({ field: 'unit_of_measurement' })
+  unitOfMeasurement: string;
+
   @Column({ type: DataType.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'), allowNull: false })
-  status: string;
+  status: DrugStatus;
 
   @Column({ type: DataType.TEXT, field: 'storage_req' })
   storageReq: string;
@@ -62,6 +71,17 @@ export class Drug extends BaseModel {
   @Column
   supplierId: string
 
-  @BelongsTo(()=> Supplier, 'category_id')
+  @BelongsTo(() => Supplier, 'category_id')
   supplier: Supplier
+}
+
+export enum DosageForm {
+  SOLIDS = 'SOLIDS',
+  LIQUIDS = 'LIQUIDS'
+}
+
+export enum DrugStatus {
+  LOW = 'LOW',
+  STOCKED = 'STOCKED',
+  OUT_OF_STOCK = 'OUT_OF_STOCK'
 }
