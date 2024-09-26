@@ -8,9 +8,8 @@ import {
   Delete,
 } from '@nestjs/common';
 import { DrugsService } from './drugs.service';
-import { CreateDrugDto } from './dto/create-drug.dto';
-import { UpdateDrugDto } from './dto/update-drug.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateDrugDto, UpdateDrugDto } from './dto';
 
 @ApiTags("Drugs")
 @Controller('drugs')
