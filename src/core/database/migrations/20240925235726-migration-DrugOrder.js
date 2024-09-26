@@ -13,14 +13,16 @@ module.exports = {
         autoIncrement: true,
         allowNull: false,
       },
-      drug_name: {
+      drugName: {
         type: Sequelize.STRING,
         allowNull: false,
+        field: 'drug_name',
       },
-      order_number: {
+      orderNumber: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
+        field: 'order_number',
       },
       supplier: {
         type: Sequelize.STRING,
@@ -34,9 +36,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      expected_delivery_date: {
+      expectedDeliveryDate: {
         type: Sequelize.DATE,
         allowNull: true,
+        field: 'expected_delivery_name',
       },
       status: {
         type: Sequelize.STRING,
@@ -48,6 +51,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('drug_orders');
   },
 };

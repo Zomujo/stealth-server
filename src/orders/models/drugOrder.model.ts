@@ -12,6 +12,7 @@ enum OrderStatus {
 @Table({
   tableName: 'drug_orders',
   underscored: true,
+  paranoid: true,
 })
 export class DrugOrder extends BaseModel {
   @Column({ type: DataType.STRING })
