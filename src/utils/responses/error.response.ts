@@ -11,7 +11,8 @@ export class ApiErrorResponse {
   statusCode: number;
 }
 
-export const  throwError = (logger: Logger, error: any) : Error => {
+export const throwError = (logger: Logger, error: any): Error => {
+  // add more instances
   logger.error(error);
     if (error instanceof NotFoundException) {
       return error;

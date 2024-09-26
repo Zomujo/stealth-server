@@ -43,8 +43,7 @@ export class DrugsService {
       const drugs = await this.drugRepo.findAll();
       return drugs
     } catch (error) {
-      this.logger.error(error.message, error);
-      throw new InternalServerErrorException(error.message, error);
+      throw throwError(this.logger, error);
     }
   }
 
@@ -57,9 +56,7 @@ export class DrugsService {
       }
       return drug
     } catch (error) {
-      this.logger.error(error.message, error)
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message, error);
+      throw throwError(this.logger, error);
     }
   }
 

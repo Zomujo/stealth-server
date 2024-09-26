@@ -5,6 +5,7 @@ import { DrugsCategory, DrugsCategoryStatus } from './models/drugs-category.mode
 import { InjectModel } from '@nestjs/sequelize';
 import { SequelizeScopeError, UniqueConstraintError, UnknownConstraintError } from 'sequelize';
 import { error } from 'console';
+import { throwError } from 'src/utils/responses/error.response';
 
 @Injectable()
 export class DrugsCategoryService {
@@ -22,12 +23,7 @@ export class DrugsCategoryService {
       })
       return category
     } catch (error) {
-      this.logger.error(error);
-      if (error instanceof UniqueConstraintError) {
-        let eMessage = `${error.errors[0].path}: ${error.errors[0].message}`;
-        throw new BadRequestException(eMessage, error.name)
-      }
-      throw new InternalServerErrorException(error.message, error)
+      throw throwError(this.logger, error);
     }
   }
 
@@ -39,8 +35,7 @@ export class DrugsCategoryService {
       });
       return categories
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error.message, error)
+      throw throwError(this.logger, error);
     }
   }
 
@@ -54,8 +49,7 @@ export class DrugsCategoryService {
       }
       return category
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message, error)
+      throw throwError(this.logger, error);
     }
   }
 
@@ -64,8 +58,7 @@ export class DrugsCategoryService {
       const category = await this.drugCategoryRepo.upsert({ id: id, ...updateDrugsCategoryDto })
       this.logger.log(`Drug category with id: ${id} updated successfully`)
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error.message, error)
+      throw throwError(this.logger, error);
     }
   }
 
@@ -73,8 +66,7 @@ export class DrugsCategoryService {
     try {
       return await this.drugCategoryRepo.destroy({ where: { id: id } })
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error.message, error);
+      throw throwError(this.logger, error);
     }
   }
 }

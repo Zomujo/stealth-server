@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { InjectModel } from '@nestjs/sequelize';
 import { Supplier } from './models/supplier.model';
 import { CreateSupplierDto, UpdateSupplierDto } from './dto';
+import { throwError } from 'src/utils/responses/error.response';
 
 @Injectable()
 export class SuppliersService {
@@ -25,12 +26,7 @@ export class SuppliersService {
       }
       return found;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        this.logger.error(`Supplier with id ${id} not found`)
-        throw error;
-      }
-      this.logger.error(error.message, error);
-      throw new InternalServerErrorException(error.message, error);
+      throw throwError(this.logger, error);
     }
   }
 
