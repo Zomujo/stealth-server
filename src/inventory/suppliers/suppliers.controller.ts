@@ -1,28 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
-import { CreateSupplierDto } from './dto/create-supplier.dto';
-import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
+import { CreateSupplierDto, GetSupplierDto, SupplierResponse, UpdateSupplierDto } from './dto';
+import { DrugResponse } from '../drugs/dto';
 
 @ApiTags("Suppliers")
 @Controller('suppliers')
 export class SuppliersController {
-  constructor(private readonly suppliersService: SuppliersService) {}
+  constructor(private readonly suppliersService: SuppliersService) { }
 
-  @CustomApiResponse(["created", "forbidden", "unauthorized"], {type: CreateSupplierDto, message: "Supplier created successfully"})
+  @CustomApiResponse(["created", "forbidden", "unauthorized"], { type: SupplierResponse, message: "Supplier created successfully" })
   @Post()
   async create(@Body() createSupplierDto: CreateSupplierDto) {
     return await this.suppliersService.create(createSupplierDto);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: CreateSupplierDto, isArray: true, message: "Suppliers retrieved successfully" })
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: SupplierResponse, isArray: true, message: "Suppliers retrieved successfully" })
   @Get()
-  async findAll() {
-    return await this.suppliersService.findAll();
+  async findAll(@Query() query: GetSupplierDto) {
+    return await this.suppliersService.findAll(query);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized", "notfound"], {type: CreateSupplierDto, message: "Supplier retrieved successfully"})
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized", "notfound"], { type: SupplierResponse, message: "Supplier retrieved successfully" })
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.suppliersService.findOne(id);
@@ -34,7 +34,7 @@ export class SuppliersController {
     return await this.suppliersService.update(id, updateSupplierDto);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", 'unauthorized'], {type: String, message: "Supplier deleted successfully"})
+  @CustomApiResponse(["accepted", "forbidden", 'unauthorized'], { type: String, message: "Supplier deleted successfully" })
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return await this.suppliersService.remove(id);
