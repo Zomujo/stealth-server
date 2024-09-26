@@ -4,7 +4,8 @@ import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
 @Injectable()
 export class SuppliersService {
-  create(createSupplierDto: CreateSupplierDto) {
+  constructor() {}
+  async create(createSupplierDto: CreateSupplierDto) {
     return 'This action adds a new supplier';
   }
 
