@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto, GetUserDto } from '../user/dto';
 import { AuthService } from './auth.service';
-import { ApiSuccessResponseDto } from '../utils/responses/success.response';
 import { User } from './models/user.model';
 import {
   ApiCreatedSuccessResponse,
@@ -25,8 +24,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiErrorResponse } from '../utils/responses/error.response';
 import { Authorize, GetUser } from './decorator';
+import { ApiErrorResponse } from '../utils/responses/error.response';
+import { ApiSuccessResponseDto } from '../utils/responses/success.response';
 
 @ApiTags('User Authentication')
 @Controller('auth')
@@ -59,7 +59,10 @@ export class AuthController {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        this.logger.error(`An error occured: ${error.message}`, error);
+        this.logger.error(
+          `An error occured: ${error.name} :: ${error.message}`,
+          error.stack,
+        );
         throw new InternalServerErrorException(error.message, error);
       }
     }
@@ -87,7 +90,10 @@ export class AuthController {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        this.logger.error(`An error occured: ${error.message}`, error);
+        this.logger.error(
+          `An error occured: ${error.name} :: ${error.message}`,
+          error.stack,
+        );
         throw new InternalServerErrorException(error.message, error);
       }
     }
@@ -120,11 +126,11 @@ export class AuthController {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        this.logger.error(`An error occured: ${error.message}`, error);
-        throw new InternalServerErrorException(
-          error.message ?? 'An unknown error occured',
-          error,
+        this.logger.error(
+          `An error occured: ${error.name} :: ${error.message}`,
+          error.stack,
         );
+        throw new InternalServerErrorException(error.message, error);
       }
     }
   }
