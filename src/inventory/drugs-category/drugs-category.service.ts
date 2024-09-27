@@ -27,15 +27,16 @@ export class DrugsCategoryService {
     try {
       const category = await this.drugCategoryRepo.create({
         ...createDrugsCategoryDto,
-      })
-      return category
+      });
+      this.logger.log(`Created drugs category with ID: ${category.id}`);
+      return category;
     } catch (error) {
       this.logger.error(error);
       if (error instanceof UniqueConstraintError) {
         let eMessage = `${error.errors[0].path}: ${error.errors[0].message}`;
-        throw new BadRequestException(eMessage, error.name)
+        throw new BadRequestException(eMessage, error.name);
       }
-      throw new InternalServerErrorException(error.message, error)
+      throw new InternalServerErrorException(error.message, error);
     }
   }
 
@@ -48,14 +49,15 @@ export class DrugsCategoryService {
    */
   async findAll(query: GetDrugsCategoryDto): Promise<DrugsCategoryResponse[]> {
     try {
-      this.logger.log(query.limit)
+      this.logger.log(`Retrieving drugs categories with limit: ${query.limit}`);
       const categories = await this.drugCategoryRepo.findAll({
         limit: query.limit,
       });
-      return categories
+      this.logger.log(`Retrieved ${categories.length} drugs categories`);
+      return categories;
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException(error.message, error)
+      throw new InternalServerErrorException(error.message, error);
     }
   }
 
@@ -69,16 +71,19 @@ export class DrugsCategoryService {
    */
   async findOne(id: string): Promise<DrugsCategoryResponse> {
     try {
+      this.logger.log(`Finding drugs category with ID: ${id}`);
       const category = await this.drugCategoryRepo.findByPk(id);
 
       if (!category) {
         this.logger.warn("Category not found");
         throw new NotFoundException(`Category with id: ${id} not found`);
       }
-      return category
+      this.logger.log(`Found drugs category with ID: ${id}`);
+      return category;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message, error)
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, error);
     }
   }
 
@@ -92,11 +97,12 @@ export class DrugsCategoryService {
    */
   async update(id: string, updateDrugsCategoryDto: UpdateDrugsCategoryDto) {
     try {
-      const category = await this.drugCategoryRepo.upsert({ id: id, ...updateDrugsCategoryDto })
-      this.logger.log(`Drug category with id: ${id} updated successfully`)
+      const category = await this.drugCategoryRepo.upsert({ id: id, ...updateDrugsCategoryDto });
+      this.logger.log(`Updated drugs category with ID: ${id}`);
+      return category;
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException(error.message, error)
+      throw new InternalServerErrorException(error.message, error);
     }
   }
 
@@ -109,7 +115,8 @@ export class DrugsCategoryService {
    */
   async remove(id: number) {
     try {
-      return await this.drugCategoryRepo.destroy({ where: { id: id } })
+      this.logger.log(`Removing drugs category with ID: ${id}`);
+      return await this.drugCategoryRepo.destroy({ where: { id: id } });
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, error);
