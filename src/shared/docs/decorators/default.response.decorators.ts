@@ -7,6 +7,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiResponse,
+  ApiSeeOtherResponse,
   ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
@@ -23,22 +24,13 @@ export function CustomApiResponse(responseTypes: CustomResponses[], options: { t
   })];
   responseTypes.forEach((response) => {
     switch (response) {
-      case 'accepted':
+      case 'success':
         docs.push(ApiSuccessResponse({
           type: options.type,
-          description: options.message || 'Request accepted',
+          description: options.message || 'Request successful',
           isArray: options.isArray
         }));
-      case 'created':
-        docs.push(ApiCreatedResponse({
-          type: options.type,
-          description: options.message || 'Resource created successfully',
-        }));
-      case 'patch':
-        docs.push(ApiResponse({
-          type: options.type,
-          description: options.message || 'Resource updated successfully',
-        }));
+        break;
       case 'unauthorized':
         docs.push(...[ApiForbiddenResponse({
           type: ApiErrorResponse,
@@ -47,11 +39,13 @@ export function CustomApiResponse(responseTypes: CustomResponses[], options: { t
           type: ApiErrorResponse,
           description: 'Unauthorized access',
         })]);
+        break;
       case 'notfound':
         docs.push(ApiNotFoundResponse({
           type: ApiErrorResponse,
           description: 'Resource not found',
         }));
+        break;
     }
   });
 
@@ -61,8 +55,6 @@ export function CustomApiResponse(responseTypes: CustomResponses[], options: { t
 }
 
 type CustomResponses =
-  | 'accepted'
-  | 'created'
-  | 'patch'
+  | 'success'
   | 'unauthorized'
   | 'notfound';

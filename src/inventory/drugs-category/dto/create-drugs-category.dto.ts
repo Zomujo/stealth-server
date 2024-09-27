@@ -1,17 +1,5 @@
-import { ApiProperty, ApiQuery, IntersectionType } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
-import { DrugsCategory, DrugsCategoryStatus } from '../models/drugs-category.model';
-import { FindOptions, Order, WhereOptions } from 'sequelize';
+import { PickType } from '@nestjs/swagger';
+import { DrugsCategory } from '../models/drugs-category.model';
 
-export class CreateDrugsCategoryDto extends IntersectionType(GenericResponseDto) {
-  @ApiProperty({
-    example: "laxatives",
-    description: "drug category name"
-  })
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-}
+export class CreateDrugsCategoryDto extends PickType(DrugsCategory, ['name']){}
 
-export class DrugsCategoryResponse extends IntersectionType(DrugsCategory, GenericResponseDto) { }

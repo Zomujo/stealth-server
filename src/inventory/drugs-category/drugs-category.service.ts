@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateDrugsCategoryDto } from './dto/update-drugs-category.dto';
 import { DrugsCategory, DrugsCategoryStatus } from './models/drugs-category.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { SequelizeScopeError, UniqueConstraintError, UnknownConstraintError } from 'sequelize';
 import { error } from 'console';
 import { CreateDrugsCategoryDto, DrugsCategoryResponse, GetDrugsCategoryDto } from './dto';
+import { ApiSuccessResponseDto, ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
 
 @Injectable()
 export class DrugsCategoryService {
@@ -23,13 +24,13 @@ export class DrugsCategoryService {
    * @throws {BadRequestException} If there is a unique constraint error.
    * @throws {InternalServerErrorException} If there is an internal server error.
    */
-  async create(createDrugsCategoryDto: CreateDrugsCategoryDto): Promise<DrugsCategoryResponse> {
+  async create(createDrugsCategoryDto: CreateDrugsCategoryDto): Promise<ApiSuccessResponseDto<DrugsCategoryResponse>> {
     try {
       const category = await this.drugCategoryRepo.create({
         ...createDrugsCategoryDto,
       });
       this.logger.log(`Created drugs category with ID: ${category.id}`);
-      return category;
+      return new ApiSuccessResponseDto(category, HttpStatus.CREATED, 'Drug category created successfully');
     } catch (error) {
       this.logger.error(error);
       if (error instanceof UniqueConstraintError) {
@@ -47,14 +48,14 @@ export class DrugsCategoryService {
    * @returns A promise that resolves to an array of DrugsCategoryResponse objects.
    * @throws InternalServerErrorException if an error occurs while retrieving the categories.
    */
-  async findAll(query: GetDrugsCategoryDto): Promise<DrugsCategoryResponse[]> {
+  async findAll(query: GetDrugsCategoryDto): Promise<ApiSuccessResponseDto<DrugsCategoryResponse[]>> {
     try {
       this.logger.log(`Retrieving drugs categories with limit: ${query.limit}`);
       const categories = await this.drugCategoryRepo.findAll({
         limit: query.limit,
       });
       this.logger.log(`Retrieved ${categories.length} drugs categories`);
-      return categories;
+      return new ApiSuccessResponseDto(categories, HttpStatus.FOUND, 'Drug categories retrieved successfully');
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, error);
@@ -69,7 +70,7 @@ export class DrugsCategoryService {
    * @throws {NotFoundException} If the drugs category with the given ID is not found.
    * @throws {InternalServerErrorException} If an internal server error occurs.
    */
-  async findOne(id: string): Promise<DrugsCategoryResponse> {
+  async findOne(id: string): Promise<ApiSuccessResponseDto<DrugsCategoryResponse>> {
     try {
       this.logger.log(`Finding drugs category with ID: ${id}`);
       const category = await this.drugCategoryRepo.findByPk(id);
@@ -79,7 +80,7 @@ export class DrugsCategoryService {
         throw new NotFoundException(`Category with id: ${id} not found`);
       }
       this.logger.log(`Found drugs category with ID: ${id}`);
-      return category;
+      return new ApiSuccessResponseDto(category, HttpStatus.FOUND, 'Drug retrieved successfully');
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       this.logger.error(error);
@@ -95,11 +96,16 @@ export class DrugsCategoryService {
    * @returns A Promise that resolves to the updated drugs category.
    * @throws InternalServerErrorException if an error occurs during the update process.
    */
-  async update(id: string, updateDrugsCategoryDto: UpdateDrugsCategoryDto) {
+  async update(id: string, updateDrugsCategoryDto: UpdateDrugsCategoryDto): Promise<ApiSuccessResponseNoData> {
     try {
-      const category = await this.drugCategoryRepo.upsert({ id: id, ...updateDrugsCategoryDto });
+      const result = await this.drugCategoryRepo.update({ ...updateDrugsCategoryDto }, { where: { id } });
+      const affected = result[0];
+      if (affected == 0) {
+        this.logger.warn(`category with id ${id} not found`);
+        throw new NotFoundException(`category with id ${id} not found`)
+      }
       this.logger.log(`Updated drugs category with ID: ${id}`);
-      return category;
+      return new ApiSuccessResponseNoData(HttpStatus.ACCEPTED, 'Drug updated successfully');
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, error);
@@ -113,10 +119,12 @@ export class DrugsCategoryService {
    * @returns A promise that resolves to the result of the removal operation.
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
-  async remove(id: number) {
+  async remove(id: string): Promise<ApiSuccessResponseNoData> {
     try {
       this.logger.log(`Removing drugs category with ID: ${id}`);
-      return await this.drugCategoryRepo.destroy({ where: { id: id } });
+      await this.drugCategoryRepo.destroy({ where: { id: id } });
+
+      return new ApiSuccessResponseNoData(HttpStatus.ACCEPTED, 'Drug deleted successfully')
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, error);
