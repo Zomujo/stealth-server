@@ -29,7 +29,7 @@ import { ApiErrorResponse } from '../utils/responses/error.response';
 import { Authorize, GetUser } from './decorator';
 
 @ApiTags('User Authentication')
-@Controller('/users/auth')
+@Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   constructor(private readonly authService: AuthService) {}
@@ -46,7 +46,7 @@ export class AuthController {
     type: ApiErrorResponse,
     description: 'An unexpected error occured',
   })
-  @Post()
+  @Post('signup')
   async signUp(@Body() dto: CreateUserDto) {
     try {
       const response = await this.authService.register(dto);
@@ -106,8 +106,8 @@ export class AuthController {
     description: 'An unexpected error occured',
   })
   @ApiBearerAuth('access-token')
-  @Get('user')
   @Authorize()
+  @Get('user')
   async getUser(@GetUser('sub') id: string) {
     try {
       const response = await this.authService.retrieveUser(id);
