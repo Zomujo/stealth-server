@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { CreateDrugsCategoryDto, DrugsCategoryResponse } from './dto/create-drugs-category.dto';
 import { UpdateDrugsCategoryDto } from './dto/update-drugs-category.dto';
 import { DrugsCategory, DrugsCategoryStatus } from './models/drugs-category.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { SequelizeScopeError, UniqueConstraintError, UnknownConstraintError } from 'sequelize';
 import { error } from 'console';
+import { CreateDrugsCategoryDto, DrugsCategoryResponse, GetDrugsCategoryDto } from './dto';
 
 @Injectable()
 export class DrugsCategoryService {
@@ -46,11 +46,11 @@ export class DrugsCategoryService {
    * @returns A promise that resolves to an array of DrugsCategoryResponse objects.
    * @throws InternalServerErrorException if an error occurs while retrieving the categories.
    */
-  async findAll(limit: number): Promise<DrugsCategoryResponse[]> {
+  async findAll(query: GetDrugsCategoryDto): Promise<DrugsCategoryResponse[]> {
     try {
-      this.logger.log(limit)
+      this.logger.log(query.limit)
       const categories = await this.drugCategoryRepo.findAll({
-        limit: limit,
+        limit: query.limit,
       });
       return categories
     } catch (error) {

@@ -12,31 +12,35 @@ import {
 } from '@nestjs/common';
 import { DrugsCategoryService } from './drugs-category.service';
 import { CreateDrugsCategoryDto, DrugsCategoryResponse, GetDrugsCategoryDto, UpdateDrugsCategoryDto } from './dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import { DrugsCategory } from './models/drugs-category.model';
+import { GetQueries } from 'src/shared/docs/decorators/get-queries.decorator';
 
 @ApiTags("Drug Category")
 @Controller('drugsCategories')
 export class DrugsCategoryController {
   private readonly logger: Logger;
-  constructor(private readonly drugsCategoryService: DrugsCategoryService) { 
+  constructor(private readonly drugsCategoryService: DrugsCategoryService) {
     this.logger = new Logger(DrugsCategoryController.name);
   }
 
-  @CustomApiResponse(["created", "forbidden", "unauthorized"], {type: DrugsCategoryResponse, message: "Drug category created successfully"})
+  @CustomApiResponse(["created", "forbidden", "unauthorized"], { type: DrugsCategoryResponse, message: "Drug category created successfully" })
   @Post()
   async create(@Body() createDrugsCategoryDto: CreateDrugsCategoryDto) {
     return await this.drugsCategoryService.create(createDrugsCategoryDto);
   }
 
   @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: DrugsCategoryResponse, isArray: true, message: "Drug categories retrieved successfully" })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'order',example: 'name=ASC', required: false, type: String })
   @Get()
-  async findAll(@Query('limit') limit: string) {
-    return await this.drugsCategoryService.findAll(+limit);
+  async findAll(@GetQueries(GetDrugsCategoryDto) query: GetDrugsCategoryDto) {
+    return await this.drugsCategoryService.findAll(query);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized", "notfound"], {type: DrugsCategoryResponse, message: "Drug category retrieved successfully"})
+  @CustomApiResponse(["accepted", "forbidden", "unauthorized", "notfound"], { type: DrugsCategoryResponse, message: "Drug category retrieved successfully" })
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.drugsCategoryService.findOne(id);
@@ -51,7 +55,7 @@ export class DrugsCategoryController {
     return this.drugsCategoryService.update(id, updateDrugsCategoryDto);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", 'unauthorized'], {type: String, message: "Drug category deleted successfully"})
+  @CustomApiResponse(["accepted", "forbidden", 'unauthorized'], { type: String, message: "Drug category deleted successfully" })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.drugsCategoryService.remove(+id);

@@ -15,13 +15,3 @@ export class CreateDrugsCategoryDto extends IntersectionType(GenericResponseDto)
 }
 
 export class DrugsCategoryResponse extends IntersectionType(DrugsCategory, GenericResponseDto) { }
-
-export class GetDrugsCategoryDto {
-  @ApiProperty({example: 10, description: "Number of drug categories to fetch", required: false})
-  limit?: number; 
-
-  @ApiProperty({example:"name"})
-  order?: Order;
-
-  where?: WhereOptions<DrugsCategory>;
-}
