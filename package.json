@@ -89,7 +89,8 @@
   "lint-staged": {
     "*.{js,ts}": [
       "yarn format",
-      "yarn lint"
+      "yarn lint",
+      "yarn test"
     ]
   },
   "jest": {
