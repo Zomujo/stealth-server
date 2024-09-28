@@ -3,87 +3,60 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Logger,
+  ParseUUIDPipe,
+  Patch,
+  Query,
 } from '@nestjs/common';
 import { DrugsCategoryService } from './drugs-category.service';
-import { CreateDrugsCategoryDto, UpdateDrugsCategoryDto } from './dto';
-import { ApiCreatedSuccessResponse, ApiSuccessResponse } from 'src/shared/docs/decorators/response.decorators';
-import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiTags } from '@nestjs/swagger';
-import { ApiErrorResponse } from 'src/utils/responses/error.response';
-import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
+import { CreateDrugsCategoryDto, DrugsCategoryResponse, GetDrugsCategoryDto, UpdateDrugsCategoryDto } from './dto';
+import { ApiQuery, ApiTags, PickType } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import { DrugsCategory } from './models/drugs-category.model';
+import { GetQueries, QueryDocs } from 'src/shared/docs/decorators/get-queries.decorator';
+import { ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
 
 @ApiTags("Drug Category")
-@Controller('drugs/category')
+@Controller('drugsCategories')
 export class DrugsCategoryController {
-  constructor(private readonly drugsCategoryService: DrugsCategoryService) { }
+  private readonly logger: Logger;
+  constructor(private readonly drugsCategoryService: DrugsCategoryService) {
+    this.logger = new Logger(DrugsCategoryController.name);
+  }
 
-  @CustomApiResponse(["created", "forbidden", "unauthorized"], { type: DrugsCategory, message: "Drug category created successfully" })
+  @CustomApiResponse(["success", "unauthorized"], { type: DrugsCategoryResponse, message: "Drug category created successfully" })
   @Post()
   async create(@Body() createDrugsCategoryDto: CreateDrugsCategoryDto) {
     return await this.drugsCategoryService.create(createDrugsCategoryDto);
   }
 
-  @CustomApiResponse(["accepted", "forbidden", "unauthorized"], { type: DrugsCategory, isArray: true, message: "Drug categories retrieved successfully" })
+  @CustomApiResponse(["success", "unauthorized"], { type: DrugsCategoryResponse, isArray: true, message: "Drug categories retrieved successfully" })
+  @QueryDocs(['limit', 'page', 'search'])
   @Get()
-  async findAll() {
-    return await this.drugsCategoryService.findAll();
+  async findAll(@GetQueries() query: GetDrugsCategoryDto) {
+    return await this.drugsCategoryService.findAll(query);
   }
 
-  @ApiSuccessResponse({
-    type: CreateDrugsCategoryDto,
-    description: "Drug category retrieved successfully",
-  })
-  @ApiBadRequestResponse({
-    type: ApiErrorResponse,
-    description: "validation error occured"
-  })
-  @ApiInternalServerErrorResponse({
-    type: ApiErrorResponse,
-    description: 'An unexpected error occured',
-  })
+  @CustomApiResponse(["success", "unauthorized", "notfound"], { type: DrugsCategoryResponse, message: "Drug category retrieved successfully" })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.drugsCategoryService.findOne(+id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.drugsCategoryService.findOne(id);
   }
 
-  @ApiSuccessResponse({
-    type: CreateDrugsCategoryDto,
-    description: "Drug category updated successfully",
-  })
-  @ApiBadRequestResponse({
-    type: ApiErrorResponse,
-    description: "validation error occured"
-  })
-  @ApiInternalServerErrorResponse({
-    type: ApiErrorResponse,
-    description: 'An unexpected error occured',
-  })
+  @CustomApiResponse(["success", "unauthorized"], { type: String, message: "Drug category updated successfully" })
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDrugsCategoryDto: UpdateDrugsCategoryDto,
   ) {
-    return this.drugsCategoryService.update(+id, updateDrugsCategoryDto);
+    return  await this.drugsCategoryService.update(id, updateDrugsCategoryDto);
   }
 
-  @ApiSuccessResponse({
-    type: CreateDrugsCategoryDto,
-    description: "Drug category deleted successfully",
-  })
-  @ApiBadRequestResponse({
-    type: ApiErrorResponse,
-    description: "validation error occured"
-  })
-  @ApiInternalServerErrorResponse({
-    type: ApiErrorResponse,
-    description: 'An unexpected error occured',
-  })
+  @CustomApiResponse(["success", 'unauthorized'], { type: String, message: "Drug category deleted successfully" })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.drugsCategoryService.remove(+id);
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    return  await this.drugsCategoryService.remove(id);
   }
 }
