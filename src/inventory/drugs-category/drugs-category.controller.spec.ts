@@ -11,7 +11,11 @@ import { ConfigModule } from '@nestjs/config';
 import jwtConfig from 'src/auth/interface/jwt.config';
 import { Drug } from '../drugs/models/drug.model';
 import { Supplier } from '../suppliers/models/supplier.model';
-import { HttpStatus, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 
 const DB_USER = 'postgres';
@@ -59,6 +63,17 @@ describe('DrugsCategoryController', () => {
     expect(res.statusCode).toEqual(HttpStatus.CREATED);
     expect(testCategory.name).toEqual('test');
     expect(testCategory.status).toBe(DrugsCategoryStatus.ACTIVE);
+  });
+
+  it('should throw unique name error', async () => {
+    try {
+      await controller.create({ name: 'test' });
+    } catch (error) {
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getStatus()).toBe(
+        HttpStatus.CONFLICT,
+      );
+    }
   });
 
   it('should retrieve drug categories', async () => {
