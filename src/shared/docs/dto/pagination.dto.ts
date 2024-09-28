@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
-export class GetManyDto {
+export class PaginationRequestDto {
   @ApiProperty({
     example: 10,
     description: 'The number of items to return',
     required: false,
   })
   @IsNumber()
-  limit: number;
+  pageSize: number;
 
   @ApiProperty({
     example: 1,
@@ -28,7 +28,7 @@ export class GetManyDto {
   search: string;
 
   @ApiProperty({
-    example: 'name=order',
+    example: 'name',
     description: 'The field to sort by',
     required: false,
   })

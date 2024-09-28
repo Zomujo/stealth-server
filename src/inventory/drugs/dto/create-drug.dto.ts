@@ -1,7 +1,6 @@
-import { IsString, IsNumber, IsEnum, IsDate, IsUUID, Matches } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsUUID, Matches } from 'class-validator';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
-import { Drug } from '../models/drug.model';
 
 export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   @ApiProperty({
@@ -96,7 +95,6 @@ export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   @IsString()
   unitOfMeasurement: string;
 
-
   @ApiProperty({
     example: 'Manufacturer Name',
     description: 'The manufacturer of the drug',
@@ -133,4 +131,3 @@ export class CreateDrugDto extends IntersectionType(GenericResponseDto) {
   @IsUUID()
   supplierId: string;
 }
-

@@ -1,15 +1,18 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Supplier } from './models/supplier.model';
-import { CreateSupplierDto, GetSupplierDto, UpdateSupplierDto } from './dto';
+import { CreateSupplierDto, UpdateSupplierDto } from './dto';
 import { throwError } from 'src/utils/responses/error.response';
+import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 
 @Injectable()
 export class SuppliersService {
   private readonly logger: Logger;
   constructor(
-    @InjectModel(Supplier) private readonly supplierRepo: typeof Supplier
-  ) { this.logger = new Logger(SuppliersService.name); }
+    @InjectModel(Supplier) private readonly supplierRepo: typeof Supplier,
+  ) {
+    this.logger = new Logger(SuppliersService.name);
+  }
   async create(createSupplierDto: CreateSupplierDto) {
     try {
       const created = await this.supplierRepo.create({ ...createSupplierDto });
@@ -19,11 +22,11 @@ export class SuppliersService {
     }
   }
 
-  async findAll(query: GetSupplierDto): Promise<Supplier[]> {
+  async findAll(_query: PaginationRequestDto): Promise<Supplier[]> {
     try {
-      const found = await this.supplierRepo.findAll()
-      this.logger.log(`retrieved ${found.length} suppliers`)
-      return found
+      const found = await this.supplierRepo.findAll();
+      this.logger.log(`retrieved ${found.length} suppliers`);
+      return found;
     } catch (error) {
       throw throwError(this.logger, error);
     }
@@ -41,7 +44,7 @@ export class SuppliersService {
     }
   }
 
-  update(id: string, updateSupplierDto: UpdateSupplierDto) {
+  update(id: string, _updateSupplierDto: UpdateSupplierDto) {
     return `This action updates a #${id} supplier`;
   }
 
