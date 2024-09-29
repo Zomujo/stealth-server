@@ -65,6 +65,7 @@ export class DrugsService {
     query: DrugPaginationDto,
   ): Promise<ApiSuccessResponseDto<PaginatedDataResponseDto<DrugResponse[]>>> {
     try {
+      /* TODO: filter by categories serach and supplier*/
       const filter: FindAndCountOptions<Drug> = {
         where:
           (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {},
