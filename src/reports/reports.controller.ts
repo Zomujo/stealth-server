@@ -31,7 +31,7 @@ export class ReportsController {
   @Post()
   @UsePipes(new ValidationPipe())
   async postReport(@Body() dto: CreateReportDto) {
-    const response = await this.reportsService.createReport(dto);
+    const response = await this.reportsService.create(dto);
 
     return new GetReportSuccessDto(
       response,

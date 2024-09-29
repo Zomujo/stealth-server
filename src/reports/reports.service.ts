@@ -14,7 +14,7 @@ export class ReportsService {
     return [];
   }
 
-  async createReport(dto: CreateReportDto) {
+  async create(dto: CreateReportDto) {
     return null;
   }
 
