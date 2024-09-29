@@ -10,11 +10,15 @@ export class ReportsService {
     private reportRepository: typeof Report,
   ) {}
 
+  async fetchAll() {
+    return [];
+  }
+
   async createReport(dto: CreateReportDto) {
     return null;
   }
 
-  async fetchAll() {
-    return []
+  async fetchOne(id: Report['id']) {
+    return null;
   }
 }

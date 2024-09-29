@@ -84,4 +84,33 @@ describe('ReportsController', () => {
       expect(response.body.data).toBeDefined();
     });
   });
+
+  describe('getting single report', () => {
+    it('should fetch successfully', async () => {
+      const response = await request(server).get('/reports/the-akshual-id');
+
+      expect(response.statusCode).toBe(200);
+
+      expect(response.body.data).toBeDefined();
+
+      for (const key of [
+        'endDate',
+        'startDate',
+        'nameInExport',
+        'reportName',
+        'reportLayout',
+      ]) {
+        expect(response.body.data).toHaveProperty(key);
+        expect(response.body.data[key]).toBeDefined();
+      }
+    });
+
+    it('should return four oh four', async () => {
+      const response = await request(server).get('/reports/404');
+
+      expect(response.statusCode).toBe(404);
+
+      expect(response.body.data).toBeNull();
+    });
+  });
 });

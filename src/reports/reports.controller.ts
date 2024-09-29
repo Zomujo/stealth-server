@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   UsePipes,
   ValidationPipe,
@@ -34,7 +35,7 @@ export class ReportsController {
     );
   }
 
-  @CustomApiResponse(["accepted"], {
+  @CustomApiResponse(['accepted'], {
     type: GetAllReportsSuccessDto,
     message: 'Report created successfully',
   })
@@ -46,6 +47,21 @@ export class ReportsController {
       response,
       HttpStatus.OK,
       'Reports retrieved successfully',
+    );
+  }
+
+  @CustomApiResponse(['accepted'], {
+    type: GetAllReportsSuccessDto,
+    message: 'Report created successfully',
+  })
+  @Get('/:id')
+  async getReport(@Param('id') id: string) {
+    const response = await this.reportsService.fetchOne(id);
+
+    return new GetReportSuccessDto(
+      response,
+      HttpStatus.OK,
+      'Report fetched successfully',
     );
   }
 }
