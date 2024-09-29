@@ -11,13 +11,10 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
-import { CreateReportDto } from './dto/create.dto';
+import { CreateReportDto, CreateReportSuccessDto } from './dto/create.dto';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import {
-  GetAllReportsSuccessDto,
-  GetReportDto,
-  GetReportSuccessDto,
-} from './dto/get.dto';
+import { GetReportDto } from './dto/get.dto';
+import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -25,7 +22,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @CustomApiResponse(['created', 'forbidden', 'unauthorized'], {
-    type: GetReportSuccessDto,
+    type: CreateReportSuccessDto,
     message: 'Report created successfully',
   })
   @Post()
@@ -33,44 +30,45 @@ export class ReportsController {
   async postReport(@Body() dto: CreateReportDto) {
     const response = await this.reportsService.create(dto);
 
-    return new GetReportSuccessDto(
+    return new ApiSuccessResponseDto(
       response,
       HttpStatus.OK,
       'Report created successfully',
     );
   }
 
-  @CustomApiResponse(['accepted'], {
-    type: GetAllReportsSuccessDto,
+  @CustomApiResponse(['accepted', 'forbidden', 'unauthorized'], {
+    type: GetReportDto,
     message: 'Report created successfully',
+    isArray: true,
   })
   @Get()
   async getReports() {
     const response = await this.reportsService.fetchAll();
 
-    return new GetAllReportsSuccessDto(
+    return new ApiSuccessResponseDto(
       response,
       HttpStatus.OK,
       'Reports retrieved successfully',
     );
   }
 
-  @CustomApiResponse(['accepted'], {
-    type: GetAllReportsSuccessDto,
+  @CustomApiResponse(['accepted', 'forbidden', 'unauthorized'], {
+    type: GetReportDto,
     message: 'Report fetched successfully',
   })
   @Get('/:id')
   async getReport(@Param('id') id: string) {
     const response = await this.reportsService.fetchOne(id);
 
-    return new GetReportSuccessDto(
+    return new ApiSuccessResponseDto(
       response,
       HttpStatus.OK,
       'Report fetched successfully',
     );
   }
 
-  @CustomApiResponse(['accepted'], {
+  @CustomApiResponse(['accepted', 'forbidden', 'unauthorized'], {
     type: GetReportDto,
     message: 'Report deleted successfully',
   })

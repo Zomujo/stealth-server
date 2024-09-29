@@ -4,7 +4,9 @@ import {
   ReportLayout,
   ReportLayoutType,
 } from '../models/reports.models';
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
+import { GetReportDto } from './get.dto';
 
 const reportPickType = PickType(Report, [
   'reportName',
@@ -51,4 +53,11 @@ export class CreateReportDto extends reportPickType {
   })
   @IsNotEmpty()
   reportLayout: ReportLayoutType;
+}
+
+export class CreateReportSuccessDto extends ApiSuccessResponseDto<GetReportDto> {
+  @ApiResponseProperty({
+    type: GetReportDto,
+  })
+  data: GetReportDto;
 }
