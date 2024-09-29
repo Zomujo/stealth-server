@@ -16,7 +16,7 @@ import { Drug } from './models/drug.model';
 import { SuppliersService } from '../suppliers/suppliers.service';
 import { throwError } from 'src/utils/responses/error.response';
 import { DrugsCategoryService } from '../drugs-category/drugs-category.service';
-import { FindAndCountOptions, Op } from 'sequelize';
+import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
@@ -66,14 +66,7 @@ export class DrugsService {
     query: DrugPaginationDto,
   ): Promise<ApiSuccessResponseDto<PaginatedDataResponseDto<DrugResponse[]>>> {
     try {
-      /* TODO: filter by categories serach and supplier*/
-      const filter: FindAndCountOptions<Drug> = {
-        where:
-          (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {},
-        limit: query.pageSize || 10,
-        offset: query.pageSize * (query.page - 1) || 0,
-        order: [[query.orderBy ?? 'name', 'ASC']],
-      };
+      const filter = this.applyFilter(query);
       const drugs = await this.drugRepo.findAndCountAll(filter);
       this.logger.log(`Retrieved ${drugs.count} drugs`);
       return new ApiSuccessResponseDto(
@@ -148,5 +141,30 @@ export class DrugsService {
 
   async getAnalytics() {
     return new NotImplementedException(`Retrieving analytics not implemented`);
+  }
+
+  private applyFilter(query: DrugPaginationDto): FindAndCountOptions<Drug> {
+    const whereOptions: WhereOptions<Drug> = {
+      [Op.and]: [
+        query.search && {
+          [Op.or]: [
+            { name: { [Op.iLike]: `%${query.search}%` } },
+            { brandName: { [Op.iLike]: `%${query.search}` } },
+          ],
+        },
+        query.supplierId && { supplierId: query.supplierId },
+        query.categories && {
+          category: {
+            name: { [Op.in]: query.categories },
+          },
+        },
+      ],
+    };
+    return {
+      where: whereOptions,
+      limit: query.pageSize || 10,
+      offset: query.pageSize * (query.page - 1) || 0,
+      order: [[query.orderBy && query.orderBy, 'ASC']],
+    };
   }
 }

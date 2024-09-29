@@ -48,7 +48,6 @@ export class DrugsController {
   })
   @ApiQuery({
     name: 'supplierId',
-    example: '44220956-0962-4dd0-9e65-1564c585563c',
     description: 'Id supplier of the drug',
     required: false,
   })
