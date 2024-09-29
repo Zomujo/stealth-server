@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  NotImplementedException,
 } from '@nestjs/common';
 import {
   CreateDrugDto,
@@ -146,6 +147,6 @@ export class DrugsService {
   }
 
   async getAnalytics() {
-    return 'This action returns analytics for drugs';
+    return new NotImplementedException(`Retrieving analytics not implemented`);
   }
 }

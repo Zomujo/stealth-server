@@ -1,9 +1,20 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  NotImplementedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Supplier } from './models/supplier.model';
-import { CreateSupplierDto, UpdateSupplierDto } from './dto';
+import { CreateSupplierDto, SupplierResponse, UpdateSupplierDto } from './dto';
 import { throwError } from 'src/utils/responses/error.response';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import {
+  ApiSuccessResponseDto,
+  PaginatedDataResponseDto,
+} from 'src/utils/responses/success.response';
+import { FindAndCountOptions, Op } from 'sequelize';
 
 @Injectable()
 export class SuppliersService {
@@ -13,42 +24,80 @@ export class SuppliersService {
   ) {
     this.logger = new Logger(SuppliersService.name);
   }
-  async create(createSupplierDto: CreateSupplierDto) {
+  async create(
+    createSupplierDto: CreateSupplierDto,
+  ): Promise<ApiSuccessResponseDto<SupplierResponse>> {
     try {
-      const created = await this.supplierRepo.create({ ...createSupplierDto });
-      return created;
+      const supplier = await this.supplierRepo.create({ ...createSupplierDto });
+
+      this.logger.log(`Created supplier with ID: ${supplier.id}`);
+
+      return new ApiSuccessResponseDto(
+        supplier,
+        HttpStatus.CREATED,
+        `Supplier created successfully`,
+      );
     } catch (error) {
       throw throwError(this.logger, error);
     }
   }
 
-  async findAll(_query: PaginationRequestDto): Promise<Supplier[]> {
+  async findAll(
+    query: PaginationRequestDto,
+  ): Promise<
+    ApiSuccessResponseDto<PaginatedDataResponseDto<SupplierResponse[]>>
+  > {
     try {
-      const found = await this.supplierRepo.findAll();
-      this.logger.log(`retrieved ${found.length} suppliers`);
-      return found;
+      // todo: refactor filter
+      const filter: FindAndCountOptions<Supplier> = {
+        where:
+          (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {},
+        limit: query.pageSize || 10,
+        offset: query.pageSize * (query.page - 1) || 0,
+        order: [[query.orderBy ?? 'name', 'ASC']],
+      };
+      const suppliers = await this.supplierRepo.findAndCountAll(filter);
+      this.logger.log(`Retrieved ${suppliers.count} supplier(s)`);
+      return new ApiSuccessResponseDto(
+        new PaginatedDataResponseDto(
+          suppliers.rows,
+          query.page || 1,
+          query.pageSize,
+          suppliers.count,
+        ),
+        HttpStatus.FOUND,
+        'Drug categories retrieved successfully',
+      );
     } catch (error) {
       throw throwError(this.logger, error);
     }
   }
 
-  async findOne(id: string): Promise<Supplier> {
+  async findOne(id: string): Promise<ApiSuccessResponseDto<SupplierResponse>> {
     try {
-      const found = await this.supplierRepo.findByPk(id);
-      if (!found) {
-        throw new NotFoundException(`Supplier with id ${id} not found`);
+      this.logger.log(`Finding supplier with ID: ${id}`);
+      const supplier = await this.supplierRepo.findByPk(id);
+
+      if (!supplier) {
+        this.logger.warn('supplier not found');
+        throw new NotFoundException(`supplier with id: ${id} not found`);
       }
-      return found;
+      this.logger.log(`Found suppliier with ID: ${id}`);
+      return new ApiSuccessResponseDto(
+        supplier,
+        HttpStatus.FOUND,
+        'supplier retrieved successfully',
+      );
     } catch (error) {
       throw throwError(this.logger, error);
     }
   }
 
-  update(id: string, _updateSupplierDto: UpdateSupplierDto) {
-    return `This action updates a #${id} supplier`;
+  update(_id: string, _updateSupplierDto: UpdateSupplierDto) {
+    throw new NotImplementedException('Updating supplier not implemented');
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} supplier`;
+  remove(_id: string) {
+    throw new NotImplementedException(`Deleting supplier not implemented`);
   }
 }
