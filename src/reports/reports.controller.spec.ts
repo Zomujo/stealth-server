@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReportsController } from './reports.controller';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize';
 import { ReportModels } from './models';
@@ -30,6 +30,7 @@ describe('ReportsController', () => {
     controller = module.get<ReportsController>(ReportsController);
 
     app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
 
     await app.init();
 
@@ -62,11 +63,10 @@ describe('ReportsController', () => {
     });
 
     it('should spit out 400', async () => {
-      const payload: Omit<CreateReportDto, 'nameInExport'> = {
+      const payload: Omit<CreateReportDto, 'reportLayout'> = {
         endDate: new Date(),
         startDate: new Date(),
         reportName: 'Sales report',
-        reportLayout: 'PORTRAIT',
       };
 
       const response = await request(server).post('/reports').send(payload);
@@ -81,13 +81,16 @@ describe('ReportsController', () => {
 
       expect(response.statusCode).toBe(200);
 
-      expect(response.body.data).toBeDefined();
+      expect(response.body.rows).toBeDefined();
     });
   });
 
   describe('getting single report', () => {
     it('should fetch successfully', async () => {
-      const response = await request(server).get('/reports/the-akshual-id');
+      const reports = await controller.getReports();
+      const response = await request(server).get(
+        `/reports/${reports.rows[0].id}`,
+      );
 
       expect(response.statusCode).toBe(200);
 
@@ -106,29 +109,37 @@ describe('ReportsController', () => {
     });
 
     it('should return four oh four', async () => {
-      const response = await request(server).get('/reports/404');
+      const response = await request(server).get(
+        '/reports/44220956-0962-4dd0-9e65-1564c585563c',
+      );
 
       expect(response.statusCode).toBe(404);
 
-      expect(response.body.data).toBeNull();
+      expect(response.body.data).toBeUndefined();
     });
   });
 
   describe('deleting single report', () => {
     it('should delete successfully', async () => {
-      const response = await request(server).delete('/reports/the-akshual-id');
+      const reports = await controller.getReports();
+
+      const response = await request(server).delete(
+        `/reports/${reports.rows[0].id}`,
+      );
 
       expect(response.statusCode).toBe(200);
 
-      expect(response.body.data).toBeNull();
+      expect(response.body.data).toBeUndefined();
     });
 
     it('should return four oh four', async () => {
-      const response = await request(server).delete('/reports/404');
+      const response = await request(server).delete(
+        '/reports/44220956-0962-4dd0-9e65-1564c585563c',
+      );
 
       expect(response.statusCode).toBe(404);
 
-      expect(response.body.data).toBeNull();
+      expect(response.body.data).toBeUndefined();
     });
   });
 });

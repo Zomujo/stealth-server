@@ -16,7 +16,7 @@ export class GetReportDto extends GenericResponseDto {
     description: 'The name to be used when exporting',
   })
   @IsOptional()
-  nameInExport: string;
+  nameInExport?: string;
 
   @ApiProperty({
     example: '2024-08-01',
