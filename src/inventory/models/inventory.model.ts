@@ -104,7 +104,7 @@ export class Department extends BaseModel {
     description: 'The hospital to which the department belongs',
   })
   @BelongsTo(() => Facility)
-  hospital: Facility;
+  facility: Facility;
 
   @ApiProperty({
     example: [],
