@@ -6,15 +6,16 @@ import {
   HttpStatus,
   Param,
   Post,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
-import { CreateReportDto, CreateReportSuccessDto } from './dto/create.dto';
+import { CreateReportDto } from './dto/create.dto';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import { GetReportDto } from './dto/get.dto';
-import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
+import {
+  ApiSuccessResponseDto,
+  PaginatedDataResponseDto,
+} from 'src/utils/responses/success.response';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -22,11 +23,10 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @CustomApiResponse(['created', 'forbidden', 'unauthorized'], {
-    type: CreateReportSuccessDto,
+    type: CreateReportDto,
     message: 'Report created successfully',
   })
   @Post()
-  @UsePipes(new ValidationPipe())
   async postReport(@Body() dto: CreateReportDto) {
     const response = await this.reportsService.create(dto);
 
@@ -37,7 +37,7 @@ export class ReportsController {
     );
   }
 
-  @CustomApiResponse(['accepted', 'forbidden', 'unauthorized'], {
+  @CustomApiResponse(['paginated', 'forbidden', 'unauthorized'], {
     type: GetReportDto,
     message: 'Report created successfully',
     isArray: true,
@@ -46,10 +46,11 @@ export class ReportsController {
   async getReports() {
     const response = await this.reportsService.fetchAll();
 
-    return new ApiSuccessResponseDto(
+    return new PaginatedDataResponseDto<GetReportDto[]>(
       response,
-      HttpStatus.OK,
-      'Reports retrieved successfully',
+      100,
+      200,
+      300,
     );
   }
 
@@ -76,7 +77,7 @@ export class ReportsController {
   async delete(@Param('id') id: string) {
     const response = await this.reportsService.removeOne(id);
 
-    return new GetReportDto(
+    return new ApiSuccessResponseDto(
       response,
       HttpStatus.OK,
       'Report deleted successfully',

@@ -1,51 +1,44 @@
+import { IsDate, IsOptional, IsNotEmpty } from 'class-validator';
+import { ReportLayout, ReportLayoutType } from '../models/reports.models';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
-import {
-  Report,
-  ReportLayout,
-  ReportLayoutType,
-} from '../models/reports.models';
-import { ApiResponseProperty, IntersectionType } from '@nestjs/swagger';
 
-export class GetReportDto extends IntersectionType(Report, GenericResponseDto) {
-  @ApiResponseProperty({
+export class GetReportDto extends GenericResponseDto {
+  @ApiProperty({
     example: 'Monthly Report',
-    type: String,
+    description: 'The name name of the report',
   })
+  @IsNotEmpty()
   reportName: string;
 
-  @ApiResponseProperty({
+  @ApiPropertyOptional({
     example: 'montly_report_Aug_2024',
-    type: String,
+    description: 'The name to be used when exporting',
   })
+  @IsOptional()
   nameInExport: string;
 
-  @ApiResponseProperty({
+  @ApiProperty({
     example: '2024-08-01',
-    type: Date,
+    description: 'The start date of the report',
   })
+  @IsNotEmpty()
+  @IsDate()
   startDate: Date;
 
-  @ApiResponseProperty({
+  @ApiProperty({
     example: '2024-08-31',
-    type: Date,
+    description: 'The end date of the report',
   })
+  @IsNotEmpty()
+  @IsDate()
   endDate: Date;
 
-  @ApiResponseProperty({
-    example: '2024-08-31',
-    type: Date,
-  })
-  deletedAt: Date;
-
-  @ApiResponseProperty({
-    example: 'you',
-    type: String,
-  })
-  deletedBy: string;
-
-  @ApiResponseProperty({
+  @ApiProperty({
     example: 'PORTRAIT',
+    description: 'The layout of the report',
     enum: ReportLayout,
   })
+  @IsNotEmpty()
   reportLayout: ReportLayoutType;
 }
