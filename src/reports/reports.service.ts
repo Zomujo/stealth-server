@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Report } from './models/reports.models';
 import { CreateReportDto } from './dto/create.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -21,8 +21,13 @@ export class ReportsService {
     return report;
   }
 
-  async fetchOne(_: Report['id']) {
-    return null;
+  async fetchOne(id: string) {
+    const report = await this.reportRepository.findByPk(id);
+    if (!report) {
+      throw new NotFoundException(`No report found`);
+    }
+
+    return report;
   }
 
   async removeOne(_: Report['id']) {
