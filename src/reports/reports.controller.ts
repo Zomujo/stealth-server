@@ -14,6 +14,7 @@ import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.d
 import { GetReportDto } from './dto/get.dto';
 import {
   ApiSuccessResponseDto,
+  ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
 
@@ -70,15 +71,14 @@ export class ReportsController {
   }
 
   @CustomApiResponse(['accepted', 'forbidden', 'unauthorized'], {
-    type: GetReportDto,
+    type: String,
     message: 'Report deleted successfully',
   })
   @Delete('/:id')
   async delete(@Param('id') id: string) {
-    const response = await this.reportsService.removeOne(id);
+    await this.reportsService.removeOne(id);
 
-    return new ApiSuccessResponseDto(
-      response,
+    return new ApiSuccessResponseNoData(
       HttpStatus.OK,
       'Report deleted successfully',
     );

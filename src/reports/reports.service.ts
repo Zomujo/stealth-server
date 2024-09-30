@@ -30,7 +30,13 @@ export class ReportsService {
     return report;
   }
 
-  async removeOne(_: Report['id']) {
-    return null;
+  async removeOne(id: string) {
+    const destroyedRows = await this.reportRepository.destroy({
+      where: { id },
+    });
+
+    if (destroyedRows == 0) {
+      throw new NotFoundException(`No report found`);
+    }
   }
 }
