@@ -1,4 +1,4 @@
-import { IsDate, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsDateString } from 'class-validator';
 import { ReportLayout, ReportLayoutType } from '../models/reports.models';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
@@ -23,7 +23,7 @@ export class GetReportDto extends GenericResponseDto {
     description: 'The start date of the report',
   })
   @IsNotEmpty()
-  @IsDate()
+  @IsDateString()
   startDate: Date;
 
   @ApiProperty({
@@ -31,7 +31,7 @@ export class GetReportDto extends GenericResponseDto {
     description: 'The end date of the report',
   })
   @IsNotEmpty()
-  @IsDate()
+  @IsDateString()
   endDate: Date;
 
   @ApiProperty({
