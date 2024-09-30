@@ -7,6 +7,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { DrugsCategory } from 'src/inventory/drugs-category/models/drugs-category.model';
+import { Department, Facility } from 'src/inventory/models/inventory.model';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { BaseModel } from 'src/shared/models/base.model';
 
@@ -77,6 +78,20 @@ export class Drug extends BaseModel {
   @Column
   supplierId: string;
 
-  @BelongsTo(() => Supplier, 'category_id')
+  @BelongsTo(() => Supplier)
   supplier: Supplier;
+
+  @ForeignKey(() => Department)
+  @Column
+  departmentId: string;
+
+  @BelongsTo(() => Department, 'department_id')
+  department: Department;
+
+  @ForeignKey(() => Facility)
+  @Column
+  facilitId: string;
+
+  @BelongsTo(() => Facility, 'facility_id')
+  facility: Facility;
 }

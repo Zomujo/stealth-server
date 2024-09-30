@@ -112,8 +112,8 @@ export class AuthService {
         this.jwtConfiguration.accessTokenTtl,
         {
           email: user.email,
-          facility: user.facility,
-          department: user.department,
+          facility: user.facility.name,
+          department: user.department.name,
           role: user.role,
         },
       ),

@@ -28,8 +28,8 @@ export class LoginTokenDto {
     this.fullName = user.fullName;
     this.email = user.email;
     this.phoneNumber = user.phoneNumber;
-    this.facility = user.facility;
-    this.department = user.department;
+    this.facility = user.facility.name;
+    this.department = user.department.name;
     this.role = user.role;
     this.tokens = tokens;
   }

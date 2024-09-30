@@ -1,5 +1,13 @@
-import { Column, DataType, DeletedAt, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  DeletedAt,
+  ForeignKey,
+  Table,
+} from 'sequelize-typescript';
 import { BaseModel } from '../../shared/models/base.model';
+import { Department, Facility } from 'src/inventory/models/inventory.model';
 
 @Table({
   tableName: 'users',
@@ -15,11 +23,19 @@ export class User extends BaseModel {
   @Column
   phoneNumber: string;
 
+  @ForeignKey(() => Facility)
   @Column
-  facility: string;
+  facilityId: string;
 
-  @Column
-  department: string;
+  @BelongsTo(() => Facility)
+  facility: Facility;
+
+  @ForeignKey(() => Department)
+  @Column({ allowNull: true })
+  departmentId: string;
+
+  @BelongsTo(() => Department)
+  department?: Department;
 
   @Column
   role: string;
