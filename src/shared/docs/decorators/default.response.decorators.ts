@@ -9,7 +9,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
-import { ApiSuccessResponse } from './response.decorators';
+import {
+  ApiSuccessResponse,
+  ApiSuccessResponseNullData,
+} from './response.decorators';
+import { ApiOkResponsePaginated } from './paginated-success.response.decorators';
 
 export function CustomApiResponse(
   responseTypes: CustomResponses[],
@@ -24,11 +28,24 @@ export function CustomApiResponse(
             description: options.message || 'Request accepted',
             isArray: options.isArray,
           });
+
         case 'created':
           return ApiCreatedResponse({
             type: options.type,
             description: options.message || 'Resource created successfully',
           });
+
+        case 'paginated':
+          return ApiOkResponsePaginated({
+            type: options.type,
+            description: options.message,
+          });
+
+        case 'null':
+          return ApiSuccessResponseNullData({
+            description: options.message || 'Resource modified successfully',
+          });
+
         case 'patch':
           return ApiResponse({
             type: options.type,
@@ -65,7 +82,9 @@ export function CustomApiResponse(
 type CustomResponses =
   | 'accepted'
   | 'created'
+  | 'paginated'
   | 'patch'
+  | 'null'
   | 'unauthorized'
   | 'forbidden'
   | 'notfound';
