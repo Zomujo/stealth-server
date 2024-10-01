@@ -19,6 +19,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import { GetQueries } from 'src/shared/docs/decorators/get-queries.decorator';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { Roles } from 'src/auth/decorator';
+import { Role } from 'src/auth/interface/roles.enum';
 
 @ApiTags('Drug Category')
 @Controller('drugsCategories')
@@ -32,6 +34,14 @@ export class DrugsCategoryController {
     type: DrugsCategoryResponse,
     message: 'Drug category created successfully',
   })
+  @Roles(
+    Role.HospitalAdmin,
+    Role.NationalAdmin,
+    Role.RegionalAdmin,
+    Role.HospitalSCM,
+    Role.NationalSCM,
+    Role.RegionalSCM,
+  )
   @Post()
   async create(@Body() createDrugsCategoryDto: CreateDrugsCategoryDto) {
     return await this.drugsCategoryService.create(createDrugsCategoryDto);
@@ -55,6 +65,14 @@ export class DrugsCategoryController {
     return await this.drugsCategoryService.findOne(id);
   }
 
+  @Roles(
+    Role.HospitalAdmin,
+    Role.NationalAdmin,
+    Role.RegionalAdmin,
+    Role.HospitalSCM,
+    Role.NationalSCM,
+    Role.RegionalSCM,
+  )
   @CustomApiResponse(['success', 'authorize'], {
     type: String,
     message: 'Drug category updated successfully',
@@ -67,6 +85,14 @@ export class DrugsCategoryController {
     return await this.drugsCategoryService.update(id, updateDrugsCategoryDto);
   }
 
+  @Roles(
+    Role.HospitalAdmin,
+    Role.NationalAdmin,
+    Role.RegionalAdmin,
+    Role.HospitalSCM,
+    Role.NationalSCM,
+    Role.RegionalSCM,
+  )
   @CustomApiResponse(['success', 'authorize'], {
     type: String,
     message: 'Drug category deleted successfully',

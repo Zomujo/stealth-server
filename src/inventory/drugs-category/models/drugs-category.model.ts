@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { Column, DataType, HasMany, Table } from 'sequelize-typescript';
+import {
+  AfterFind,
+  Column,
+  DataType,
+  HasMany,
+  Table,
+} from 'sequelize-typescript';
 import { Drug } from 'src/inventory/drugs/models/drug.model';
 import { BaseModel } from 'src/shared/models/base.model';
 
@@ -34,7 +40,6 @@ export class DrugsCategory extends BaseModel {
   })
   status: DrugsCategoryStatus;
 
-  @Column({ type: DataType.INTEGER, field: 'drug_count' })
   @ApiProperty({
     example: 100,
     description: 'Number of drugs under category',
@@ -45,4 +50,13 @@ export class DrugsCategory extends BaseModel {
 
   @HasMany(() => Drug)
   drugs: Drug[];
+
+  @AfterFind
+  static async calculateDrugCount(instance: DrugsCategory[] | DrugsCategory) {
+    if (instance instanceof Array) {
+      for (const inst of instance) {
+        delete inst.dataValues.drugs;
+      }
+    }
+  }
 }
