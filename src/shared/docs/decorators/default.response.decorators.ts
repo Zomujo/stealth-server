@@ -10,6 +10,7 @@ import { ApiErrorResponse } from 'src/utils/responses/error.response';
 import {
   ApiCreatedSuccessResponse,
   ApiSuccessResponse,
+  ApiSuccessResponseNullData,
 } from './response.decorators';
 import { ApiOkResponsePaginated } from './paginated-success.response.decorators';
 
@@ -26,16 +27,23 @@ export function CustomApiResponse(
             description: options.message || 'Request accepted',
             isArray: options.isArray,
           });
-        case 'paginated':
-          return ApiOkResponsePaginated({
-            type: options.type,
-            description: options.message,
-          });
         case 'created':
           return ApiCreatedSuccessResponse({
             type: options.type,
             description: options.message || 'Resource created successfully',
           });
+
+        case 'paginated':
+          return ApiOkResponsePaginated({
+            type: options.type,
+            description: options.message,
+          });
+
+        case 'null':
+          return ApiSuccessResponseNullData({
+            description: options.message || 'Resource modified successfully',
+          });
+
         case 'patch':
           return ApiSuccessResponse({
             type: options.type,
@@ -73,6 +81,7 @@ type CustomResponses =
   | 'accepted'
   | 'created'
   | 'patch'
+  | 'null'
   | 'unauthorized'
   | 'forbidden'
   | 'notfound'
