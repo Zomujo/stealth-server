@@ -4,6 +4,7 @@ import { CreateReportDto } from './dto/create.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { GetReportDto, GetReportPaginationDto } from './dto/get.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class ReportsService {
@@ -37,6 +38,39 @@ export class ReportsService {
     const { rows, count } = await this.reportRepository.findAndCountAll(filter);
 
     return { rows: rows.map((report) => new GetReportDto(report)), count };
+  }
+
+  async export(query: GetReportPaginationDto) {
+    const { rows } = await this.fetchAll(query);
+
+    const headerLabels = {
+      '#': '#',
+      id: 'Report ID',
+      reportName: 'Report Name',
+      nameInExport: 'Name in Export',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      reportLayout: 'Report Layout',
+    };
+
+    const rowsJson = rows.map((report) => instanceToPlain(report));
+
+    const csvRows = [];
+
+    csvRows.push(Object.values(headerLabels).join(','));
+
+    for (const [index, row] of rowsJson.entries()) {
+      const values = Object.keys(headerLabels).map((header) => {
+        const escaped =
+          headerLabels[header] === '#'
+            ? index + 1
+            : ('' + (row[header] ?? '')).replace(/"/g, '\\"');
+        return `"${escaped}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+
+    return csvRows.join('\n');
   }
 
   async create(dto: CreateReportDto) {

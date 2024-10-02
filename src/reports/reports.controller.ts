@@ -3,10 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
@@ -18,6 +20,7 @@ import {
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
+import { Response } from 'express';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -41,7 +44,7 @@ export class ReportsController {
 
   @CustomApiResponse(['paginated', 'forbidden', 'unauthorized'], {
     type: GetReportDto,
-    message: 'Report created successfully',
+    message: 'Report fetched successfully',
     isArray: true,
   })
   @Get()
@@ -53,6 +56,31 @@ export class ReportsController {
       query.page || 1,
       query.pageSize,
       count,
+    );
+  }
+
+  @Get('/export')
+  @CustomApiResponse(['null', 'forbidden', 'unauthorized'], {
+    type: null,
+    message: 'Report exported successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  async exportReports(
+    @Query() query: GetReportPaginationDto,
+    @Res() res: Response,
+  ) {
+    const csv = await this.reportsService.export(query);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=report-${Date.now()}.csv`,
+    );
+    res.send(csv);
+
+    return new ApiSuccessResponseNoData(
+      HttpStatus.OK,
+      'Report exported successfully',
     );
   }
 
