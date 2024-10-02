@@ -74,7 +74,7 @@ export class DrugsCategoryController {
     Role.RegionalSCM,
   )
   @CustomApiResponse(['success', 'authorize'], {
-    type: String,
+    type: null,
     message: 'Drug category updated successfully',
   })
   @Patch(':id')
@@ -94,7 +94,7 @@ export class DrugsCategoryController {
     Role.RegionalSCM,
   )
   @CustomApiResponse(['success', 'authorize'], {
-    type: String,
+    type: null,
     message: 'Drug category deleted successfully',
   })
   @Delete(':id')

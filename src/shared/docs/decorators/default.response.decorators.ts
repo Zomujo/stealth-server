@@ -10,7 +10,6 @@ import {
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
 import { ApiSuccessResponse } from './response.decorators';
 import { ApiOkResponsePaginated } from './paginated-success.response.decorators';
-import { PaginationDocs } from './get-queries.decorator';
 import { Authorize } from 'src/auth/decorator';
 
 export function CustomApiResponse(
@@ -46,7 +45,6 @@ export function CustomApiResponse(
               description:
                 options.message || 'Resources retrieved successfully',
             }),
-            PaginationDocs(),
           ],
         );
         break;
