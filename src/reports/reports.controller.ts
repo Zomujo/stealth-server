@@ -6,12 +6,13 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { CreateReportDto } from './dto/create.dto';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { GetReportDto } from './dto/get.dto';
+import { GetReportDto, GetReportPaginationDto } from './dto/get.dto';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
@@ -44,14 +45,14 @@ export class ReportsController {
     isArray: true,
   })
   @Get()
-  async getReports() {
-    const response = await this.reportsService.fetchAll();
+  async getReports(@Query() query: GetReportPaginationDto) {
+    const { rows, count } = await this.reportsService.fetchAll(query);
 
     return new PaginatedDataResponseDto<GetReportDto[]>(
-      response,
-      1,
-      10,
-      response.length,
+      rows,
+      query.page || 1,
+      query.pageSize,
+      count,
     );
   }
 

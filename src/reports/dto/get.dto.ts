@@ -8,8 +8,10 @@ import {
   ApiProperty,
   ApiPropertyOptional,
   ApiResponseProperty,
+  OmitType,
 } from '@nestjs/swagger';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
+import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 
 export class GetReportDto extends GenericResponseDto {
   constructor(report: Report) {
@@ -63,4 +65,38 @@ export class GetReportDto extends GenericResponseDto {
   })
   @IsNotEmpty()
   reportLayout: ReportLayoutType;
+}
+
+export class GetReportPaginationDto extends OmitType(PaginationRequestDto, [
+  'search',
+]) {
+  @ApiPropertyOptional({
+    description: 'The name of the report',
+    example: 'Monthly Report',
+  })
+  @IsOptional()
+  reportName: string;
+
+  @ApiPropertyOptional({
+    description: 'The name to be used when exporting',
+    example: 'montly_report_Aug_2024',
+  })
+  @IsOptional()
+  nameInExport: string;
+
+  @ApiPropertyOptional({
+    description: 'The start date of the report',
+    example: '2024-08-01',
+  })
+  @IsOptional()
+  @IsDateString()
+  startDate: string;
+
+  @ApiPropertyOptional({
+    description: 'The end date of the report',
+    example: '2024-08-31',
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate: string;
 }

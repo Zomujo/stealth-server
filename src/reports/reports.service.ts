@@ -2,16 +2,41 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Report } from './models/reports.models';
 import { CreateReportDto } from './dto/create.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { GetReportDto } from './dto/get.dto';
+import { GetReportDto, GetReportPaginationDto } from './dto/get.dto';
+import { FindAndCountOptions, Op } from 'sequelize';
 
 @Injectable()
 export class ReportsService {
   constructor(@InjectModel(Report) private reportRepository: typeof Report) {}
 
-  async fetchAll() {
-    const reports = await this.reportRepository.findAll();
+  async fetchAll(query: GetReportPaginationDto) {
+    const whereConditions: Record<string, Record<any, any>> = {};
 
-    return reports.map((report) => new GetReportDto(report));
+    if (query.reportName) {
+      whereConditions.reportName = { [Op.iLike]: `%${query.reportName}%` };
+    }
+
+    if (query.nameInExport) {
+      whereConditions.nameInExport = { [Op.iLike]: `%${query.nameInExport}%` };
+    }
+
+    if (query.startDate || query.endDate) {
+      whereConditions.createdAt = {
+        ...(query.startDate && { [Op.gte]: new Date(query.startDate) }),
+        ...(query.endDate && { [Op.lte]: new Date(query.endDate) }),
+      };
+    }
+
+    const filter: FindAndCountOptions<Report> = {
+      where: whereConditions,
+      limit: query.pageSize || 10,
+      offset: query.pageSize * (query.page - 1) || 0,
+      order: query.orderBy && [[query.orderBy, 'ASC']],
+    };
+
+    const { rows, count } = await this.reportRepository.findAndCountAll(filter);
+
+    return { rows: rows.map((report) => new GetReportDto(report)), count };
   }
 
   async create(dto: CreateReportDto) {
