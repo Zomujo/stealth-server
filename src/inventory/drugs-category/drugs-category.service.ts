@@ -1,9 +1,4 @@
-import {
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DrugsCategory } from './models/drugs-category.model';
 import { InjectModel } from '@nestjs/sequelize';
 import {
@@ -11,12 +6,7 @@ import {
   DrugsCategoryResponse,
   UpdateDrugsCategoryDto,
 } from './dto';
-import {
-  ApiSuccessResponseDto,
-  ApiSuccessResponseNoData,
-  PaginatedDataResponseDto,
-} from 'src/utils/responses/success.response';
-import { throwError } from 'src/utils/responses/error.response';
+import { ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { Drug } from '../drugs/models/drug.model';
@@ -41,19 +31,15 @@ export class DrugsCategoryService {
    */
   async create(
     createDrugsCategoryDto: CreateDrugsCategoryDto,
-  ): Promise<ApiSuccessResponseDto<DrugsCategoryResponse>> {
+  ): Promise<DrugsCategoryResponse> {
     try {
       const category = await this.drugCategoryRepo.create({
         ...createDrugsCategoryDto,
       });
       this.logger.log(`Created drugs category with ID: ${category.id}`);
-      return new ApiSuccessResponseDto(
-        category,
-        HttpStatus.CREATED,
-        'Drug category created successfully',
-      );
+      return category;
     } catch (error) {
-      throw throwError(this.logger, error);
+      throw error;
     }
   }
 
@@ -66,9 +52,7 @@ export class DrugsCategoryService {
    */
   async findAll(
     query: PaginationRequestDto,
-  ): Promise<
-    ApiSuccessResponseDto<PaginatedDataResponseDto<DrugsCategoryResponse[]>>
-  > {
+  ): Promise<[DrugsCategoryResponse[], number]> {
     try {
       const filter: FindAndCountOptions<DrugsCategory> = {
         where:
@@ -81,18 +65,9 @@ export class DrugsCategoryService {
       const categories = await this.drugCategoryRepo.findAndCountAll(filter);
 
       this.logger.log(`Retrieved ${categories.count} drugs categories`);
-      return new ApiSuccessResponseDto(
-        new PaginatedDataResponseDto(
-          categories.rows,
-          query.page || 1,
-          query.pageSize,
-          categories.count,
-        ),
-        HttpStatus.FOUND,
-        'Drug categories retrieved successfully',
-      );
+      return [categories.rows, categories.count];
     } catch (error) {
-      throw throwError(this.logger, error);
+      throw error;
     }
   }
 
@@ -104,9 +79,7 @@ export class DrugsCategoryService {
    * @throws {NotFoundException} If the drugs category with the given ID is not found.
    * @throws {InternalServerErrorException} If an internal server error occurs.
    */
-  async findOne(
-    id: string,
-  ): Promise<ApiSuccessResponseDto<DrugsCategoryResponse>> {
+  async findOne(id: string): Promise<DrugsCategoryResponse> {
     try {
       this.logger.log(`Finding drugs category with ID: ${id}`);
       const category = await this.drugCategoryRepo.findByPk(id, {
@@ -118,13 +91,9 @@ export class DrugsCategoryService {
         throw new NotFoundException(`Category with id: ${id} not found`);
       }
       this.logger.log(`Found drugs category with ID: ${id}`);
-      return new ApiSuccessResponseDto(
-        category,
-        HttpStatus.FOUND,
-        'Drug retrieved successfully',
-      );
+      return category;
     } catch (error) {
-      throw throwError(this.logger, error);
+      throw error;
     }
   }
 
@@ -151,12 +120,9 @@ export class DrugsCategoryService {
         throw new NotFoundException(`category with id ${id} not found`);
       }
       this.logger.log(`Updated drugs category with ID: ${id}`);
-      return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
-        'Drug updated successfully',
-      );
+      return;
     } catch (error) {
-      throw throwError(this.logger, error);
+      throw error;
     }
   }
 
@@ -176,12 +142,9 @@ export class DrugsCategoryService {
         this.logger.warn(`Category with id ${id} not found`);
         throw new NotFoundException(`Category with id ${id} not found`);
       }
-      return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
-        'Drug deleted successfully',
-      );
+      return;
     } catch (error) {
-      throw throwError(this.logger, error);
+      throw error;
     }
   }
 }
