@@ -1,4 +1,4 @@
-import { IsOptional, IsNotEmpty, IsDateString } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsDateString, IsEnum } from 'class-validator';
 import {
   Report,
   ReportLayout,
@@ -64,6 +64,7 @@ export class GetReportDto extends GenericResponseDto {
     enum: ReportLayout,
   })
   @IsNotEmpty()
+  @IsEnum(ReportLayout)
   reportLayout: ReportLayoutType;
 }
 
