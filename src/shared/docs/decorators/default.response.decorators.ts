@@ -4,6 +4,7 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
@@ -45,7 +46,7 @@ export function CustomApiResponse(
           });
 
         case 'patch':
-          return ApiSuccessResponse({
+          return ApiResponse({
             type: options.type,
             description: options.message || 'Resource updated successfully',
           });
