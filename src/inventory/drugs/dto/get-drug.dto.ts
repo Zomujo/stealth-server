@@ -1,4 +1,8 @@
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  IntersectionType,
+} from '@nestjs/swagger';
 import { CreateDrugDto } from './create-drug.dto';
 import { IsString, IsUUID } from 'class-validator';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
@@ -6,8 +10,10 @@ import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 
 export class DrugPaginationDto extends IntersectionType(PaginationRequestDto) {
   @IsUUID()
+  @ApiPropertyOptional()
   supplierId: string;
 
+  @ApiPropertyOptional()
   @IsString({ each: true })
   categories: string[];
 }

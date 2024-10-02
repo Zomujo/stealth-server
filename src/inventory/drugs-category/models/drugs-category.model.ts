@@ -40,7 +40,6 @@ export class DrugsCategory extends BaseModel {
   })
   status: DrugsCategoryStatus;
 
-  @Column({ type: DataType.INTEGER, field: 'drug_count' })
   @ApiProperty({
     example: 100,
     description: 'Number of drugs under category',

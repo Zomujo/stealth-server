@@ -6,6 +6,10 @@ import { User } from './models/user.model';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './interface/jwt.config';
+import { MailService } from '../notification/mail/mail.service';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -14,6 +18,17 @@ import jwtConfig from './interface/jwt.config';
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    MailService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AuthModule {}

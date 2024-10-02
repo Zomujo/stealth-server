@@ -7,9 +7,10 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { DrugsService } from './drugs.service';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import {
   CreateDrugDto,
@@ -18,7 +19,6 @@ import {
   DrugResponse,
   UpdateDrugDto,
 } from './dto';
-import { GetQueries } from 'src/shared/docs/decorators/get-queries.decorator';
 
 @ApiTags('Drugs')
 @Controller('drugs')
@@ -34,25 +34,13 @@ export class DrugsController {
     return await this.drugsService.create(createDrugDto);
   }
 
-  @CustomApiResponse(['filter', 'authorize'], {
+  @CustomApiResponse(['paginated', 'authorize'], {
     type: DrugResponse,
     isArray: true,
     message: 'Drugs retrieved successfully',
   })
-  @ApiQuery({
-    name: 'categories',
-    example: 'laxatives',
-    isArray: true,
-    description: 'The category of the drug',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'supplierId',
-    description: 'Id supplier of the drug',
-    required: false,
-  })
   @Get()
-  async findAll(@GetQueries() query: DrugPaginationDto) {
+  async findAll(@Query() query: DrugPaginationDto) {
     return await this.drugsService.findAll(query);
   }
 
@@ -65,7 +53,7 @@ export class DrugsController {
     return await this.drugsService.getAnalytics();
   }
 
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['success', 'authorize', 'notfound'], {
     type: DrugResponse,
     message: 'Drug retrieved successfully',
   })

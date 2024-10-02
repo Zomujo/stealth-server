@@ -10,7 +10,6 @@ import {
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
 import { ApiSuccessResponse } from './response.decorators';
 import { ApiOkResponsePaginated } from './paginated-success.response.decorators';
-import { PaginationDocs } from './get-queries.decorator';
 import { Authorize } from 'src/auth/decorator';
 
 export function CustomApiResponse(
@@ -32,13 +31,13 @@ export function CustomApiResponse(
       case 'success':
         docs.push(
           ApiSuccessResponse({
-            type: options.type,
+            type: options.type ?? 'any',
             description: options.message || 'Request successful',
             isArray: options.isArray,
           }),
         );
         break;
-      case 'filter':
+      case 'paginated':
         docs.push(
           ...[
             ApiOkResponsePaginated({
@@ -46,7 +45,6 @@ export function CustomApiResponse(
               description:
                 options.message || 'Resources retrieved successfully',
             }),
-            PaginationDocs(),
           ],
         );
         break;
@@ -80,4 +78,4 @@ export function CustomApiResponse(
   return applyDecorators(...docs);
 }
 
-type CustomResponses = 'success' | 'authorize' | 'filter' | 'notfound';
+type CustomResponses = 'success' | 'authorize' | 'paginated' | 'notfound';

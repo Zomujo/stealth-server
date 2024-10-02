@@ -8,6 +8,7 @@ import {
   Logger,
   ParseUUIDPipe,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { DrugsCategoryService } from './drugs-category.service';
 import {
@@ -17,8 +18,9 @@ import {
 } from './dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { GetQueries } from 'src/shared/docs/decorators/get-queries.decorator';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { Roles } from 'src/auth/decorator';
+import { Role } from 'src/auth/interface/roles.enum';
 
 @ApiTags('Drug Category')
 @Controller('drugsCategories')
@@ -32,17 +34,25 @@ export class DrugsCategoryController {
     type: DrugsCategoryResponse,
     message: 'Drug category created successfully',
   })
+  @Roles(
+    Role.HospitalAdmin,
+    Role.NationalAdmin,
+    Role.RegionalAdmin,
+    Role.HospitalSCM,
+    Role.NationalSCM,
+    Role.RegionalSCM,
+  )
   @Post()
   async create(@Body() createDrugsCategoryDto: CreateDrugsCategoryDto) {
     return await this.drugsCategoryService.create(createDrugsCategoryDto);
   }
 
-  @CustomApiResponse(['filter', 'authorize'], {
+  @CustomApiResponse(['paginated', 'authorize'], {
     type: DrugsCategoryResponse,
     message: 'Drug categories retrieved successfully',
   })
   @Get()
-  async findAll(@GetQueries() query?: PaginationRequestDto) {
+  async findAll(@Query() query?: PaginationRequestDto) {
     return await this.drugsCategoryService.findAll(query);
   }
 
@@ -55,8 +65,16 @@ export class DrugsCategoryController {
     return await this.drugsCategoryService.findOne(id);
   }
 
+  @Roles(
+    Role.HospitalAdmin,
+    Role.NationalAdmin,
+    Role.RegionalAdmin,
+    Role.HospitalSCM,
+    Role.NationalSCM,
+    Role.RegionalSCM,
+  )
   @CustomApiResponse(['success', 'authorize'], {
-    type: String,
+    type: null,
     message: 'Drug category updated successfully',
   })
   @Patch(':id')
@@ -67,8 +85,16 @@ export class DrugsCategoryController {
     return await this.drugsCategoryService.update(id, updateDrugsCategoryDto);
   }
 
+  @Roles(
+    Role.HospitalAdmin,
+    Role.NationalAdmin,
+    Role.RegionalAdmin,
+    Role.HospitalSCM,
+    Role.NationalSCM,
+    Role.RegionalSCM,
+  )
   @CustomApiResponse(['success', 'authorize'], {
-    type: String,
+    type: null,
     message: 'Drug category deleted successfully',
   })
   @Delete(':id')
