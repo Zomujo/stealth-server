@@ -10,7 +10,10 @@ import {
   Query,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiSuccessResponseDto } from '../utils/responses/success.response';
+import {
+  ApiSuccessResponseDto,
+  PaginatedDataResponseDto,
+} from '../utils/responses/success.response';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateDrugOrderDto, CreateDrugOrderDto, GetOrdersDto } from './dto';
 import { DrugOrdersService } from './orders.service';
@@ -29,7 +32,7 @@ export class DrugOrdersController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new drug order' })
-  @CustomApiResponse(['created', 'unauthorized', 'forbidden'], {
+  @CustomApiResponse(['authorize', 'success'], {
     type: DrugOrder,
     message: 'Drug order created successfully',
   })
@@ -50,13 +53,13 @@ export class DrugOrdersController {
 
   @Get()
   @ApiOperation({ summary: 'Retrieve multiple drug orders' })
-  @CustomApiResponse(['paginated', 'unauthorized', 'forbidden'], {
+  @CustomApiResponse(['paginated', 'authorize'], {
     type: DrugOrder,
     message: 'Multiple drug orders retrieved successfully',
   })
   async getDrugOrders(
     @Query() query: GetOrdersDto,
-  ): Promise<ApiSuccessResponseDto<DrugOrder[]>> {
+  ): Promise<ApiSuccessResponseDto<PaginatedDataResponseDto<DrugOrder[]>>> {
     try {
       const result = await this.orderService.findDrugOrders(query);
       return new ApiSuccessResponseDto(
@@ -71,7 +74,7 @@ export class DrugOrdersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific drug order by ID' })
-  @CustomApiResponse(['accepted', 'notfound', 'unauthorized', 'forbidden'], {
+  @CustomApiResponse(['success', 'notfound', 'authorize'], {
     type: DrugOrder,
     message: 'Drug order retrieved successfully',
   })
@@ -93,7 +96,7 @@ export class DrugOrdersController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a drug order by ID' })
-  @CustomApiResponse(['patch', 'notfound', 'unauthorized', 'forbidden'], {
+  @CustomApiResponse(['success', 'notfound', 'authorize'], {
     type: DrugOrder,
     message: 'Drug order updated successfully',
   })
@@ -115,13 +118,18 @@ export class DrugOrdersController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a drug order by ID' })
-  @CustomApiResponse(['notfound', 'unauthorized', 'forbidden'], {
+  @CustomApiResponse(['success', 'notfound', 'authorize'], {
     type: DrugOrder,
     message: 'Multiple drug orders retrieved successfully',
   })
   async deleteDrugOrder(@Param('id') id: string) {
     try {
-      return await this.orderService.deleteDrugOrder(id);
+      const msg = await this.orderService.deleteDrugOrder(id);
+      return new ApiSuccessResponseDto(
+        msg,
+        HttpStatus.OK,
+        'Drug order deleted successfully',
+      );
     } catch (error) {
       throw throwError(this.logger, error);
     }
