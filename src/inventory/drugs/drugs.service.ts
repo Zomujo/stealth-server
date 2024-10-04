@@ -29,16 +29,12 @@ export class DrugsService {
    * @throws If any error occurs during the creation process.
    */
   async create(createDrugDto: CreateDrugDto): Promise<DrugResponse> {
-    try {
-      const createdDrug = await this.drugRepo.create({
-        ...createDrugDto,
-        status: DrugStatus.STOCKED,
-      });
-      this.logger.log(`Drug added successfully. id: ${createdDrug.id}`);
-      return createdDrug;
-    } catch (error) {
-      throw error;
-    }
+    const createdDrug = await this.drugRepo.create({
+      ...createDrugDto,
+      status: DrugStatus.STOCKED,
+    });
+    this.logger.log(`Drug added successfully. id: ${createdDrug.id}`);
+    return createdDrug;
   }
 
   /**
@@ -49,14 +45,10 @@ export class DrugsService {
    * @throws Throws an error if there was an issue retrieving the drugs.
    */
   async findAll(query: DrugPaginationDto): Promise<[DrugResponse[], number]> {
-    try {
-      const filter = this.applyFilter(query);
-      const drugs = await this.drugRepo.findAndCountAll(filter);
-      this.logger.log(`Retrieved ${drugs.count} drugs`);
-      return [drugs.rows, drugs.count];
-    } catch (error) {
-      throw error;
-    }
+    const filter = this.applyFilter(query);
+    const drugs = await this.drugRepo.findAndCountAll(filter);
+    this.logger.log(`Retrieved ${drugs.count} drugs`);
+    return [drugs.rows, drugs.count];
   }
 
   /**
@@ -67,18 +59,14 @@ export class DrugsService {
    * @throws {NotFoundException} If the drug with the given ID is not found.
    */
   async findOne(id: string): Promise<DrugResponse> {
-    try {
-      this.logger.log(`finding drug with id: ${id}`);
-      const drug = await this.drugRepo.findByPk(id);
-      if (!drug) {
-        throw new NotFoundException(`drug with id: ${id} not found`);
-      }
-
-      this.logger.log(`Found drugs category with ID: ${id}`);
-      return drug;
-    } catch (error) {
-      throw error;
+    this.logger.log(`finding drug with id: ${id}`);
+    const drug = await this.drugRepo.findByPk(id);
+    if (!drug) {
+      throw new NotFoundException(`drug with id: ${id} not found`);
     }
+
+    this.logger.log(`Found drugs category with ID: ${id}`);
+    return drug;
   }
 
   /**
@@ -90,20 +78,16 @@ export class DrugsService {
    * @returns A Promise that resolves to void.
    */
   async update(id: string, updateDrugDto: UpdateDrugDto): Promise<void> {
-    try {
-      const result = await this.drugRepo.update(
-        { ...updateDrugDto },
-        { where: { id: id } },
-      );
-      if (result[0] == 0) {
-        this.logger.warn(`drug with id ${id} not found`);
-        throw new NotFoundException(`drug with id ${id} not found`);
-      }
-      this.logger.log(`Updated drug with ID: ${id}`);
-      return;
-    } catch (error) {
-      throw error;
+    const result = await this.drugRepo.update(
+      { ...updateDrugDto },
+      { where: { id: id } },
+    );
+    if (result[0] == 0) {
+      this.logger.warn(`drug with id ${id} not found`);
+      throw new NotFoundException(`drug with id ${id} not found`);
     }
+    this.logger.log(`Updated drug with ID: ${id}`);
+    return;
   }
 
   /**
