@@ -78,7 +78,7 @@ export class DrugOrdersService {
 
     // Apply drug name filter if provided
     if (drugName) {
-      queryOptions.where.drugName = {
+      queryOptions.where.drug_name = {
         [Op.like]: `%${drugName}%`,
       };
     }
