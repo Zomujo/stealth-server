@@ -90,7 +90,7 @@ module.exports = {
           email: 'example@email.com',
           phone_number: '0244335567',
           facility_id: facilityId,
-          department_id: departmentId,
+          department_id: null,
           role: 'hospital_admin',
           password: hashedPassword,
           account_approved: true,
