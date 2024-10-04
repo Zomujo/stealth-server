@@ -17,8 +17,8 @@ export class DrugOrdersService {
   public async createDrugOrder(dto: CreateDrugOrderDto): Promise<DrugOrder> {
     // Convert DTO to a plain object to match the Sequelize model format
     const orderData: any = {
-      drugName: dto.drugName,
-      orderNumber: generateOrderNumber(),
+      drug_name: dto.drugName,
+      order_number: generateOrderNumber(),
       supplier: dto.supplier,
       date: dto.dateCreated,
       quantity: dto.quantity,
@@ -39,7 +39,6 @@ export class DrugOrdersService {
     dto: GetOrdersDto,
   ): Promise<PaginatedDataResponseDto<DrugOrder[]>> {
     const {
-      search,
       page = 1,
       pageSize = 10,
       orderBy = 'createdAt',
@@ -56,13 +55,6 @@ export class DrugOrdersService {
       limit: pageSize,
       offset: (page - 1) * pageSize,
     };
-
-    // Apply search filter if provided
-    if (search) {
-      queryOptions.where.name = {
-        [Op.like]: `%${search}%`,
-      };
-    }
 
     // Apply status filter if provided
     if (status) {
