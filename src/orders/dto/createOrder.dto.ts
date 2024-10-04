@@ -1,21 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrderStatus } from '../../shared/enums/drugOrder.enum';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateDrugOrderDto {
   @ApiProperty({ description: 'The name of the drug', example: 'Paracetamol' })
   @IsNotEmpty()
   @IsString()
   drugName: string;
-
-  @ApiProperty({
-    description: 'The order number',
-    example: 'ORD-12345',
-    uniqueItems: true,
-  })
-  @IsNotEmpty()
-  @IsString()
-  orderNumber: string;
 
   @ApiProperty({
     description: 'The name of the supplier',
@@ -27,27 +24,29 @@ export class CreateDrugOrderDto {
 
   @ApiProperty({
     description: 'The date of the order',
-    example: '2024-09-13T15:07:15.716764',
+    example: new Date().toISOString(), // ensures correct, consistent date format despite system differences
   })
   @IsNotEmpty()
   dateCreated: Date;
 
-  @ApiProperty({ description: 'The quantity of the drug', example: '1000pcs' })
+  @ApiProperty({ description: 'The quantity of the drug', example: 1000 })
   @IsNotEmpty()
   @IsString()
-  quantity: string;
+  quantity: number;
 
   @ApiPropertyOptional({
     description: 'The expected delivery date of the order',
-    example: '2023-09-15',
+    example: new Date().toISOString(),
   })
   @IsOptional()
+  @IsDateString()
   expectedDeliveryDate?: Date;
 
   @ApiProperty({
     description: 'The status of the order',
-    enum: OrderStatus,
-    default: OrderStatus.DRAFT,
+    example: 'completed',
+    enum: ['requested', 'draft', 'cancelled', 'delivering', 'received'],
+    default: 'draft',
   })
   @IsEnum(OrderStatus)
   status: OrderStatus;
