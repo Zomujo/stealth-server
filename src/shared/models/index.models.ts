@@ -3,6 +3,7 @@ import { InventoryModels } from 'src/inventory/models';
 import { DrugOrderModels } from '../../orders/models';
 import { UserModels } from '../../auth/models';
 import { AdminModels } from '../../admin/models';
+import { DepartmentRequestModels } from '../../department-requests/models';
 
 export const IndexModels = [
   ...AdminModels,
@@ -10,4 +11,5 @@ export const IndexModels = [
   ...ReportModels,
   ...DrugOrderModels,
   ...InventoryModels,
+  ...DepartmentRequestModels,
 ];
