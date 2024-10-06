@@ -3,9 +3,11 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Index,
   Table,
 } from 'sequelize-typescript';
+import { DepartmentRequest } from 'src/department-requests/models/department-requests.model';
 import { DrugsCategory } from 'src/inventory/drugs-category/models/drugs-category.model';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { BaseModel } from 'src/shared/models/base.model';
@@ -79,4 +81,7 @@ export class Drug extends BaseModel {
 
   @BelongsTo(() => Supplier, 'category_id')
   supplier: Supplier;
+
+  @HasMany(() => DepartmentRequest)
+  departmentRequests: DepartmentRequest[];
 }
