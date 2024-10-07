@@ -2,9 +2,7 @@ import { Controller, Post, Body, HttpStatus, Logger } from '@nestjs/common';
 import { DepartmentRequestsService } from './department-requests.service';
 import { CreateDepartmentRequestDto } from './dto/create-department-request.dto';
 import { ApiTags } from '@nestjs/swagger';
-import {
-  CustomApiResponse,
-} from 'src/shared/docs/decorators';
+import { CustomApiResponse } from 'src/shared/docs/decorators';
 import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 
@@ -24,6 +22,9 @@ export class DepartmentRequestsController {
   @Post()
   async create(@Body() createDepartmentRequestDto: CreateDepartmentRequestDto) {
     try {
+      createDepartmentRequestDto.requestId = `Req-${new Date().getTime()}`;
+      createDepartmentRequestDto.status = 'PENDING';
+
       const response = await this.departmentRequestsService.create(
         createDepartmentRequestDto,
       );

@@ -31,7 +31,7 @@ export class DepartmentRequest extends BaseModel {
 
   @ForeignKey(() => Department)
   @Column({ type: DataType.STRING, field: 'department_id' })
-  department_id: string;
+  departmentId: string;
 
   @BelongsTo(() => Department, 'department_id')
   department: Department;

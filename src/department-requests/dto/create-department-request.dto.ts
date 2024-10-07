@@ -1,5 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsUUID, Min } from 'class-validator';
+import {
+  DepartmentRequestStatus,
+  DepartmentRequestStatusType,
+} from '../models/department-requests.model';
 
 export class CreateDepartmentRequestDto {
   @ApiProperty({
@@ -33,4 +37,15 @@ export class CreateDepartmentRequestDto {
   })
   @IsNotEmpty()
   additionalNotes: string;
+
+  @ApiResponseProperty({
+    example: 'Req-434534587923',
+  })
+  requestId: string;
+
+  @ApiResponseProperty({
+    example: 'PENDING',
+    enum: DepartmentRequestStatus,
+  })
+  status: DepartmentRequestStatusType;
 }

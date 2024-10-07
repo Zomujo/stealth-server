@@ -46,15 +46,15 @@ describe('DepartmentRequestsController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('Creating requests', () => {
-    it('should create successfully', async () => {
-      const payload: CreateDepartmentRequestDto = {
-        drugId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        departmentId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        quantity: 4,
-        additionalNotes: 'The recent drugs had expired',
-      };
+  describe('Creating requests', async () => {
+    const payload: Partial<CreateDepartmentRequestDto> = {
+      drugId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
+      departmentId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
+      quantity: 4,
+      additionalNotes: 'The recent drugs had expired',
+    };
 
+    it('should create successfully', async () => {
       const response = await request(server)
         .post('/department-requests')
         .send(payload);
@@ -65,13 +65,6 @@ describe('DepartmentRequestsController', () => {
     });
 
     it('should fail for missing department', async () => {
-      const payload: CreateDepartmentRequestDto = {
-        drugId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        departmentId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        quantity: 4,
-        additionalNotes: 'The recent drugs had expired',
-      };
-
       const response = await request(server)
         .post('/department-requests')
         .send(payload);
@@ -80,13 +73,6 @@ describe('DepartmentRequestsController', () => {
     });
 
     it('should fail for missing drug', async () => {
-      const payload: CreateDepartmentRequestDto = {
-        drugId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        departmentId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        quantity: 4,
-        additionalNotes: 'The recent drugs had expired',
-      };
-
       const response = await request(server)
         .post('/department-requests')
         .send(payload);
@@ -95,11 +81,7 @@ describe('DepartmentRequestsController', () => {
     });
 
     it('should spit out 400', async () => {
-      const payload: Omit<CreateDepartmentRequestDto, 'drugId'> = {
-        departmentId: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-        quantity: 4,
-        additionalNotes: 'The recent drugs had expired',
-      };
+      delete payload.departmentId;
 
       const response = await request(server)
         .post('/department-requests')
