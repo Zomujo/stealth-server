@@ -117,4 +117,14 @@ describe('DepartmentRequestsController', () => {
       expect(response.statusCode).toBe(400);
     });
   });
+
+  describe('getting requests', () => {
+    it('should fetch successfully', async () => {
+      const response = await request(server).get('/department-requests');
+
+      expect(response.statusCode).toBe(200);
+
+      expect(response.body.data.rows).toBeDefined();
+    });
+  });
 });
