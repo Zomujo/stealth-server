@@ -4,6 +4,7 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  DeletedAt,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../shared/models/base.model';
 import { Drug } from 'src/inventory/drugs/models/drug.model';
@@ -50,4 +51,11 @@ export class DepartmentRequest extends BaseModel {
 
   @Column({ type: DataType.TEXT, field: 'additional_notes' })
   additionalNotes: string;
+
+  @DeletedAt
+  @Column({ type: DataType.DATE, field: 'deleted_at' })
+  deletedAt: Date;
+
+  @Column({ type: DataType.STRING, field: 'deleted_by' })
+  deletedBy: string;
 }
