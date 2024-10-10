@@ -22,7 +22,7 @@ export class DepartmentRequestsController {
   @Post()
   async create(@Body() createDepartmentRequestDto: CreateDepartmentRequestDto) {
     try {
-      createDepartmentRequestDto.requestId = `Req-${new Date().getTime()}`;
+      createDepartmentRequestDto.requestId = `R-${new Date().getTime()}`;
       createDepartmentRequestDto.status = 'PENDING';
 
       const response = await this.departmentRequestsService.create(
