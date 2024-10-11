@@ -50,4 +50,8 @@ export class DepartmentRequestsService {
   async update(_: string, __: UpdateDepartmentRequestDto) {
     return new GetDepartmentRequestDto();
   }
+
+  async fetchOne(_: string) {
+    return new GetDepartmentRequestDto();
+  }
 }

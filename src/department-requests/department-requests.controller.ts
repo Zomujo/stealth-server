@@ -91,4 +91,23 @@ export class DepartmentRequestsController {
       throwError(this.logger, error);
     }
   }
+
+  @CustomApiResponse(['success', 'authorize'], {
+    type: GetDepartmentRequestDto,
+    message: 'Request fetched successfully',
+  })
+  @Get(':id')
+  async getRequest(@Param() id: string) {
+    try {
+      const response = await this.departmentRequestsService.fetchOne(id);
+
+      return new ApiSuccessResponseDto(
+        response,
+        HttpStatus.OK,
+        'Request fetched successfully',
+      );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
 }
