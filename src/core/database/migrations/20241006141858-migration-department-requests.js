@@ -29,9 +29,9 @@ module.exports = {
         },
       },
 
-      requestId: {
+      requestNumber: {
         type: Sequelize.STRING,
-        field: 'request_id',
+        field: 'request_number',
         allowNull: false,
       },
 
@@ -57,19 +57,29 @@ module.exports = {
         field: 'deleted_at',
         type: Sequelize.DATE,
         allowNull: true,
-        field: 'deleted_at',
       },
 
       deletedBy: {
         field: 'deleted_by',
         type: Sequelize.STRING,
         allowNull: true,
-        field: 'deleted_by',
       },
     });
   },
 
   async down(queryInterface, _) {
+    await Promise.all([
+      await queryInterface.removeConstraint(
+        'department_requests',
+        'department_requests_department_id_fkey',
+      ),
+
+      await queryInterface.removeConstraint(
+        'department_requests',
+        'department_requests_drug_id_fkey',
+      ),
+    ]);
+
     await queryInterface.dropTable('department_requests');
   },
 };

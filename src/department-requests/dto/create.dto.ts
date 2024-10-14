@@ -5,10 +5,14 @@ import {
   DepartmentRequestStatusType,
 } from '../models/department-requests.model';
 
-export class CreateDepartmentRequestDto extends GetDepartmentRequestDto {}
+export class CreateDepartmentRequestDto extends OmitType(
+  GetDepartmentRequestDto,
+  ['departmentId'],
+) {}
+
 export class UpdateDepartmentRequestDto extends OmitType(
   GetDepartmentRequestDto,
-  ['id', 'requestId', 'status'],
+  ['id', 'requestNumber', 'status'],
 ) {
   @ApiProperty({
     example: 'PENDING',

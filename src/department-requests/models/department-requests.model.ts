@@ -21,6 +21,7 @@ export type DepartmentRequestStatusType = keyof typeof DepartmentRequestStatus;
 
 @Table({
   tableName: 'department_requests',
+  underscored: true,
 })
 export class DepartmentRequest extends BaseModel {
   @ForeignKey(() => Drug)
@@ -37,8 +38,8 @@ export class DepartmentRequest extends BaseModel {
   @BelongsTo(() => Department, 'department_id')
   department: Department;
 
-  @Column({ type: DataType.STRING, field: 'request_id' })
-  requestId: string;
+  @Column({ type: DataType.STRING, field: 'request_number' })
+  requestNumber: string;
 
   @Column({ type: DataType.INTEGER, field: 'quantity' })
   quantity: number;

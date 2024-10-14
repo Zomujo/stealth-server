@@ -13,13 +13,14 @@ import { DepartmentRequestsService } from './department-requests.service';
 import {
   CreateDepartmentRequestDto,
   UpdateDepartmentRequestDto,
-} from './dto/create-department-request.dto';
+} from './dto/create.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators';
 import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import { GetDepartmentRequestDto } from './dto/get.dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { GetUser } from 'src/auth/decorator';
 
 @ApiTags('Department Requests')
 @Controller('department-requests')
@@ -35,10 +36,15 @@ export class DepartmentRequestsController {
     message: 'Request created successfully',
   })
   @Post()
-  async create(@Body() createDepartmentRequestDto: CreateDepartmentRequestDto) {
+  async create(
+    @Body() createDepartmentRequestDto: CreateDepartmentRequestDto,
+
+    @GetUser('department') departmentId: string,
+  ) {
     try {
       const response = await this.departmentRequestsService.create(
         createDepartmentRequestDto,
+        departmentId,
       );
 
       return new ApiSuccessResponseDto(

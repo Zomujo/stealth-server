@@ -23,7 +23,7 @@ export class GetDepartmentRequestDto extends GenericResponseDto {
 
   @ApiProperty({
     example: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-    description: 'The Id of the selected category',
+    description: 'The Id of the selected department',
   })
   @IsUUID(4)
   @IsNotEmpty()
@@ -48,7 +48,7 @@ export class GetDepartmentRequestDto extends GenericResponseDto {
   @ApiResponseProperty({
     example: `R-${new Date().getTime()}`,
   })
-  requestId: string;
+  requestNumber: string;
 
   @ApiResponseProperty({
     example: 'PENDING',
@@ -62,11 +62,11 @@ export class GetDepartmentRequestsPaginationDto extends OmitType(
   ['search'],
 ) {
   @ApiPropertyOptional({
-    description: 'The request Id',
+    description: 'The request number',
     example: 'Req-35245284524',
   })
   @IsOptional()
-  requestId: string;
+  requestNumber: string;
 
   @ApiPropertyOptional({
     description: 'The status of the request',
