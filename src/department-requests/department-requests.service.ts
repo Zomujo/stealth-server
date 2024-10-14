@@ -9,7 +9,7 @@ import { DrugsService } from 'src/inventory/drugs/drugs.service';
 import { DepartmentService } from 'src/admin/department/department.service';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
-import { GetDepartmentRequestDto } from './dto/get.dto';
+import { GetDepartmentRequestDto } from './dto/';
 
 @Injectable()
 export class DepartmentRequestsService {

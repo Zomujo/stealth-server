@@ -18,7 +18,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators';
 import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
-import { GetDepartmentRequestDto } from './dto/get.dto';
+import { GetDepartmentRequestDto } from './dto/';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { GetUser } from 'src/auth/decorator';
 
