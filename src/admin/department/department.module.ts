@@ -8,5 +8,6 @@ import { Department } from './models/department.model';
   imports: [SequelizeModule.forFeature([Department])],
   providers: [DepartmentService],
   controllers: [DepartmentController],
+  exports: [DepartmentService],
 })
 export class DepartmentModule {}
