@@ -7,68 +7,84 @@ const baseModelColumns = require('../seed-base.js');
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
-    // Seed drugs
-    const drugs = [
-      {
-        name: 'Paracetamol',
-        brand_name: 'Tylenol',
-        dosage_form: 'SOLIDS',
-        cost_price: 5.0,
-        selling_price: 7.5,
-        code: 'PARA001',
-        fda_approval: 'Approved',
-        ISO: 'ISO9001',
-        manufacturer: 'Johnson & Johnson',
-        strength: '500mg',
-        unit_of_measurement: 'tablet',
-        storage_req: 'Store in a cool, dry place',
-        reorder_point: 100,
-        status: 'STOCKED',
-        category_id: await queryInterface.rawSelect(
-          'drug_categories',
-          { where: { name: 'Analgesics' } },
-          ['id'],
-        ),
-        facility_id: await queryInterface.rawSelect(
-          'facilities',
-          { where: { name: 'Facility A' } },
-          ['id'],
-        ),
-      },
-      // Add more drugs as needed
-    ];
+    // Get all drug categories
+    const categories = await queryInterface.sequelize.query(
+      'SELECT id, name FROM drug_categories;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT },
+    );
 
-    const seedDrugs = drugs.map((drug) => ({
-      id: uuidv4(),
-      ...drug,
-      ...baseModelColumns,
-    }));
+    // Get all facilities
+    const facilities = await queryInterface.sequelize.query(
+      'SELECT id, name FROM facilities;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT },
+    );
 
-    await queryInterface.bulkInsert('drugs', seedDrugs, {});
+    // Get all suppliers
+    const suppliers = await queryInterface.sequelize.query(
+      'SELECT id, name FROM suppliers;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT },
+    );
 
-    // Seed batches
-    const batches = [
-      {
-        drug_id: seedDrugs[0].id,
-        validity: new Date('2025-12-31'),
-        batch_number: 'BATCH001',
-        quantity: 1000,
-        supplier_id: await queryInterface.rawSelect(
-          'suppliers',
-          { where: { name: 'Supplier A' } },
-          ['id'],
-        ),
-      },
-      // Add more batches as needed
-    ];
+    const drugs = [];
+    const batches = [];
 
-    const seedBatches = batches.map((batch) => ({
-      id: uuidv4(),
-      ...batch,
-      ...baseModelColumns,
-    }));
+    // Generate 5 drugs for each category
+    for (const category of categories) {
+      for (let i = 1; i <= 5; i++) {
+        const drugId = uuidv4();
+        const randomIndex = Math.floor(Math.random() * facilities.length);
+        const facilityId = facilities[randomIndex].id;
 
-    await queryInterface.bulkInsert('batches', seedBatches, {});
+        drugs.push({
+          id: drugId,
+          name: `${category.name} Drug ${i}`,
+          brand_name: `Brand ${category.name} ${i}`,
+          dosage_form: Math.random() > 0.5 ? 'SOLIDS' : 'LIQUIDS',
+          cost_price: parseFloat((Math.random() * 100 + 1).toFixed(2)),
+          selling_price: parseFloat((Math.random() * 200 + 50).toFixed(2)),
+          code: `${category.name.substring(0, 3).toUpperCase()}${i.toString().padStart(3, '0')}`,
+          fda_approval: 'Approved',
+          ISO: 'ISO9001',
+          manufacturer: `Manufacturer ${Math.floor(Math.random() * 10) + 1}`,
+          strength: `${Math.floor(Math.random() * 1000) + 1}mg`,
+          unit_of_measurement: Math.random() > 0.5 ? 'tablet' : 'ml',
+          storage_req: 'Store in a cool, dry place',
+          reorder_point: Math.floor(Math.random() * 100) + 50,
+          status: ['LOW', 'STOCKED', 'OUT_OF_STOCK'][
+            Math.floor(Math.random() * 3)
+          ],
+          created_by: 'System',
+          category_id: category.id,
+          facility_id: facilityId,
+          ...baseModelColumns,
+        });
+
+        // Generate 3 batches for each drug
+        for (let j = 1; j <= 3; j++) {
+          batches.push({
+            id: uuidv4(),
+            drug_id: drugId,
+            validity: new Date(
+              new Date().setFullYear(
+                new Date().getFullYear() + Math.floor(Math.random() * 5) + 1,
+              ),
+            ),
+            batch_number: `BATCH${drugId.substring(0, 4)}${j}`,
+            quantity: Math.floor(Math.random() * 1000) + 100,
+            created_by: 'System',
+            supplier_id:
+              suppliers[Math.floor(Math.random() * suppliers.length)].id,
+            ...baseModelColumns,
+          });
+        }
+      }
+    }
+
+    // Insert drugs
+    await queryInterface.bulkInsert('drugs', drugs, {});
+
+    // Insert batches
+    await queryInterface.bulkInsert('batches', batches, {});
   },
 
   async down(queryInterface) {

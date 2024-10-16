@@ -110,14 +110,13 @@ export class DrugsCategoryService {
     );
     const affected = result[0];
     if (affected == 0) {
-      this.logger.warn(`category with id ${id} not found`);
       throw new NotFoundException(`category with id ${id} not found`);
     }
     this.logger.log(`Updated drugs category with ID: ${id}`);
     return;
   }
 
-  async toggleStatus(id: string): Promise<ApiSuccessResponseNoData> {
+  async toggleStatus(id: string): Promise<void> {
     const category = await this.findOne(id);
     category.status =
       category.status == DrugsCategoryStatus.ACTIVE
@@ -135,12 +134,11 @@ export class DrugsCategoryService {
    * @returns A promise that resolves to the result of the removal operation.
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
-  async remove(id: string): Promise<ApiSuccessResponseNoData> {
+  async remove(id: string): Promise<void> {
     this.logger.log(`Removing drugs category with ID: ${id}`);
     const res = await this.drugCategoryRepo.destroy({ where: { id: id } });
 
     if (res == 0) {
-      this.logger.warn(`Category with id ${id} not found`);
       throw new NotFoundException(`Category with id ${id} not found`);
     }
     return;

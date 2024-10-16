@@ -1,3 +1,4 @@
+import { DepartmentRequestsModule } from 'src/department-requests/department-requests.module';
 import { AdminModule } from '../../admin/admin.module';
 import { AuthModule } from '../../auth/auth.module';
 import { CloudinaryModule } from '../../cloudinary/cloudinary.module';
@@ -16,4 +17,5 @@ export const IndexModules = [
   OrdersModule,
   InventoryModule,
   ReportsModule,
+  DepartmentRequestsModule,
 ];

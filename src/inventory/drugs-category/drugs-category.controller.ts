@@ -126,7 +126,7 @@ export class DrugsCategoryController {
     try {
       await this.drugsCategoryService.changeName(id, updateDrugsCategoryDto);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
+        HttpStatus.OK,
         'Drug updated successfully',
       );
     } catch (error) {
@@ -151,7 +151,7 @@ export class DrugsCategoryController {
     try {
       await this.drugsCategoryService.toggleStatus(id);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
+        HttpStatus.OK,
         'Drug category status updated successfully',
       );
     } catch (error) {

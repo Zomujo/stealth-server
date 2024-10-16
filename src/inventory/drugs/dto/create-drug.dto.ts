@@ -124,6 +124,13 @@ export class CreateDrugDto {
   storageReq: string;
 
   @ApiProperty({
+    example: 'Kratos',
+    description: 'The name of the user',
+  })
+  @IsString()
+  createdBy: string;
+
+  @ApiProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
     description: 'The category ID of the drug',
   })
@@ -158,6 +165,7 @@ export class CreateBatchDto extends PickType(CreateDrugDto, [
   'validity',
   'quantity',
   'supplierId',
+  'createdBy',
 ]) {
   @ApiProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
