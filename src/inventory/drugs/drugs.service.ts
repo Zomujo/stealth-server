@@ -7,13 +7,13 @@ import {
 import {
   CreateDrugDto,
   DrugPaginationDto,
-  ManyDrugs,
+  ManyDrugs as ManyDrug,
   OneDrug,
   UpdateDrugDto,
 } from './dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
-import { Drug, DrugStatus } from './models';
+import { Batch, Drug, DrugStatus } from './models';
 import { BatchService } from './batch.service';
 
 @Injectable()
@@ -56,18 +56,21 @@ export class DrugsService {
    * @returns A promise that resolves to an array of OneDrug and the total count of drugs.
    * @throws Throws an error if there was an issue retrieving the drugs.
    */
-  async findAll(query: DrugPaginationDto): Promise<[ManyDrugs[], number]> {
+  async findAll(query: DrugPaginationDto): Promise<[ManyDrug[], number]> {
     const filter = this.applyFilter(query);
     const drugs = await this.drugRepo.findAndCountAll(filter);
 
     const drugList = [];
+
     drugs.rows.forEach((drug) => {
-      for (const batch of drug.batches) {
-        const drugData = drug.toJSON() as ManyDrugs;
+      drug.batches.forEach((batch) => {
+        delete drug.dataValues.batches;
+        const drugData = drug.toJSON() as ManyDrug;
         drugData.batch = batch;
         drugList.push(drugData);
-      }
+      });
     });
+
     this.logger.log(`Retrieved ${drugs.count} drugs`);
     return [drugList, drugs.count];
   }
@@ -81,7 +84,7 @@ export class DrugsService {
    */
   async findOne(id: string): Promise<OneDrug> {
     this.logger.log(`finding drug with id: ${id}`);
-    const drug = await this.drugRepo.findByPk(id);
+    const drug = await this.drugRepo.findByPk(id, { include: [Batch] });
     if (!drug) {
       throw new NotFoundException(`drug with id: ${id} not found`);
     }
@@ -169,6 +172,7 @@ export class DrugsService {
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
+      include: [Batch],
     };
   }
 }

@@ -69,12 +69,12 @@ export class DrugsController {
       if (error instanceof ConflictException) {
         try {
           const id = JSON.parse(error.message).id;
-          const batch = await this.batchService.create({
+          this.logger.log(`Drug already existed. ID: ${id}`);
+          await this.batchService.create({
             ...createDrugDto,
             drugId: id,
           });
           const drug = await this.drugsService.findOne(id);
-          drug.batches = [batch];
           return new ApiSuccessResponseDto(
             drug,
             HttpStatus.CREATED,

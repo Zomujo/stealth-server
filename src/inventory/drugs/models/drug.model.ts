@@ -147,7 +147,7 @@ export class Drug extends BaseModel {
   })
   categoryId: string;
 
-  @BelongsTo(() => DrugsCategory, 'category_id')
+  @BelongsTo(() => DrugsCategory)
   category: DrugsCategory;
 
   @ApiProperty({
@@ -162,7 +162,7 @@ export class Drug extends BaseModel {
   })
   facilityId: string;
 
-  @BelongsTo(() => Facility, 'facility_id')
+  @BelongsTo(() => Facility)
   facility: Facility;
 
   @ApiProperty({
@@ -173,7 +173,7 @@ export class Drug extends BaseModel {
   @Column({ allowNull: true })
   departmentId: string;
 
-  @BelongsTo(() => Department, 'department_id')
+  @BelongsTo(() => Department)
   department: Department;
 
   @HasMany(() => Batch)
@@ -202,7 +202,7 @@ export class Drug extends BaseModel {
       throw new ConflictException(
         JSON.stringify({
           message: 'Drug already exists in facility or department',
-          id: drug.id,
+          id: exists.id,
         }),
       );
     }

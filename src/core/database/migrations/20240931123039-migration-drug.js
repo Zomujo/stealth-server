@@ -121,6 +121,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      deletedAt: {
+        type: Sequelize.DATE,
+        field: 'deleted_at',
+      },
       supplierId: {
         type: Sequelize.UUID,
         allowNull: false,

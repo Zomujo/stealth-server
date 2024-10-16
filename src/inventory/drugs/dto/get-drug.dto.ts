@@ -72,6 +72,7 @@ export class DrugAnalytics {
 }
 
 export class OneDrug extends IntersectionType(Drug, GenericResponseDto) {
+  @ApiProperty({ description: 'The batches of the drug', type: () => Batch })
   batches: Batch[];
 }
 
@@ -79,5 +80,6 @@ export class ManyDrugs extends IntersectionType(
   OmitType(Drug, ['batches']),
   GenericResponseDto,
 ) {
+  @ApiProperty({ description: 'The batch of the drug', type: () => Batch })
   batch: Batch;
 }
