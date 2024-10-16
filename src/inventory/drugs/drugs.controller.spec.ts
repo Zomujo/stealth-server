@@ -1,17 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DrugsController } from './drugs.controller';
 import { DrugsService } from './drugs.service';
-import { DrugsCategory } from '../drugs-category/models/drugs-category.model';
 import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize';
 import { Supplier } from '../suppliers/models/supplier.model';
 import { Drug } from './models/drug.model';
-import { DrugsCategoryService } from '../drugs-category/drugs-category.service';
 import { SuppliersService } from '../suppliers/suppliers.service';
-import { Facility } from 'src/admin/facility/models/facility.model';
-import { Department } from 'src/admin/department/models/department.model';
-import { FacilityService } from 'src/admin/facility/facility.service';
-import { DepartmentService } from 'src/admin/department/department.service';
 import { configuration } from 'src/shared/config/config';
+import { BatchService } from './batch.service';
+import { Batch } from './models';
 
 describe('DrugsController', () => {
   let controller: DrugsController;
@@ -22,24 +18,10 @@ describe('DrugsController', () => {
       imports: [
         SequelizeModule.forRoot(configuration.test as SequelizeModuleOptions),
 
-        SequelizeModule.forFeature([
-          DrugsCategory,
-          Drug,
-          Supplier,
-          Facility,
-          Department,
-        ]),
-        // ConfigModule.forFeature(jwtConfig),
-        // JwtModule.registerAsync(jwtConfig.asProvider()),
+        SequelizeModule.forFeature([Drug, Batch, Supplier]),
       ],
       controllers: [DrugsController],
-      providers: [
-        DrugsService,
-        DrugsCategoryService,
-        SuppliersService,
-        FacilityService,
-        DepartmentService,
-      ],
+      providers: [DrugsService, SuppliersService, BatchService],
     }).compile();
 
     controller = module.get<DrugsController>(DrugsController);
