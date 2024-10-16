@@ -107,7 +107,6 @@ export class DrugsService {
       { where: { id: id } },
     );
     if (result[0] == 0) {
-      this.logger.warn(`drug with id ${id} not found`);
       throw new NotFoundException(`drug with id ${id} not found`);
     }
     this.logger.log(`Updated drug with ID: ${id}`);
@@ -124,7 +123,6 @@ export class DrugsService {
     try {
       const res = await this.drugRepo.destroy({ where: { id: id } });
       if (res == 0) {
-        this.logger.warn(`drug with id ${id} not found`);
         throw new NotFoundException(`drug with id ${id} not found`);
       }
       this.logger.log(`Deleted Drug with id: ${id}`);

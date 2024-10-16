@@ -160,7 +160,7 @@ export class DrugsController {
     try {
       await this.drugsService.update(id, updateDrugDto);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
+        HttpStatus.OK,
         'Drug updated successfully',
       );
     } catch (error) {
@@ -188,7 +188,7 @@ export class DrugsController {
     try {
       await this.drugsService.update(id, dto);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
+        HttpStatus.OK,
         'Drug prices adjusted successfully',
       );
     } catch (error) {

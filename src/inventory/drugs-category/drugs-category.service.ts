@@ -79,13 +79,11 @@ export class DrugsCategoryService {
    * @throws {InternalServerErrorException} If an internal server error occurs.
    */
   async findOne(id: string): Promise<DrugsCategoryResponse> {
-    this.logger.log(`Finding drugs category with ID: ${id}`);
     const category = await this.drugCategoryRepo.findByPk(id, {
       include: [{ all: true }],
     });
 
     if (!category) {
-      this.logger.warn('Category not found');
       throw new NotFoundException(`Category with id: ${id} not found`);
     }
     this.logger.log(`Found drugs category with ID: ${id}`);

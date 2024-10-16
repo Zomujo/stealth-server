@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from 'src/admin/facility/models/facility.model';
+import { DepartmentRequest } from 'src/department-requests/models/department-requests.model';
 import { DrugsCategory } from 'src/inventory/drugs-category/models/drugs-category.model';
 import { BaseModel } from 'src/shared/models/base.model';
 import { ConflictException, NotFoundException } from '@nestjs/common';
@@ -212,4 +213,7 @@ export class Drug extends BaseModel {
       );
     }
   }
+
+  @HasMany(() => DepartmentRequest)
+  departmentRequests: DepartmentRequest[];
 }
