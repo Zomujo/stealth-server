@@ -14,6 +14,7 @@ import { BaseModel } from 'src/shared/models/base.model';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Batch } from '.';
+import { StockAdjustment } from 'src/stock-adjustments/model/stock-adjustment.model';
 
 export enum DosageForm {
   SOLIDS = 'SOLIDS',
@@ -183,6 +184,9 @@ export class Drug extends BaseModel {
 
   @HasMany(() => Batch)
   batches: Batch[];
+
+  @HasMany(() => StockAdjustment)
+  stockAdjustments: StockAdjustment[];
 
   @BeforeCreate
   static async validate(drug: Drug) {
