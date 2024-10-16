@@ -16,6 +16,7 @@ import { DrugsService } from './drugs.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import {
+  AdjustPriceDto,
   CreateDrugDto,
   DrugAnalytics,
   DrugPaginationDto,
@@ -161,6 +162,34 @@ export class DrugsController {
       return new ApiSuccessResponseNoData(
         HttpStatus.ACCEPTED,
         'Drug updated successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['success', 'authorize'], {
+    type: String,
+    message: 'Drug prices adjusted successfully',
+  })
+  @Roles(
+    Role.NationalAdmin,
+    Role.NationalSCM,
+    Role.RegionalAdmin,
+    Role.RegionalSCM,
+    Role.HospitalAdmin,
+    Role.HospitalSCM,
+  )
+  @Patch('/adjust-prices/:id')
+  async adjustPrice(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AdjustPriceDto,
+  ) {
+    try {
+      await this.drugsService.update(id, dto);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.ACCEPTED,
+        'Drug prices adjusted successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);

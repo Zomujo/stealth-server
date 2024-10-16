@@ -1,5 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { DrugsCategory } from './models/drugs-category.model';
+import {
+  DrugsCategory,
+  DrugsCategoryStatus,
+} from './models/drugs-category.model';
 import { InjectModel } from '@nestjs/sequelize';
 import {
   CreateDrugsCategoryDto,
@@ -93,16 +96,16 @@ export class DrugsCategoryService {
    * Updates a drugs category.
    *
    * @param id - The ID of the drugs category.
-   * @param updateDrugsCategoryDto - The DTO containing the updated drugs category data.
+   * @param changeNameDto - The DTO containing the updated drugs category data.
    * @returns A Promise that resolves to the updated drugs category.
    * @throws InternalServerErrorException if an error occurs during the update process.
    */
-  async update(
+  async changeName(
     id: string,
-    updateDrugsCategoryDto: UpdateDrugsCategoryDto,
+    changeNameDto: UpdateDrugsCategoryDto,
   ): Promise<ApiSuccessResponseNoData> {
     const result = await this.drugCategoryRepo.update(
-      { ...updateDrugsCategoryDto },
+      { ...changeNameDto },
       { where: { id } },
     );
     const affected = result[0];
@@ -110,6 +113,17 @@ export class DrugsCategoryService {
       this.logger.warn(`category with id ${id} not found`);
       throw new NotFoundException(`category with id ${id} not found`);
     }
+    this.logger.log(`Updated drugs category with ID: ${id}`);
+    return;
+  }
+
+  async toggleStatus(id: string): Promise<ApiSuccessResponseNoData> {
+    const category = await this.findOne(id);
+    category.status =
+      category.status == DrugsCategoryStatus.ACTIVE
+        ? DrugsCategoryStatus.DEACTIVATED
+        : DrugsCategoryStatus.ACTIVE;
+    await category.save();
     this.logger.log(`Updated drugs category with ID: ${id}`);
     return;
   }
