@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { StockAdjustmentsService } from './stock-adjustments.service';
 import { StockAdjustmentsController } from './stock-adjustments.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { StockAdjustment } from './model/stock-adjustment.model';
+import { StockAdjustment } from './model';
 
 @Module({
   imports: [SequelizeModule.forFeature([StockAdjustment])],

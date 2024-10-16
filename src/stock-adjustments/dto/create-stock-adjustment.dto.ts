@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/swagger';
-import { StockAdjustment } from '../model/stock-adjustment.model';
+import { StockAdjustment } from '../model';
 
 export class CreateStockAdjustmentDto extends PickType(StockAdjustment, [
   'reason',
