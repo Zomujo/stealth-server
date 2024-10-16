@@ -46,15 +46,14 @@ export class Department extends BaseModel {
 
   @HasMany(() => StockAdjustment)
   stockAdjustments: StockAdjustment[];
+  @HasMany(() => DepartmentRequest)
+  departmentRequests: DepartmentRequest[];
 
   @Column({ field: 'created_by', allowNull: true })
   createdBy: string;
 
   @Column({ field: 'updated_by', allowNull: true })
   updatedBy: string;
-
-  @HasMany(() => DepartmentRequest)
-  departmentRequests: DepartmentRequest[];
 
   // @ApiProperty({
   //   example: [],

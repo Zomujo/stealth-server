@@ -140,6 +140,11 @@ export class Drug extends BaseModel {
 
   // relationships
 
+  @Column({ field: 'created_by', allowNull: true })
+  createdBy: string;
+
+  // relationships
+
   @ApiProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
     description: 'The category ID of the drug',
