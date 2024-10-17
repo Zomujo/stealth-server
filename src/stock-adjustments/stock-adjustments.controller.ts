@@ -81,7 +81,7 @@ export class StockAdjustmentsController {
           query.pageSize,
           adjustments[1],
         ),
-        HttpStatus.FOUND,
+        HttpStatus.OK,
         'Stock adjustments retrieved successfully',
       );
     } catch (error) {
@@ -99,7 +99,7 @@ export class StockAdjustmentsController {
       const adjustment = await this.stockAdjustmentsService.findOne(id);
       return new ApiSuccessResponseDto(
         adjustment,
-        HttpStatus.FOUND,
+        HttpStatus.OK,
         'Stock adjustment retrieved successfully',
       );
     } catch (error) {
@@ -127,7 +127,7 @@ export class StockAdjustmentsController {
     try {
       await this.stockAdjustmentsService.update(id, updateStockAdjustmentDto);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
+        HttpStatus.OK,
         'Stock adjustment updated successfully',
       );
     } catch (error) {
@@ -152,7 +152,7 @@ export class StockAdjustmentsController {
     try {
       await this.stockAdjustmentsService.remove(id);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
+        HttpStatus.OK,
         'Stock adjustment deleted successfully',
       );
     } catch (error) {
