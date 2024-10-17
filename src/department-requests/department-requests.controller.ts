@@ -62,9 +62,15 @@ export class DepartmentRequestsController {
     message: 'Requests fetched successfully',
   })
   @Get()
-  async getRequests(@Query() query: PaginationRequestDto) {
+  async getRequests(
+    @Query() query: PaginationRequestDto,
+    @GetUser('department') departmentId: string,
+  ) {
     try {
-      const response = await this.departmentRequestsService.fetchAll(query);
+      const response = await this.departmentRequestsService.fetchAll(
+        query,
+        departmentId,
+      );
 
       return new ApiSuccessResponseDto(
         response,

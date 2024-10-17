@@ -15,7 +15,7 @@ import { GetDepartmentRequestDto } from './dto/';
 export class DepartmentRequestsService {
   constructor(
     @InjectModel(DepartmentRequest)
-    private reportRepository: typeof DepartmentRequest,
+    private requestRepository: typeof DepartmentRequest,
 
     private drugService: DrugsService,
     private departmentService: DepartmentService,
@@ -28,7 +28,7 @@ export class DepartmentRequestsService {
     dto.requestNumber = `R-${new Date().getTime()}`;
     dto.status = 'PENDING';
 
-    const result = await this.reportRepository.create({
+    const result = await this.requestRepository.create({
       ...dto,
       departmentId,
     });
@@ -36,12 +36,18 @@ export class DepartmentRequestsService {
     return result;
   }
 
-  async fetchAll(query: PaginationRequestDto) {
+  async fetchAll(query: PaginationRequestDto, departmentId: string) {
+    await this.departmentService.findOne(departmentId);
+
+    const requests = await this.requestRepository.findAll({
+      where: { departmentId },
+    });
+
     const response = new PaginatedDataResponseDto<GetDepartmentRequestDto[]>(
-      [],
+      requests,
       query.page || 1,
       query.pageSize,
-      0,
+      requests.length,
     );
 
     return response;
