@@ -57,7 +57,9 @@ export class DepartmentRequestsService {
     return new GetDepartmentRequestDto();
   }
 
-  async fetchOne(_: string) {
-    return new GetDepartmentRequestDto();
+  async fetchOne(id: string) {
+    const request = await this.requestRepository.findOne({ where: { id } });
+
+    return request;
   }
 }
