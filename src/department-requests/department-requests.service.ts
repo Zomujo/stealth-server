@@ -30,6 +30,7 @@ export class DepartmentRequestsService {
 
     const result = await this.reportRepository.create({
       ...dto,
+      departmentId,
     });
 
     return result;
