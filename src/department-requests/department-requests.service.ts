@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateDepartmentRequestDto,
   UpdateDepartmentRequestDto,
@@ -53,12 +53,26 @@ export class DepartmentRequestsService {
     return response;
   }
 
-  async update(_: string, __: UpdateDepartmentRequestDto) {
-    return new GetDepartmentRequestDto();
+  async update(id: string, dto: UpdateDepartmentRequestDto) {
+    const [rowsUpdated] = await this.requestRepository.update(
+      { ...dto },
+      {
+        where: { id },
+      },
+    );
+
+    if (rowsUpdated == 0) {
+      throw new NotFoundException(`Report not found`);
+    }
+
+    return this.fetchOne(id);
   }
 
   async fetchOne(id: string) {
     const request = await this.requestRepository.findOne({ where: { id } });
+    if (!request) {
+      throw new NotFoundException(`Request not found`);
+    }
 
     return request;
   }
