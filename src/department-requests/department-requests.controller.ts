@@ -20,10 +20,12 @@ import { ApiSuccessResponseDto } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import { GetDepartmentRequestDto } from './dto/';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { GetUser } from 'src/auth/decorator';
+import { GetUser, Roles } from 'src/auth/decorator';
+import { Role } from 'src/auth/interface/roles.enum';
 
 @ApiTags('Department Requests')
 @Controller('department-requests')
+@Roles(Role.HospitalAdmin)
 export class DepartmentRequestsController {
   private logger = new Logger(DepartmentRequestsController.name);
 
