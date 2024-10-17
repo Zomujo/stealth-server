@@ -135,11 +135,13 @@ export class StockAdjustmentsService {
         query.facilityId && { facilityId: query.facilityId },
         query.departmentId && { departmentId: query.departmentId },
         query.createdBy && { createdBy: query.createdBy },
+        query.type && { type: query.type },
+        query.status && { type: query.status },
         query.search && {
           [Op.or]: [{ reason: { [Op.iLike]: `%${query.search}%` } }],
         },
-        query.startDate && { createdAt: { [Op.gte]: query.startDate } },
-        query.endDate && { createdAt: { [Op.lte]: query.endDate } },
+        query.startDate && { dateAdded: { [Op.gte]: query.startDate } },
+        query.endDate && { dateAdded: { [Op.lte]: query.endDate } },
       ],
     };
     return {
