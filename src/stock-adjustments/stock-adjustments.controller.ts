@@ -115,7 +115,7 @@ export class StockAdjustmentsController {
     Role.NationalSCM,
     Role.RegionalSCM,
   )
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['successNull', 'authorize'], {
     type: null,
     message: 'Stock adjustment updated successfully',
   })
@@ -143,7 +143,7 @@ export class StockAdjustmentsController {
     Role.NationalSCM,
     Role.RegionalSCM,
   )
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['successNull', 'authorize'], {
     type: null,
     message: 'Stock adjustment deleted successfully',
   })

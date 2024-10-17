@@ -3,7 +3,6 @@ import { StockAdjustmentsModule } from 'src/stock-adjustments/stock-adjustments.
 import { AdminModule } from '../../admin/admin.module';
 import { AuthModule } from '../../auth/auth.module';
 import { CloudinaryModule } from '../../cloudinary/cloudinary.module';
-import { CloudinaryModule } from '../../cloudinary/cloudinary.module';
 import { InventoryModule } from '../../inventory/inventory.module';
 import { NotificationModule } from '../../notification/notification.module';
 import { ReportsModule } from '../../reports/reports.module';
