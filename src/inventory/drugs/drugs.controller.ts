@@ -118,7 +118,6 @@ export class DrugsController {
   }
 
 @CustomApiResponse(['successNull', 'authorize'], {
-    type: String,
     message: 'Drug updated successfully',
   })
   @Roles(
