@@ -172,8 +172,7 @@ export class DrugsController {
     }
   }
 
-  @CustomApiResponse(['success', 'authorize'], {
-    type: String,
+  @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug deleted successfully',
   })
   @Roles(
