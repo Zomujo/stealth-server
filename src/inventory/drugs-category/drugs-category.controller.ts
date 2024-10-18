@@ -114,8 +114,7 @@ export class DrugsCategoryController {
     Role.NationalSCM,
     Role.RegionalSCM,
   )
-  @CustomApiResponse(['success', 'authorize'], {
-    type: null,
+  @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug category updated successfully',
   })
   @Patch(':id')
@@ -142,8 +141,7 @@ export class DrugsCategoryController {
     Role.NationalSCM,
     Role.RegionalSCM,
   )
-  @CustomApiResponse(['success', 'authorize'], {
-    type: null,
+  @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug category status updated successfully',
   })
   @Patch(':id')
@@ -167,8 +165,7 @@ export class DrugsCategoryController {
     Role.NationalSCM,
     Role.RegionalSCM,
   )
-  @CustomApiResponse(['success', 'authorize'], {
-    type: null,
+  @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug category deleted successfully',
   })
   @Delete(':id')
