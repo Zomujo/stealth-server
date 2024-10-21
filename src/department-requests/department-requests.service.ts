@@ -62,14 +62,14 @@ export class DepartmentRequestsService {
     );
 
     if (rowsUpdated == 0) {
-      throw new NotFoundException(`Report not found`);
+      throw new NotFoundException(`Request not found`);
     }
 
-    return this.fetchOne(id);
+    return;
   }
 
   async fetchOne(id: string) {
-    const request = await this.requestRepository.findOne({ where: { id } });
+    const request = await this.requestRepository.findByPk(id);
     if (!request) {
       throw new NotFoundException(`Request not found`);
     }
