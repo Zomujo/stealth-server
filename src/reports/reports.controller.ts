@@ -83,12 +83,12 @@ export class ReportsController {
   @HttpCode(HttpStatus.OK)
   async exportReport(@Res() res: Response, @Param('id') id: string) {
     try {
-      const csv = await this.reportsService.export(id);
+      const { csv, reportName } = await this.reportsService.export(id);
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename=report-${Date.now()}.csv`,
+        `attachment; filename=${reportName}.csv`,
       );
       res.send(csv);
 

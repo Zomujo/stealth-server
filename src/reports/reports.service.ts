@@ -6,10 +6,17 @@ import { GetReportDto, GetReportPaginationDto } from './dto/get.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { UpdateReportDto } from './dto/edit.dto';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
+import { DrugsService } from 'src/inventory/drugs/drugs.service';
+import { DrugPaginationDto } from 'src/inventory/drugs/dto';
 
 @Injectable()
 export class ReportsService {
-  constructor(@InjectModel(Report) private reportRepository: typeof Report) {}
+  constructor(
+    @InjectModel(Report)
+    private reportRepository: typeof Report,
+
+    private drugService: DrugsService,
+  ) {}
 
   private dataToCSV(headerLabels: Record<string, string>, rowsJson: any[]) {
     const csvRows = [];
@@ -68,18 +75,19 @@ export class ReportsService {
   }
 
   async export(id: string) {
-    //TODO: Get inventory
+    const [rows] = await this.drugService.findAll(new DrugPaginationDto());
 
-    await this.fetchOne(id);
+    const { reportName } = await this.fetchOne(id);
 
     const headerLabels = {
-      clinicName: 'Clinic Name',
-      date: 'date',
+      name: 'Drug Name',
+      costPrice: 'Cost Price',
+      sellingPrice: 'Selling Price',
     };
 
-    const rowsJson = [];
+    const csv = this.dataToCSV(headerLabels, rows);
 
-    return this.dataToCSV(headerLabels, rowsJson);
+    return { reportName, csv };
   }
 
   async create(dto: CreateReportDto) {
