@@ -120,7 +120,7 @@ export class ReportsService {
     });
 
     if (destroyedRows == 0) {
-      throw new NotFoundException(`No report found`);
+      throw new NotFoundException(`Report not found`);
     }
 
     return;
