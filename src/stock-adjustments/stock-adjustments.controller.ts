@@ -3,23 +3,22 @@ import {
   Get,
   Post,
   Body,
+  Patch,
   Param,
   Delete,
   Logger,
   ParseUUIDPipe,
-  Patch,
   Query,
   HttpStatus,
 } from '@nestjs/common';
-import { DrugsCategoryService } from './drugs-category.service';
+import { StockAdjustmentsService } from './stock-adjustments.service';
 import {
-  CreateDrugsCategoryDto,
-  DrugsCategoryResponse,
-  UpdateDrugsCategoryDto,
+  CreateStockAdjustmentDto,
+  OneStockAdjustment,
+  StockAdjustmentPaginationDto,
 } from './dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { Roles } from 'src/auth/decorator';
 import { Role } from 'src/auth/interface/roles.enum';
 import {
@@ -28,18 +27,21 @@ import {
   PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
+import { StockAdjustmentStatus } from './model';
 
-@ApiTags('Drug Category')
-@Controller('drug-categories')
-export class DrugsCategoryController {
+@ApiTags('Stock Adjustments')
+@Controller('stock-adjustments')
+export class StockAdjustmentsController {
   private readonly logger: Logger;
-  constructor(private readonly drugsCategoryService: DrugsCategoryService) {
-    this.logger = new Logger(DrugsCategoryController.name);
+  constructor(
+    private readonly stockAdjustmentsService: StockAdjustmentsService,
+  ) {
+    this.logger = new Logger(StockAdjustmentsController.name);
   }
 
   @CustomApiResponse(['success', 'authorize'], {
-    type: DrugsCategoryResponse,
-    message: 'Drug category created successfully',
+    type: OneStockAdjustment,
+    message: 'Stock adjustment created successfully',
   })
   @Roles(
     Role.HospitalAdmin,
@@ -50,15 +52,15 @@ export class DrugsCategoryController {
     Role.RegionalSCM,
   )
   @Post()
-  async create(@Body() createDrugsCategoryDto: CreateDrugsCategoryDto) {
+  async create(@Body() createStockAdjustmentDto: CreateStockAdjustmentDto) {
     try {
-      const createdCategory = await this.drugsCategoryService.create(
-        createDrugsCategoryDto,
+      const createdAdjustment = await this.stockAdjustmentsService.create(
+        createStockAdjustmentDto,
       );
       return new ApiSuccessResponseDto(
-        createdCategory,
+        createdAdjustment,
         HttpStatus.CREATED,
-        'Drug category created successfully',
+        'Stock adjustment created successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -66,22 +68,22 @@ export class DrugsCategoryController {
   }
 
   @CustomApiResponse(['paginated', 'authorize'], {
-    type: DrugsCategoryResponse,
-    message: 'Drug categories retrieved successfully',
+    type: OneStockAdjustment,
+    message: 'Stock adjustments retrieved successfully',
   })
   @Get()
-  async findAll(@Query() query?: PaginationRequestDto) {
+  async findAll(@Query() query?: StockAdjustmentPaginationDto) {
     try {
-      const categories = await this.drugsCategoryService.findAll(query);
+      const adjustments = await this.stockAdjustmentsService.findAll(query);
       return new ApiSuccessResponseDto(
         new PaginatedDataResponseDto(
-          categories[0],
+          adjustments[0],
           query.page || 1,
           query.pageSize,
-          categories[1],
+          adjustments[1],
         ),
-        HttpStatus.FOUND,
-        'Drug categories retrieved successfully',
+        HttpStatus.OK,
+        'Stock adjustments retrieved successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -89,17 +91,17 @@ export class DrugsCategoryController {
   }
 
   @CustomApiResponse(['success', 'authorize', 'notfound'], {
-    type: DrugsCategoryResponse,
-    message: 'Drug category retrieved successfully',
+    type: OneStockAdjustment,
+    message: 'Stock adjustment retrieved successfully',
   })
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      const category = await this.drugsCategoryService.findOne(id);
+      const adjustment = await this.stockAdjustmentsService.findOne(id);
       return new ApiSuccessResponseDto(
-        category,
-        HttpStatus.FOUND,
-        'Drug retrieved successfully',
+        adjustment,
+        HttpStatus.OK,
+        'Stock adjustment retrieved successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -115,18 +117,18 @@ export class DrugsCategoryController {
     Role.RegionalSCM,
   )
   @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Drug category updated successfully',
+    message: 'Stock adjustment updated successfully',
   })
-  @Patch(':id')
-  async changeName(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateDrugsCategoryDto: UpdateDrugsCategoryDto,
-  ) {
+  @Patch('/reject/:id')
+  async rejectAdjustment(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      await this.drugsCategoryService.changeName(id, updateDrugsCategoryDto);
+      await this.stockAdjustmentsService.update(
+        id,
+        StockAdjustmentStatus.REJECTED,
+      );
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
-        'Drug updated successfully',
+        'Stock adjustment updated successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -142,15 +144,18 @@ export class DrugsCategoryController {
     Role.RegionalSCM,
   )
   @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Drug category status updated successfully',
+    message: 'Stock adjustment updated successfully',
   })
-  @Patch(':id')
-  async toggleStatus(@Param('id', ParseUUIDPipe) id: string) {
+  @Patch('/accept/:id')
+  async acceptAdjustment(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      await this.drugsCategoryService.toggleStatus(id);
+      await this.stockAdjustmentsService.update(
+        id,
+        StockAdjustmentStatus.ADJUSTED,
+      );
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
-        'Drug category status updated successfully',
+        'Stock adjustment updated successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -166,15 +171,15 @@ export class DrugsCategoryController {
     Role.RegionalSCM,
   )
   @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Drug category deleted successfully',
+    message: 'Stock adjustment deleted successfully',
   })
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      await this.drugsCategoryService.remove(id);
+      await this.stockAdjustmentsService.remove(id);
       return new ApiSuccessResponseNoData(
-        HttpStatus.ACCEPTED,
-        'Drug deleted successfully',
+        HttpStatus.OK,
+        'Stock adjustment deleted successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
