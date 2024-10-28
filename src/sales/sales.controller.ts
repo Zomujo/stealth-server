@@ -19,7 +19,7 @@ export class SalesController {
     return this.salesService.create(createSaleDto);
   }
 
-  @CustomApiResponse(['authorize', 'success'], {
+  @CustomApiResponse(['authorize', 'paginated'], {
     type: GetSalesDto,
     message: 'Sales retrieved successfully',
   })
