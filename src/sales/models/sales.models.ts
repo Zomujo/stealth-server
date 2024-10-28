@@ -2,6 +2,7 @@ import {
   BelongsTo,
   Column,
   DataType,
+  DeletedAt,
   ForeignKey,
   Table,
 } from 'sequelize-typescript';
@@ -38,4 +39,11 @@ export class Sale extends BaseModel {
     field: 'status',
   })
   status: PaymentStatusType;
+
+  @DeletedAt
+  @Column({ type: DataType.DATE, field: 'deleted_at' })
+  deletedAt: Date;
+
+  @Column({ type: DataType.STRING, field: 'deleted_by' })
+  deletedBy: string;
 }
