@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiResponseProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString, IsUUID, Min } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { PaymentStatus, PaymentStatusType } from '../models/sales.models';
@@ -34,6 +34,11 @@ export class CreateSaleDto extends GenericResponseDto {
     enum: PaymentStatus,
   })
   status: PaymentStatusType;
+
+  @ApiResponseProperty({
+    example: 'S-1234',
+  })
+  saleNumber: string;
 }
 
 export class UpdateSalesDto extends PartialType(CreateSaleDto) {}

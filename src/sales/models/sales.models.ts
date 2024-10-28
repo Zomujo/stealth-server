@@ -31,6 +31,9 @@ export class Sale extends BaseModel {
   @Column({ type: DataType.STRING, field: 'patient_name' })
   patientName: string;
 
+  @Column({ type: DataType.STRING, field: 'sale_number' })
+  saleNumber: string;
+
   @Column({ type: DataType.NUMBER, field: 'quantity' })
   quantity: number;
 

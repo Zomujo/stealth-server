@@ -26,6 +26,12 @@ module.exports = {
         field: 'patient_name',
       },
 
+      saleNumber: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        field: 'sale_number',
+      },
+
       quantity: {
         type: Sequelize.INTEGER,
         allowNull: false,
