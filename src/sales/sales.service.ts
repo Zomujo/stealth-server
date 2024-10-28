@@ -6,4 +6,8 @@ export class SalesService {
   create(_: CreateSaleDto) {
     return 'This action adds a new sale';
   }
+
+  fetchAll() {
+    return [];
+  }
 }
