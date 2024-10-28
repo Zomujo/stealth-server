@@ -9,10 +9,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { SalesService } from './sales.service';
-import { CreateSaleDto, UpdateSalesDto } from './dto/create.dto';
+import {
+  GetSalesDto,
+  CreateSaleDto,
+  UpdateSalesDto,
+  GetSalesPaginationDto,
+} from './dto/';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators';
-import { GetSalesDto, GetSalesPaginationDto } from './dto/get.dto';
 
 @ApiTags('Sales')
 @Controller('sales')
