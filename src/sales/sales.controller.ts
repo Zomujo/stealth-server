@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param } from '@nestjs/common';
 import { SalesService } from './sales.service';
-import { CreateSaleDto } from './dto/create.dto';
+import { CreateSaleDto, UpdateSalesDto } from './dto/create.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators';
 import { GetSalesDto } from './dto/get.dto';
@@ -26,5 +26,13 @@ export class SalesController {
   @Get()
   getSales() {
     return this.salesService.fetchAll();
+  }
+
+  @CustomApiResponse(['authorize', 'successNull'], {
+    message: 'Sale updated  successfully',
+  })
+  @Patch('/:id')
+  updateSale(@Body() dto: UpdateSalesDto, @Param('id') id: string) {
+    this.salesService.update(id, dto);
   }
 }

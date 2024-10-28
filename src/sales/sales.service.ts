@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSaleDto } from './dto/create.dto';
+import { CreateSaleDto, UpdateSalesDto } from './dto/create.dto';
 
 @Injectable()
 export class SalesService {
@@ -10,4 +10,6 @@ export class SalesService {
   fetchAll() {
     return [];
   }
+
+  update(__: string, _: UpdateSalesDto) {}
 }
