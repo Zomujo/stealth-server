@@ -54,7 +54,11 @@ export class SalesController {
   })
   @Get()
   getSales(@Query() query: GetSalesPaginationDto) {
-    return this.salesService.fetchAll(query);
+    try {
+      return this.salesService.fetchAll(query);
+    } catch (error) {
+      throwError(this.logger, error);
+    }
   }
 
   @CustomApiResponse(['authorize', 'successNull'], {
@@ -62,7 +66,11 @@ export class SalesController {
   })
   @Patch('/:id')
   updateSale(@Body() dto: UpdateSalesDto, @Param('id') id: string) {
-    return this.salesService.update(id, dto);
+    try {
+      return this.salesService.update(id, dto);
+    } catch (error) {
+      throwError(this.logger, error);
+    }
   }
 
   @CustomApiResponse(['authorize', 'success'], {
@@ -71,7 +79,11 @@ export class SalesController {
   })
   @Get('/:id')
   getSale(@Param('id') id: string) {
-    return this.salesService.fetchOne(id);
+    try {
+      return this.salesService.fetchOne(id);
+    } catch (error) {
+      throwError(this.logger, error);
+    }
   }
 
   @CustomApiResponse(['authorize', 'successNull'], {
@@ -79,6 +91,10 @@ export class SalesController {
   })
   @Delete('/:id')
   deleteSale(@Param('id') id: string) {
-    this.salesService.removeOne(id);
+    try {
+      this.salesService.removeOne(id);
+    } catch (error) {
+      throwError(this.logger, error);
+    }
   }
 }
