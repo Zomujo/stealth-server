@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   GetSalesPaginationDto,
   CreateSaleDto,
@@ -63,7 +63,20 @@ export class SalesService {
     return response;
   }
 
-  update(__: string, _: UpdateSalesDto) {}
+  async update(id: string, dto: UpdateSalesDto) {
+    const [rowsUpdated] = await this.saleRepository.update(
+      { ...dto },
+      {
+        where: { id },
+      },
+    );
+
+    if (rowsUpdated == 0) {
+      throw new NotFoundException(`Sale not found`);
+    }
+
+    return rowsUpdated;
+  }
 
   fetchOne(_: string) {}
 
