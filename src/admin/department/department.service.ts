@@ -4,6 +4,7 @@ import { FindAndCountOptions, Op } from 'sequelize';
 import { Department } from './models/department.model';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
 import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
+import { NotificationService } from '../../notification/notification.service';
 
 @Injectable()
 export class DepartmentService {
@@ -11,6 +12,7 @@ export class DepartmentService {
   constructor(
     @InjectModel(Department)
     private readonly departmentRepo: typeof Department,
+    private readonly notificationService: NotificationService,
   ) {
     this.logger = new Logger(DepartmentService.name);
   }
@@ -25,11 +27,17 @@ export class DepartmentService {
    */
   async create(
     createDepartmentDto: CreateDepartmentDto,
+    facilityId: string,
     adminId: string,
   ): Promise<Department> {
     const department = await this.departmentRepo.create({
       ...createDepartmentDto,
+      facilityId,
       createdBy: adminId,
+    });
+    this.notificationService.notifyAdmin({
+      message: 'Department has been created successfully',
+      url: 'https://ims-frontend-xi.vercel.app/suppliers',
     });
     return department;
   }
@@ -115,7 +123,6 @@ export class DepartmentService {
     const res = await this.departmentRepo.destroy({ where: { id: id } });
 
     if (res == 0) {
-      this.logger.warn(`Department with id ${id} not found`);
       throw new NotFoundException(`Department with id ${id} not found`);
     }
   }

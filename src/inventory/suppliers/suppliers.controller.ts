@@ -14,13 +14,23 @@ import {
 import { SuppliersService } from './suppliers.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { CreateSupplierDto, SupplierResponse, UpdateSupplierDto } from './dto';
+import {
+  CreateSupplierDto,
+  GetSuppliersResponse,
+  SupplierResponse,
+  UpdateSupplierDto,
+} from './dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import {
   ApiSuccessResponseDto,
+  ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
+import { StatusType } from './models/supplier.model';
+import { Role } from '../../auth/interface/roles.enum';
+import { Roles } from '../../auth/decorator';
+import { DeleteItemsDto } from '../../shared/docs/dto/delete.dto';
 
 @ApiTags('Suppliers')
 @Controller('suppliers')
@@ -30,7 +40,7 @@ export class SuppliersController {
     this.logger = new Logger(SuppliersController.name);
   }
 
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['created', 'authorize'], {
     type: SupplierResponse,
     message: 'Supplier created successfully',
   })
@@ -49,7 +59,7 @@ export class SuppliersController {
   }
 
   @CustomApiResponse(['paginated', 'authorize'], {
-    type: SupplierResponse,
+    type: GetSuppliersResponse,
     isArray: true,
     message: 'Suppliers retrieved successfully',
   })
@@ -98,7 +108,49 @@ export class SuppliersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSupplierDto: UpdateSupplierDto,
   ) {
-    return await this.suppliersService.update(id, updateSupplierDto);
+    try {
+      await this.suppliersService.update(id, updateSupplierDto);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'supplier updated successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize'], {
+    message: 'Supplier deactivated successfully',
+  })
+  @Roles(Role.HospitalAdmin)
+  @Patch(':id/deactivate')
+  async deactivateSupplier(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      await this.suppliersService.changeStatus(id, StatusType.DEACTIVATED);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'Supplier deactivated successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize'], {
+    message: 'Supplier activated successfully',
+  })
+  @Roles(Role.HospitalAdmin)
+  @Patch(':id/activate')
+  async activateSupplier(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      await this.suppliersService.changeStatus(id, StatusType.ACTIVE);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'Supplier activated successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
   }
 
   @CustomApiResponse(['successNull', 'authorize'], {
@@ -106,6 +158,30 @@ export class SuppliersController {
   })
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.suppliersService.remove(id);
+    try {
+      await this.suppliersService.remove(id);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'Supplier deleted successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize'], {
+    message: 'Suppliers deleted successfully',
+  })
+  @Delete()
+  async removeBulk(@Body() dto: DeleteItemsDto) {
+    try {
+      await this.suppliersService.removeBulk(dto.ids);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'Suppliers deleted successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
   }
 }

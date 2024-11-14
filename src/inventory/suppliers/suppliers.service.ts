@@ -5,11 +5,10 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Supplier } from './models/supplier.model';
-import { CreateSupplierDto, SupplierResponse, UpdateSupplierDto } from './dto';
+import { StatusType, Supplier } from './models/supplier.model';
+import { CreateSupplierDto, UpdateSupplierDto } from './dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { FindAndCountOptions, Op } from 'sequelize';
-import { Drug } from '../drugs/models/drug.model';
+import { FindAndCountOptions, literal, Op } from 'sequelize';
 
 @Injectable()
 export class SuppliersService {
@@ -19,25 +18,40 @@ export class SuppliersService {
   ) {
     this.logger = new Logger(SuppliersService.name);
   }
-  async create(
-    createSupplierDto: CreateSupplierDto,
-  ): Promise<SupplierResponse> {
+  async create(createSupplierDto: CreateSupplierDto): Promise<Supplier> {
     const supplier = await this.supplierRepo.create({ ...createSupplierDto });
 
     this.logger.log(`Created supplier with ID: ${supplier.id}`);
     return supplier;
   }
 
-  async findAll(
-    query: PaginationRequestDto,
-  ): Promise<[SupplierResponse[], number]> {
+  async findAll(query: PaginationRequestDto): Promise<[Supplier[], number]> {
     // todo: refactor filter
     const filter: FindAndCountOptions<Supplier> = {
       where:
         (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {},
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy && [[query.orderBy, 'ASC']],
+      order: (query.orderBy && [[query.orderBy, 'ASC']]) || [
+        [
+          literal(`
+        CASE 
+          WHEN status = 'Deactivated' THEN 1
+          WHEN status = 'Active' THEN 2
+        END
+      `),
+          'ASC',
+        ],
+      ],
+      attributes: [
+        'id',
+        'name',
+        'createdAt',
+        'phoneNumber',
+        'status',
+        'city',
+        'physicalAddress',
+      ],
     };
     const suppliers = await this.supplierRepo.findAndCountAll(filter);
     this.logger.log(`Retrieved ${suppliers.count} supplier(s)`);
@@ -49,11 +63,9 @@ export class SuppliersService {
     return !!supplier;
   }
 
-  async findOne(id: string): Promise<SupplierResponse> {
+  async findOne(id: string): Promise<Supplier> {
     this.logger.log(`Finding supplier with ID: ${id}`);
-    const supplier = await this.supplierRepo.findByPk(id, {
-      include: [Drug],
-    });
+    const supplier = await this.supplierRepo.findByPk(id, {});
 
     if (!supplier) {
       throw new NotFoundException(`supplier with id: ${id} not found`);
@@ -66,7 +78,37 @@ export class SuppliersService {
     throw new NotImplementedException('Updating supplier not implemented');
   }
 
-  remove(_id: string) {
-    throw new NotImplementedException(`Deleting supplier not implemented`);
+  async changeStatus(id: string, status: StatusType) {
+    const updatedSupplier = await this.supplierRepo.update(
+      { status },
+      { where: { id } },
+    );
+
+    if (updatedSupplier[0] == 0) {
+      throw new NotFoundException('Supplier not found');
+    }
+    return;
+  }
+
+  //TODO:: Implement delete and update for supplier feature.
+  //TODO:: `There should be a delete endpoint that accepts an array of ids to delete them
+  async remove(id: string) {
+    const supplier = await this.supplierRepo.destroy({
+      where: { id },
+    });
+    if (supplier == 0) {
+      throw new NotFoundException('Supplier not found');
+    }
+    return;
+  }
+
+  async removeBulk(ids: string[]) {
+    const supplier = await this.supplierRepo.destroy({
+      where: { id: ids },
+    });
+    if (supplier == 0) {
+      throw new NotFoundException('Suppliers not found');
+    }
+    return;
   }
 }

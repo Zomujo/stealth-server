@@ -46,10 +46,15 @@ export class DepartmentController {
   @Roles(Role.HospitalAdmin)
   async addDepartment(
     @Body() dto: CreateDepartmentDto,
+    @GetUser('facility') facilityId: string,
     @GetUser('sub') adminId: string,
   ) {
     try {
-      const response = await this.departmentService.create(dto, adminId);
+      const response = await this.departmentService.create(
+        dto,
+        facilityId,
+        adminId,
+      );
       return new ApiSuccessResponseDto<Department>(
         response,
         HttpStatus.CREATED,

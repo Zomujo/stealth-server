@@ -4,4 +4,5 @@ export interface IUserPayload {
   facility: string;
   department: string;
   role: string;
+  session: string;
 }

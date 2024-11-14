@@ -169,7 +169,6 @@ export class StockAdjustmentsService {
       [Op.and]: [
         query.facilityId && { facilityId: query.facilityId },
         query.departmentId && { departmentId: query.departmentId },
-        query.createdBy && { createdBy: query.createdBy },
         query.type && { type: query.type },
         query.status && { type: query.status },
         query.search && {

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
 import {
+  ApiCreatedSuccessResponse,
   ApiSuccessResponse,
   ApiSuccessResponseNullData,
 } from './response.decorators';
@@ -30,6 +31,14 @@ export function CustomApiResponse(
   ];
   responseTypes.forEach((response) => {
     switch (response) {
+      case 'created':
+        docs.push(
+          ApiCreatedSuccessResponse({
+            type: options.type ?? 'any',
+            description: options.message || 'Request successful',
+          }),
+        );
+        break;
       case 'success':
         docs.push(
           ApiSuccessResponse({
@@ -87,6 +96,7 @@ export function CustomApiResponse(
 }
 
 export type CustomResponses =
+  | 'created'
   | 'success'
   | 'successNull'
   | 'authorize'

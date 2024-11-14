@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { CreateLoginSessionDto } from './login-session.dto';
 
 export class LoginDto {
   @ApiProperty({
@@ -16,4 +17,11 @@ export class LoginDto {
   })
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty({
+    type: CreateLoginSessionDto,
+    description: 'Login session metadata',
+  })
+  @IsNotEmpty()
+  loginSessionMeta: CreateLoginSessionDto;
 }

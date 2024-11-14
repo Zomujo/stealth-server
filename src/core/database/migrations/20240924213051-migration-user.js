@@ -14,10 +14,6 @@ module.exports = {
 
       phoneNumber: { type: Sequelize.STRING, field: 'phone_number' },
 
-      facility: Sequelize.STRING,
-
-      department: Sequelize.STRING,
-
       role: Sequelize.STRING,
 
       password: Sequelize.STRING,

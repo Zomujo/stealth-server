@@ -4,6 +4,8 @@ import {
   GoneException,
   Inject,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -19,25 +21,34 @@ import { IUserPayload } from './interface/payload.interface';
 import { MailService } from '../notification/mail/mail.service';
 import { randomInt } from 'crypto';
 import { add, isAfter } from 'date-fns';
+import axios from 'axios';
 import {
   ChangePasswordDto,
   CheckCodeDto,
   ResetPasswordDto,
 } from './dto/reset-password.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { LoginSession, StatusType } from './models/login-session.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class AuthService {
   private SALT_OR_ROUNDS: number = 10;
+  private logger: Logger;
+
   constructor(
     private configService: ConfigService,
     @InjectModel(User) private userRepository: typeof User,
+    @InjectModel(LoginSession)
+    private loginSessionRepository: typeof LoginSession,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly mailService: MailService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) {
+    this.logger = new Logger(AuthService.name);
+  }
 
   async register(dto: CreateUserDto) {
     const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
@@ -98,12 +109,13 @@ export class AuthService {
     if (!user.accountApproved) {
       throw new ForbiddenException('User has not been approved by admin');
     }
-
-    const token = await this.generateTokens(user);
+    const sessionData = await this.getSessionDetails(dto, user.id);
+    const token = await this.generateTokens(user, sessionData.id);
     if (user.status != AccountState.ACTIVE) {
       user.status = AccountState.ACTIVE;
       await user.save();
     }
+
     return new LoginTokenDto(user, token);
   }
 
@@ -130,17 +142,44 @@ export class AuthService {
     return user;
   }
 
+  async retrieveSessions(userId: string) {
+    const sessions = await this.loginSessionRepository.findAll({
+      where: { userId },
+      attributes: [
+        'id',
+        'browser',
+        'location',
+        'activity',
+        'status',
+        'updatedAt',
+      ],
+    });
+    const response = sessions.map((session: LoginSession) => {
+      const { id, browser, location, activity } = session.get({ plain: true }); // Get plain object
+      return { id, browser, location, activity };
+    });
+    return response;
+  }
+
   async delete(userId: string) {
     console.log(userId);
     return { message: 'user deleted' };
   }
 
-  async refreshToken(userId: string) {
+  async refreshToken(userId: string, sessionId: string) {
     const user = await this.userRepository.findByPk(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this.generateTokens(user);
+    const loginSession = await this.loginSessionRepository.findOne({
+      where: {
+        id: sessionId,
+      },
+    });
+    loginSession.status = StatusType.ACTIVE;
+    await loginSession.save();
+
+    return this.generateTokens(user, sessionId);
   }
 
   async sendResetPasswordCode(mail: string) {
@@ -292,6 +331,81 @@ export class AuthService {
   //TODO:: implement settings that allow you to set notification and email preferences
   //TODO:: implement endpoint that lists all sessions and devices the user has had sessions on.
 
+  private async getSessionDetails(dto: LoginDto, userId: string) {
+    const location = await this.getLocation(
+      dto.loginSessionMeta.locationBody.latitude,
+      dto.loginSessionMeta.locationBody.longitude,
+    );
+
+    const loginSession = await this.loginSessionRepository.update(
+      { status: StatusType.ACTIVE },
+      {
+        where: {
+          [Op.and]: { browser: dto.loginSessionMeta.browser, location },
+        },
+      },
+    );
+
+    let sessionData: LoginSession;
+
+    if (loginSession[0] == 0) {
+      sessionData = await this.loginSessionRepository.create({
+        userId,
+        browser: dto.loginSessionMeta.browser,
+        location,
+      });
+    } else {
+      sessionData = await this.loginSessionRepository.findOne({
+        where: {
+          [Op.and]: { browser: dto.loginSessionMeta.browser, location },
+        },
+      });
+    }
+
+    const tokenExpiresAt =
+      this.configService.get<number>('JWT_ACCESS_TOKEN_TTL') * 1000;
+    setTimeout(
+      async (loginSessionRepository, browser, location, logger) => {
+        logger.log('updating');
+        await loginSessionRepository.update(
+          { status: StatusType.INACTIVE },
+          {
+            where: {
+              browser,
+              location,
+            },
+          },
+        );
+        logger.log('updating done');
+      },
+      tokenExpiresAt,
+      this.loginSessionRepository,
+      dto.loginSessionMeta.browser,
+      location,
+      this.logger,
+    );
+    return sessionData;
+  }
+  private async getLocation(latitude: string, longitude: string) {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
+
+    try {
+      const response = await axios.get(url);
+      if (response.data.address) {
+        const address = `${response.data.address.town}, ${response.data.address.city}, ${response.data.address.country_code.toUpperCase()}`;
+        return address;
+      } else {
+        throw new InternalServerErrorException('No results found');
+      }
+    } catch (error) {
+      this.logger.error(
+        `An error occured: ${error.name} :: ${error.message}`,
+        error.stack,
+      );
+      return 'GH';
+    }
+  }
+
   private async signToken<T>(userId: string, expiresIn: number, payload?: T) {
     return await this.jwtService.signAsync(
       {
@@ -316,7 +430,7 @@ export class AuthService {
     return code;
   }
 
-  private async generateTokens(user: User) {
+  private async generateTokens(user: User, sessionId: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken<Partial<IUserPayload>>(
         user.id,
@@ -326,9 +440,12 @@ export class AuthService {
           facility: user.facilityId,
           department: user.departmentId,
           role: user.role,
+          session: sessionId,
         },
       ),
-      this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
+      this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl, {
+        session: sessionId,
+      }),
     ]);
     return new TokenDto(accessToken, refreshToken);
   }

@@ -4,11 +4,13 @@ import {
   DataType,
   DeletedAt,
   ForeignKey,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../shared/models/base.model';
 import { Facility } from '../../admin/facility/models/facility.model';
 import { Department } from '../../admin/department/models/department.model';
+import { LoginSession } from './login-session.model';
 
 export enum AccountState {
   PENDING = 'Pending',
@@ -44,6 +46,9 @@ export class User extends BaseModel {
 
   @BelongsTo(() => Department)
   department?: Department;
+
+  @HasMany(() => LoginSession)
+  loginSessions: LoginSession;
 
   @Column
   role: string;
