@@ -23,14 +23,14 @@ import {
   OneDrug,
   UpdateDrugDto,
 } from './dto';
-import { Roles } from 'src/auth/decorator';
-import { Role } from 'src/auth/interface/roles.enum';
+import { Permission } from 'src/auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
+import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 
 @ApiTags('Drugs')
 @Controller('drugs')
@@ -44,14 +44,7 @@ export class DrugsController {
     type: OneDrug,
     message: 'Drug created successfully',
   })
-  @Roles(
-    Role.NationalAdmin,
-    Role.NationalSCM,
-    Role.RegionalAdmin,
-    Role.RegionalSCM,
-    Role.HospitalAdmin,
-    Role.HospitalSCM,
-  )
+  @Permission(Features.DRUGS, PermissionLevel.READ_WRITE)
   @Post()
   async create(@Body() createDrugDto: CreateDrugDto) {
     try {
@@ -71,6 +64,7 @@ export class DrugsController {
     isArray: true,
     message: 'Drugs retrieved successfully',
   })
+  @Permission(Features.DRUGS, PermissionLevel.READ)
   @Get()
   async findAll(@Query() query: DrugPaginationDto) {
     try {
@@ -94,6 +88,7 @@ export class DrugsController {
     type: DrugAnalytics,
     message: 'Drug analytics retrieved successfully',
   })
+  @Permission(Features.DRUGS, PermissionLevel.READ)
   @Get('/analytics')
   async analytics() {
     return await this.drugsService.getAnalytics();
@@ -103,6 +98,7 @@ export class DrugsController {
     type: OneDrug,
     message: 'Drug retrieved successfully',
   })
+  @Permission(Features.DRUGS, PermissionLevel.READ)
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -120,14 +116,7 @@ export class DrugsController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug updated successfully',
   })
-  @Roles(
-    Role.NationalAdmin,
-    Role.NationalSCM,
-    Role.RegionalAdmin,
-    Role.RegionalSCM,
-    Role.HospitalAdmin,
-    Role.HospitalSCM,
-  )
+  @Permission(Features.DRUGS, PermissionLevel.READ_WRITE)
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -147,14 +136,7 @@ export class DrugsController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug prices adjusted successfully',
   })
-  @Roles(
-    Role.NationalAdmin,
-    Role.NationalSCM,
-    Role.RegionalAdmin,
-    Role.RegionalSCM,
-    Role.HospitalAdmin,
-    Role.HospitalSCM,
-  )
+  @Permission(Features.DRUGS, PermissionLevel.READ_WRITE)
   @Patch('/adjust-prices/:id')
   async adjustPrice(
     @Param('id', ParseUUIDPipe) id: string,
@@ -174,14 +156,7 @@ export class DrugsController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug deleted successfully',
   })
-  @Roles(
-    Role.NationalAdmin,
-    Role.NationalSCM,
-    Role.RegionalAdmin,
-    Role.RegionalSCM,
-    Role.HospitalAdmin,
-    Role.HospitalSCM,
-  )
+  @Permission(Features.DRUGS, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {

@@ -16,6 +16,8 @@ module.exports = {
 
       role: Sequelize.STRING,
 
+      permissions: Sequelize.ARRAY(Sequelize.STRING),
+
       password: Sequelize.STRING,
 
       accountApproved: { type: Sequelize.BOOLEAN, field: 'account_approved' },

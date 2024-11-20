@@ -27,6 +27,8 @@ import {
 import { Response } from 'express';
 import { UpdateReportDto } from './dto/edit.dto';
 import { throwError } from 'src/utils/responses/error.response';
+import { Permission } from '../auth/decorator';
+import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
 
 const generalResponses: CustomResponses[] = ['success', 'authorize'];
 
@@ -41,6 +43,7 @@ export class ReportsController {
     type: GetReportDto,
     message: 'Report created successfully',
   })
+  @Permission(Features.REPORTS, PermissionLevel.READ_WRITE)
   @Post()
   async postReport(@Body() dto: CreateReportDto) {
     try {
@@ -60,6 +63,7 @@ export class ReportsController {
     type: GetReportDto,
     message: 'Report fetched successfully',
   })
+  @Permission(Features.REPORTS, PermissionLevel.READ)
   @Get()
   async getReports(@Query() query: GetReportPaginationDto) {
     try {
@@ -75,11 +79,12 @@ export class ReportsController {
     }
   }
 
-  @Get(':id/export')
   @CustomApiResponse(['authorize', 'successNull'], {
     message: 'Report exported successfully',
   })
   @HttpCode(HttpStatus.OK)
+  @Permission(Features.REPORTS, PermissionLevel.READ)
+  @Get(':id/export')
   async exportReport(@Res() res: Response, @Param('id') id: string) {
     try {
       const { csv, reportName } = await this.reportsService.export(id);
@@ -104,6 +109,7 @@ export class ReportsController {
     type: GetReportDto,
     message: 'Report fetched successfully',
   })
+  @Permission(Features.REPORTS, PermissionLevel.READ)
   @Get(':id')
   async getReport(@Param('id') id: string) {
     try {
@@ -123,6 +129,7 @@ export class ReportsController {
     type: String,
     message: 'Report deleted successfully',
   })
+  @Permission(Features.REPORTS, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     try {
@@ -137,12 +144,13 @@ export class ReportsController {
     }
   }
 
-  @Patch(':id')
   @CustomApiResponse([...generalResponses, 'notfound'], {
     type: null,
     message: 'Report updated successfully',
   })
   @HttpCode(HttpStatus.OK)
+  @Permission(Features.REPORTS, PermissionLevel.READ_WRITE)
+  @Patch(':id')
   async editReport(@Body() dto: UpdateReportDto, @Param('id') id: string) {
     try {
       await this.reportsService.update(id, dto);

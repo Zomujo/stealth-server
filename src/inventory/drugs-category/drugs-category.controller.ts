@@ -20,14 +20,14 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { Roles } from 'src/auth/decorator';
-import { Role } from 'src/auth/interface/roles.enum';
+import { Permission } from 'src/auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
+import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 
 @ApiTags('Drug Category')
 @Controller('drug-categories')
@@ -41,14 +41,7 @@ export class DrugsCategoryController {
     type: DrugsCategoryResponse,
     message: 'Drug category created successfully',
   })
-  @Roles(
-    Role.HospitalAdmin,
-    Role.NationalAdmin,
-    Role.RegionalAdmin,
-    Role.HospitalSCM,
-    Role.NationalSCM,
-    Role.RegionalSCM,
-  )
+  @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE)
   @Post()
   async create(@Body() createDrugsCategoryDto: CreateDrugsCategoryDto) {
     try {
@@ -69,6 +62,7 @@ export class DrugsCategoryController {
     type: DrugsCategoryResponse,
     message: 'Drug categories retrieved successfully',
   })
+  @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ)
   @Get()
   async findAll(@Query() query?: PaginationRequestDto) {
     try {
@@ -92,6 +86,7 @@ export class DrugsCategoryController {
     type: DrugsCategoryResponse,
     message: 'Drug category retrieved successfully',
   })
+  @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ)
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -106,17 +101,10 @@ export class DrugsCategoryController {
     }
   }
 
-  @Roles(
-    Role.HospitalAdmin,
-    Role.NationalAdmin,
-    Role.RegionalAdmin,
-    Role.HospitalSCM,
-    Role.NationalSCM,
-    Role.RegionalSCM,
-  )
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug category updated successfully',
   })
+  @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE)
   @Patch(':id')
   async changeName(
     @Param('id', ParseUUIDPipe) id: string,
@@ -133,17 +121,10 @@ export class DrugsCategoryController {
     }
   }
 
-  @Roles(
-    Role.HospitalAdmin,
-    Role.NationalAdmin,
-    Role.RegionalAdmin,
-    Role.HospitalSCM,
-    Role.NationalSCM,
-    Role.RegionalSCM,
-  )
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug category status updated successfully',
   })
+  @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE)
   @Patch(':id')
   async toggleStatus(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -157,17 +138,10 @@ export class DrugsCategoryController {
     }
   }
 
-  @Roles(
-    Role.HospitalAdmin,
-    Role.NationalAdmin,
-    Role.RegionalAdmin,
-    Role.HospitalSCM,
-    Role.NationalSCM,
-    Role.RegionalSCM,
-  )
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Drug category deleted successfully',
   })
+  @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {

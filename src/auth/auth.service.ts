@@ -440,6 +440,7 @@ export class AuthService {
           facility: user.facilityId,
           department: user.departmentId,
           role: user.role,
+          permissions: user.permissions,
           session: sessionId,
         },
       ),

@@ -12,6 +12,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { LoginSession } from './models/login-session.model';
+import { PermissionGuard } from './guards/permissions.guard';
 
 @Module({
   imports: [
@@ -31,6 +32,10 @@ import { LoginSession } from './models/login-session.model';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
     },
   ],
 })

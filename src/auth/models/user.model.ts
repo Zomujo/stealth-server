@@ -53,6 +53,9 @@ export class User extends BaseModel {
   @Column
   role: string;
 
+  @Column({ type: DataType.ARRAY(DataType.STRING) })
+  permissions: string[];
+
   @Column
   password: string;
 

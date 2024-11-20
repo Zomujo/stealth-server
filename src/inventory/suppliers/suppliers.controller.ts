@@ -28,9 +28,9 @@ import {
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import { StatusType } from './models/supplier.model';
-import { Role } from '../../auth/interface/roles.enum';
-import { Roles } from '../../auth/decorator';
+import { Permission } from '../../auth/decorator';
 import { DeleteItemsDto } from '../../shared/docs/dto/delete.dto';
+import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 
 @ApiTags('Suppliers')
 @Controller('suppliers')
@@ -44,6 +44,7 @@ export class SuppliersController {
     type: SupplierResponse,
     message: 'Supplier created successfully',
   })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE)
   @Post()
   async create(@Body() createSupplierDto: CreateSupplierDto) {
     try {
@@ -63,6 +64,7 @@ export class SuppliersController {
     isArray: true,
     message: 'Suppliers retrieved successfully',
   })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ)
   @Get()
   async findAll(@Query() query: PaginationRequestDto) {
     try {
@@ -86,6 +88,7 @@ export class SuppliersController {
     type: SupplierResponse,
     message: 'Supplier retrieved successfully',
   })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ)
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -103,6 +106,7 @@ export class SuppliersController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Supplier updated successfully',
   })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE)
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -122,7 +126,7 @@ export class SuppliersController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Supplier deactivated successfully',
   })
-  @Roles(Role.HospitalAdmin)
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE)
   @Patch(':id/deactivate')
   async deactivateSupplier(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -139,7 +143,7 @@ export class SuppliersController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Supplier activated successfully',
   })
-  @Roles(Role.HospitalAdmin)
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE)
   @Patch(':id/activate')
   async activateSupplier(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -156,6 +160,7 @@ export class SuppliersController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Supplier deleted successfully',
   })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -172,6 +177,7 @@ export class SuppliersController {
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Suppliers deleted successfully',
   })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE_DELETE)
   @Delete()
   async removeBulk(@Body() dto: DeleteItemsDto) {
     try {
