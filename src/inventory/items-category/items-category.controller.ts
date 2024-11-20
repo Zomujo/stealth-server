@@ -11,7 +11,7 @@ import {
   Query,
   HttpStatus,
 } from '@nestjs/common';
-import { DrugsCategoryService } from './items-category.service';
+import { ItemCategoryService } from './items-category.service';
 import {
   CreateItemsCategoryDto,
   ItemCategoryResponse,
@@ -29,29 +29,27 @@ import {
 import { throwError } from 'src/utils/responses/error.response';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 
-@ApiTags('Drug Category')
-@Controller('drug-categories')
+@ApiTags('Item Category')
+@Controller('item-categories')
 export class DrugsCategoryController {
   private readonly logger: Logger;
-  constructor(private readonly drugsCategoryService: DrugsCategoryService) {
+  constructor(private readonly itemCategoryService: ItemCategoryService) {
     this.logger = new Logger(DrugsCategoryController.name);
   }
 
   @CustomApiResponse(['success', 'authorize'], {
     type: ItemCategoryResponse,
-    message: 'Drug category created successfully',
+    message: 'Item category created successfully',
   })
   @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE)
   @Post()
-  async create(@Body() createDrugsCategoryDto: CreateItemsCategoryDto) {
+  async create(@Body() dto: CreateItemsCategoryDto) {
     try {
-      const createdCategory = await this.drugsCategoryService.create(
-        createDrugsCategoryDto,
-      );
+      const createdCategory = await this.itemCategoryService.create(dto);
       return new ApiSuccessResponseDto(
         createdCategory,
         HttpStatus.CREATED,
-        'Drug category created successfully',
+        'Item category created successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -60,13 +58,13 @@ export class DrugsCategoryController {
 
   @CustomApiResponse(['paginated', 'authorize'], {
     type: ItemCategoryResponse,
-    message: 'Drug categories retrieved successfully',
+    message: 'Item categories retrieved successfully',
   })
   @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ)
   @Get()
   async findAll(@Query() query?: PaginationRequestDto) {
     try {
-      const categories = await this.drugsCategoryService.findAll(query);
+      const categories = await this.itemCategoryService.findAll(query);
       return new ApiSuccessResponseDto(
         new PaginatedDataResponseDto(
           categories[0],
@@ -75,7 +73,7 @@ export class DrugsCategoryController {
           categories[1],
         ),
         HttpStatus.FOUND,
-        'Drug categories retrieved successfully',
+        'Item categories retrieved successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -84,17 +82,17 @@ export class DrugsCategoryController {
 
   @CustomApiResponse(['success', 'authorize', 'notfound'], {
     type: ItemCategoryResponse,
-    message: 'Drug category retrieved successfully',
+    message: 'Item category retrieved successfully',
   })
   @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ)
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      const category = await this.drugsCategoryService.findOne(id);
+      const category = await this.itemCategoryService.findOne(id);
       return new ApiSuccessResponseDto(
         category,
         HttpStatus.FOUND,
-        'Drug retrieved successfully',
+        'Item retrieved successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -102,19 +100,19 @@ export class DrugsCategoryController {
   }
 
   @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Drug category updated successfully',
+    message: 'Item category updated successfully',
   })
   @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE)
   @Patch(':id')
   async changeName(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateDrugsCategoryDto: UpdateItemCategoryDto,
+    @Body() dto: UpdateItemCategoryDto,
   ) {
     try {
-      await this.drugsCategoryService.changeName(id, updateDrugsCategoryDto);
+      await this.itemCategoryService.changeName(id, dto);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
-        'Drug updated successfully',
+        'Item updated successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -122,16 +120,16 @@ export class DrugsCategoryController {
   }
 
   @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Drug category status updated successfully',
+    message: 'Item category status updated successfully',
   })
   @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE)
   @Patch(':id')
   async toggleStatus(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      await this.drugsCategoryService.toggleStatus(id);
+      await this.itemCategoryService.toggleStatus(id);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
-        'Drug category status updated successfully',
+        'Item category status updated successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);
@@ -139,16 +137,16 @@ export class DrugsCategoryController {
   }
 
   @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Drug category deleted successfully',
+    message: 'Item category deleted successfully',
   })
   @Permission(Features.DRUGS_CATEGORIES, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      await this.drugsCategoryService.remove(id);
+      await this.itemCategoryService.remove(id);
       return new ApiSuccessResponseNoData(
         HttpStatus.ACCEPTED,
-        'Drug deleted successfully',
+        'Item deleted successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);

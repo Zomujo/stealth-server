@@ -15,38 +15,38 @@ import { FindAndCountOptions, Op } from 'sequelize';
 import { Item } from '../items/models/item.model';
 
 @Injectable()
-export class DrugsCategoryService {
+export class ItemCategoryService {
   private readonly logger: Logger;
   constructor(
     @InjectModel(ItemCategory)
     private readonly drugCategoryRepo: typeof ItemCategory,
   ) {
-    this.logger = new Logger(DrugsCategoryService.name);
+    this.logger = new Logger(ItemCategoryService.name);
   }
 
   /**
-   * Creates a new drugs category.
+   * Creates a new items category.
    *
-   * @param createDrugsCategoryDto - The DTO containing the data for creating a drugs category.
-   * @returns A promise that resolves to the created drugs category.
+   * @param createitemsCategoryDto - The DTO containing the data for creating a items category.
+   * @returns A promise that resolves to the created items category.
    * @throws {BadRequestException} If there is a unique constraint error.
    * @throws {InternalServerErrorException} If there is an internal server error.
    */
   async create(
-    createDrugsCategoryDto: CreateItemsCategoryDto,
+    createitemsCategoryDto: CreateItemsCategoryDto,
   ): Promise<ItemCategoryResponse> {
     const category = await this.drugCategoryRepo.create({
-      ...createDrugsCategoryDto,
+      ...createitemsCategoryDto,
     });
-    this.logger.log(`Created drugs category with ID: ${category.id}`);
+    this.logger.log(`Created items category with ID: ${category.id}`);
     return category;
   }
 
   /**
-   * Retrieves all drugs categories.
+   * Retrieves all items categories.
    *
    * @param limit - The maximum number of categories to retrieve.
-   * @returns A promise that resolves to an array of DrugsCategoryResponse objects.
+   * @returns A promise that resolves to an array of itemsCategoryResponse objects.
    * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
    */
   async findAll(
@@ -62,16 +62,16 @@ export class DrugsCategoryService {
     };
     const categories = await this.drugCategoryRepo.findAndCountAll(filter);
 
-    this.logger.log(`Retrieved ${categories.count} drugs categories`);
+    this.logger.log(`Retrieved ${categories.count} items categories`);
     return [categories.rows, categories.count];
   }
 
   /**
-   * Finds a drugs category by its ID.
+   * Finds a items category by its ID.
    *
-   * @param id - The ID of the drugs category to find.
-   * @returns A promise that resolves to the found drugs category.
-   * @throws {NotFoundException} If the drugs category with the given ID is not found.
+   * @param id - The ID of the items category to find.
+   * @returns A promise that resolves to the found items category.
+   * @throws {NotFoundException} If the items category with the given ID is not found.
    * @throws {InternalServerErrorException} If an internal server error occurs.
    */
   async findOne(id: string): Promise<ItemCategoryResponse> {
@@ -82,16 +82,16 @@ export class DrugsCategoryService {
     if (!category) {
       throw new NotFoundException(`Category with id: ${id} not found`);
     }
-    this.logger.log(`Found drugs category with ID: ${id}`);
+    this.logger.log(`Found items category with ID: ${id}`);
     return category;
   }
 
   /**
-   * Updates a drugs category.
+   * Updates a items category.
    *
-   * @param id - The ID of the drugs category.
-   * @param changeNameDto - The DTO containing the updated drugs category data.
-   * @returns A Promise that resolves to the updated drugs category.
+   * @param id - The ID of the items category.
+   * @param changeNameDto - The DTO containing the updated items category data.
+   * @returns A Promise that resolves to the updated items category.
    * @throws InternalServerErrorException if an error occurs during the update process.
    */
   async changeName(
@@ -106,7 +106,7 @@ export class DrugsCategoryService {
     if (affected == 0) {
       throw new NotFoundException(`category with id ${id} not found`);
     }
-    this.logger.log(`Updated drugs category with ID: ${id}`);
+    this.logger.log(`Updated items category with ID: ${id}`);
     return;
   }
 
@@ -117,7 +117,7 @@ export class DrugsCategoryService {
         ? ItemCategoryStatus.DEACTIVATED
         : ItemCategoryStatus.ACTIVE;
     await category.save();
-    this.logger.log(`Updated drugs category with ID: ${id}`);
+    this.logger.log(`Updated items category with ID: ${id}`);
     return;
   }
 
@@ -129,7 +129,7 @@ export class DrugsCategoryService {
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
   async remove(id: string): Promise<void> {
-    this.logger.log(`Removing drugs category with ID: ${id}`);
+    this.logger.log(`Removing items category with ID: ${id}`);
     const res = await this.drugCategoryRepo.destroy({ where: { id: id } });
 
     if (res == 0) {
