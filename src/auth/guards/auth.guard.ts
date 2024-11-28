@@ -50,11 +50,13 @@ export class AuthGuard implements CanActivate {
         secret: this.jwtConfiguration.secret,
       });
       request['user'] = payload;
-      const session = await this.loginSessionRepository.findByPk(
-        payload.session,
-      );
-      if (!session) {
-        throw new UnauthorizedException();
+      if (payload.session) {
+        const session = await this.loginSessionRepository.findByPk(
+          payload.session,
+        );
+        if (!session) {
+          throw new UnauthorizedException();
+        }
       }
     } catch {
       throw new UnauthorizedException();

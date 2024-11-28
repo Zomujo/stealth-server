@@ -108,8 +108,13 @@ export class AuthService {
     if (!user.accountActivated) {
       throw new ForbiddenException('Account Deactivated');
     }
-    const sessionData = await this.getSessionDetails(dto, user.id);
-    const token = await this.generateTokens(user, sessionData.id);
+    let token: TokenDto;
+    if (dto.loginSessionMeta) {
+      const sessionData = await this.getSessionDetails(dto, user.id);
+      token = await this.generateTokens(user, sessionData.id);
+    } else {
+      token = await this.generateTokens(user, null);
+    }
     if (user.status != AccountState.ACTIVE) {
       user.status = AccountState.ACTIVE;
       await user.save();
@@ -171,15 +176,19 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const loginSession = await this.loginSessionRepository.findOne({
-      where: {
-        id: sessionId,
-      },
-    });
-    loginSession.status = StatusType.ACTIVE;
-    await loginSession.save();
+    if (sessionId) {
+      const loginSession = await this.loginSessionRepository.findOne({
+        where: {
+          id: sessionId,
+        },
+      });
+      loginSession.status = StatusType.ACTIVE;
+      await loginSession.save();
 
-    return this.generateTokens(user, sessionId);
+      return this.generateTokens(user, sessionId);
+    } else {
+      return this.generateTokens(user, null);
+    }
   }
 
   async sendResetPasswordCode(mail: string) {
