@@ -1,6 +1,21 @@
 {
   "roles": [
     {
+      "role": "Central Admin",
+      "permissions": [
+        "items:READ_WRITE_DELETE",
+        "item_categories:READ_WRITE_DELETE",
+        "stock_adjustment:READ_WRITE_DELETE",
+        "item_orders:READ_WRITE_DELETE",
+        "reports:READ_WRITE_DELETE",
+        "suppliers:READ_WRITE_DELETE",
+        "sales:READ_WRITE_DELETE",
+        "department_requests:READ_WRITE_DELETE",
+        "departments:READ_WRITE_DELETE",
+        "users:READ_WRITE_DELETE"
+      ]
+    },
+    {
       "role": "Pharmacist",
       "permissions": [
         "items:READ_WRITE",
