@@ -86,12 +86,12 @@ module.exports = {
       await queryInterface.bulkInsert('users', [
         {
           id: adminId,
-          full_name: 'John Doe',
-          email: 'example@email.com',
+          full_name: 'Foster Asare',
+          email: 'asare4ster@gmail.com',
           phone_number: '0244335567',
           facility_id: facilityId,
           department_id: null,
-          role: 'Hospital Admin',
+          role: 'Central Admin',
           permissions: [
             'items:READ_WRITE_DELETE',
             'item_categories:READ_WRITE_DELETE',
