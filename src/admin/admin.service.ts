@@ -13,9 +13,11 @@ import { MailService } from '../notification/mail/mail.service';
 import { Department } from './department/models/department.model';
 import { CreateUserDto } from '../user/dto';
 import * as roles from './data/roles.json';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
+  private SALT_OR_ROUNDS: number = 10;
   private logger: Logger;
   constructor(
     private configService: ConfigService,
@@ -28,8 +30,10 @@ export class AdminService {
   async createPersonnel(dto: CreateUserDto, facilityId: string) {
     dto.accountActivated = false;
     dto.status = 'Pending';
+    const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
     const user = await this.userRepository.create({
       ...dto,
+      password: hashPassword,
       status: dto.status,
       accountActivated: dto.accountActivated,
       facilityId,
@@ -48,10 +52,11 @@ export class AdminService {
     userId: string,
   ) {
     this.logger.log(`Retrieving facilities personnel`);
+    const departmentIdObj = departmentId ? { departmentId } : {};
     const users = await this.userRepository.findAndCountAll({
       where: {
         facilityId,
-        departmentId,
+        ...departmentIdObj,
       },
       order: [
         [
