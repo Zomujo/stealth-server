@@ -28,7 +28,6 @@ export class AdminService {
   }
 
   async createPersonnel(dto: CreateUserDto, facilityId: string) {
-    dto.accountActivated = false;
     dto.status = 'Pending';
     const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
     const user = await this.userRepository.create({
@@ -39,7 +38,11 @@ export class AdminService {
       facilityId,
     });
     this.sendUserCreatedMail(user);
-    return user;
+
+    const response = await this.userRepository.findByPk(user.id, {
+      attributes: { exclude: ['accountActivated', 'password'] },
+    });
+    return response;
   }
 
   retrieveStarterRoles() {

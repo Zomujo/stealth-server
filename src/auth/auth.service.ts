@@ -99,7 +99,7 @@ export class AuthService {
     }
 
     const authorized =
-      user.status === AccountState.ACCEPTED ||
+      user.status === AccountState.PENDING ||
       user.status === AccountState.ACTIVE;
 
     if (!authorized) {
