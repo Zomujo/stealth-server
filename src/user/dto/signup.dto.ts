@@ -3,24 +3,38 @@ import {
   ApiResponseProperty,
   IntersectionType,
 } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, Matches } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, Matches } from 'class-validator';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
 
+enum FacilityType {
+  HOSPITAL = 'hospital',
+  PHARMACY = 'pharmacy',
+}
 export class AdminSignUpDto extends IntersectionType(GenericResponseDto) {
   @ApiProperty({
-    example: 'John Doe',
+    example: 'Jack Frost',
     description: 'The full name of the user',
   })
   @IsNotEmpty()
   fullName: string;
 
   @ApiProperty({
-    example: 'example@email.com',
+    example: 'newUser@email.com',
     description: 'The email of the user',
   })
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @ApiProperty({
+    example: 'Hospital',
+    enum: FacilityType,
+    description:
+      'The kind of facility whether it will be hospital or local pharmacy',
+  })
+  @IsNotEmpty()
+  @IsEnum(FacilityType)
+  facilityType: string;
 
   @ApiProperty({
     example: 'XT(v2EiTqQZ',

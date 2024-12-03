@@ -16,7 +16,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDto, GetUserDto, UpdateUserDto } from '../user/dto';
+import { GetUserDto, UpdateUserDto } from '../user/dto';
 import { AuthService } from './auth.service';
 import { User } from './models/user.model';
 import {
@@ -54,6 +54,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateLoginSessionDto } from './dto/login-session.dto';
 import { CustomApiResponse } from '../shared/docs/decorators';
+import { AdminSignUpDto } from '../user/dto/signup.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -77,7 +78,7 @@ export class AuthController {
     description: 'An unexpected error occured',
   })
   @Post('signup')
-  async signUp(@Body() dto: CreateUserDto) {
+  async signUp(@Body() dto: AdminSignUpDto) {
     try {
       const response = await this.authService.register(dto);
       return new ApiSuccessResponseDto<User>(
