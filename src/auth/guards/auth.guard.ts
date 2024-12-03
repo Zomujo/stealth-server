@@ -43,7 +43,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('TOKEN_ABSENT');
     }
     try {
       const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
@@ -51,15 +51,16 @@ export class AuthGuard implements CanActivate {
       });
       request['user'] = payload;
       if (payload.session) {
-        const session = await this.loginSessionRepository.findByPk(
-          payload.session,
-        );
-        if (!session) {
-          throw new UnauthorizedException();
+        try {
+          const _session = await this.loginSessionRepository.findByPk(
+            payload.session,
+          );
+        } catch {
+          throw new UnauthorizedException('NO_SESSION');
         }
       }
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('TOKEN_EXPIRED');
     }
     return true;
   }
