@@ -76,11 +76,6 @@ export class CreateUserDto extends IntersectionType(GenericResponseDto) {
   facilityId: string;
 
   @ApiResponseProperty({
-    example: true,
-  })
-  accountActivated: boolean;
-
-  @ApiResponseProperty({
     example: 'Active',
   })
   status: string;

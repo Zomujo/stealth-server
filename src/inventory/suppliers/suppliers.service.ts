@@ -4,6 +4,7 @@ import { StatusType, Supplier } from './models/supplier.model';
 import { CreateSupplierDto, UpdateSupplierDto } from './dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { FindAndCountOptions, literal, Op } from 'sequelize';
+import { Batch } from '../items/models';
 
 @Injectable()
 export class SuppliersService {
@@ -47,10 +48,19 @@ export class SuppliersService {
         'city',
         'physicalAddress',
       ],
+      include: { model: Batch, attributes: ['quantity'] },
+      distinct: true,
     };
     const suppliers = await this.supplierRepo.findAndCountAll(filter);
+
+    const modifiedSuppliers = suppliers.rows.map((supplier) => {
+      const modified: Supplier = supplier.get({ plain: true });
+      delete modified.batches;
+      return modified;
+    });
+
     this.logger.log(`Retrieved ${suppliers.count} supplier(s)`);
-    return [suppliers.rows, suppliers.count];
+    return [modifiedSuppliers, suppliers.count];
   }
 
   async exists(id: string): Promise<boolean> {
@@ -61,27 +71,24 @@ export class SuppliersService {
   async findOne(id: string): Promise<Supplier> {
     this.logger.log(`Finding supplier with ID: ${id}`);
     const supplier = await this.supplierRepo.findByPk(id, {
-      attributes: [
-        'id',
-        'name',
-        'primaryContactName',
-        'jobTitle',
-        'phoneNumber',
-        'supplierType',
-        'minimumOrderQuantity',
-        'leadTime',
-        'emergencyContactName',
-        'emergencyContactTitle',
-        'emergencyContactNumber',
-        'physicalAddress',
-      ],
+      attributes: { exclude: ['status'] },
     });
 
     if (!supplier) {
       throw new NotFoundException(`supplier with id: ${id} not found`);
     }
+    const modifiedSupplier: Supplier = supplier.get({ plain: true });
+    delete modifiedSupplier.totalItems;
+    if (modifiedSupplier.paymentType == 'Bank') {
+      delete modifiedSupplier.provider;
+      delete modifiedSupplier.mobileMoneyPhoneNumber;
+    } else {
+      delete modifiedSupplier.bankName;
+      delete modifiedSupplier.accountType;
+      delete modifiedSupplier.accountNumber;
+    }
     this.logger.log(`Found suppliier with ID: ${id}`);
-    return supplier;
+    return modifiedSupplier;
   }
 
   async update(id: string, dto: UpdateSupplierDto) {

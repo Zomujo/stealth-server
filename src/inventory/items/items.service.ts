@@ -16,12 +16,15 @@ import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { Batch, Item, ItemStatus } from './models';
 import { BatchService } from './batch.service';
+import { IUserPayload } from '../../auth/interface/payload.interface';
+import { User } from '../../auth/models/user.model';
 
 @Injectable()
 export class ItemService {
   private readonly logger: Logger;
   constructor(
     @InjectModel(Item) private readonly itemRepo: typeof Item,
+    @InjectModel(User) private readonly userRepo: typeof User,
     private readonly batchService: BatchService,
   ) {
     this.logger = new Logger(ItemService.name);
@@ -34,10 +37,17 @@ export class ItemService {
    * @returns A promise that resolves to the created item.
    * @throws If any error occurs during the creation process.
    */
-  async create(createItemDto: CreateItemDto): Promise<OneItem> {
+  async create(
+    createItemDto: CreateItemDto,
+    user: IUserPayload,
+  ): Promise<OneItem> {
     try {
+      const admin = await this.userRepo.findByPk(user.sub);
       const createdItem = await this.itemRepo.create({
         ...createItemDto,
+        facilityId: user.facility,
+        departmentId: user.department,
+        createdBy: admin.fullName,
         status: ItemStatus.STOCKED,
       });
 
@@ -184,6 +194,7 @@ export class ItemService {
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
       include: [Batch],
+      distinct: true,
     };
   }
 }

@@ -23,7 +23,7 @@ import {
   OneItem,
   UpdateItemDto,
 } from './dto';
-import { Permission } from 'src/auth/decorator';
+import { GetUser, Permission } from 'src/auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
@@ -31,6 +31,7 @@ import {
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
+import { IUserPayload } from '../../auth/interface/payload.interface';
 
 @ApiTags('Items')
 @Controller('items')
@@ -40,15 +41,18 @@ export class ItemController {
     this.logger = new Logger(ItemController.name);
   }
 
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['created', 'authorize'], {
     type: OneItem,
     message: 'Item created successfully',
   })
   @Permission(Features.ITEMS, PermissionLevel.READ_WRITE)
   @Post()
-  async create(@Body() createItemDto: CreateItemDto) {
+  async create(
+    @Body() createItemDto: CreateItemDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const createdItem = await this.itemsService.create(createItemDto);
+      const createdItem = await this.itemsService.create(createItemDto, user);
       return new ApiSuccessResponseDto(
         createdItem,
         HttpStatus.CREATED,

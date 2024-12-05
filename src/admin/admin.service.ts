@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AccountState, User } from '../auth/models/user.model';
 import { literal } from 'sequelize';
@@ -29,13 +34,12 @@ export class AdminService {
       ...dto,
       password: hashPassword,
       status: dto.status,
-      accountActivated: dto.accountActivated,
       facilityId,
     });
     this.sendUserCreatedMail(user);
 
     const response = await this.userRepository.findByPk(user.id, {
-      attributes: { exclude: ['accountActivated', 'password'] },
+      attributes: { exclude: ['password', 'accountActivated'] },
     });
     return response;
   }
@@ -72,6 +76,7 @@ export class AdminService {
       ],
       include: [{ model: Department, attributes: ['id', 'name'] }],
       attributes: ['id', 'fullName', 'role', 'status'],
+      distinct: true,
     });
 
     const modifiedUsers = users.rows.filter((user) => user.id != userId);
@@ -92,7 +97,6 @@ export class AdminService {
         'departmentId',
         'role',
         'permissions',
-        'accountActivated',
         'status',
       ],
     });
@@ -128,10 +132,10 @@ export class AdminService {
 
   async deactivateUser(personnelId: string, adminId: string) {
     const user = await this.changeUserState(
-      false,
       AccountState.INACTIVE,
       personnelId,
       adminId,
+      'deactivated',
     );
     user.deactivatedAt = new Date();
     user.deactivatedBy = adminId;
@@ -146,10 +150,10 @@ export class AdminService {
 
   async activateUser(personnelId: string, adminId: string) {
     const user = await this.changeUserState(
-      true,
       AccountState.ACTIVE,
       personnelId,
       adminId,
+      'activated',
     );
     this.sendActivatedAccountConfirmation(user.email);
     return;
@@ -170,16 +174,18 @@ export class AdminService {
   }
 
   private async changeUserState(
-    accountApproved: boolean,
     status: AccountState,
     personnelId: string,
     adminId: string,
+    changedState: string,
   ) {
     const personnel = await this.userRepository.findByPk(personnelId);
     if (!personnel) {
       throw new NotFoundException('personnel not found');
     }
-    personnel.accountActivated = accountApproved;
+    if (personnel.status == AccountState.PENDING) {
+      throw new BadRequestException(`account cannot be ${changedState}`);
+    }
     personnel.status = status;
     personnel.updatedBy = adminId;
     await personnel.save();

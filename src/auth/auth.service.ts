@@ -105,9 +105,6 @@ export class AuthService {
     if (!authorized) {
       throw new UnauthorizedException('Account is not authorized');
     }
-    if (!user.accountActivated) {
-      throw new ForbiddenException('Account Deactivated');
-    }
     let token: TokenDto;
     if (dto.loginSessionMeta) {
       const sessionData = await this.getSessionDetails(dto, user.id);
@@ -133,7 +130,6 @@ export class AuthService {
         'departmentId',
         'role',
         'permissions',
-        'accountActivated',
         'status',
       ],
     });
@@ -156,7 +152,7 @@ export class AuthService {
       ],
     });
     const response = sessions.map((session: LoginSession) => {
-      const { id, browser, location, activity } = session.get({ plain: true }); // Get plain object
+      const { id, browser, location, activity } = session.get({ plain: true });
       return { id, browser, location, activity };
     });
     return response;

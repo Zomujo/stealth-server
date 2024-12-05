@@ -85,6 +85,26 @@ export class SuppliersController {
     }
   }
 
+  @CustomApiResponse(['success', 'authorize'], {
+    type: GetSuppliersResponse,
+    isArray: true,
+    message: 'Suppliers retrieved successfully',
+  })
+  @Permission(Features.SUPPLIERS, PermissionLevel.READ)
+  @Get('no-paginate')
+  async findAllNoPaginate(@Query() query: PaginationRequestDto) {
+    try {
+      const suppliers = await this.suppliersService.findAll(query);
+      return new ApiSuccessResponseDto(
+        suppliers[0],
+        HttpStatus.OK,
+        'Suppliers retrieved successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
   @CustomApiResponse(['success', 'authorize', 'notfound'], {
     type: GetSupplierResponse,
     message: 'Supplier retrieved successfully',

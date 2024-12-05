@@ -6,9 +6,10 @@ import { Batch, Item } from './models';
 import { BatchService } from './batch.service';
 import { SuppliersService } from '../suppliers/suppliers.service';
 import { Supplier } from '../suppliers/models/supplier.model';
+import { User } from '../../auth/models/user.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Item, Batch, Supplier])],
+  imports: [SequelizeModule.forFeature([Item, Batch, Supplier, User])],
   controllers: [ItemController],
   providers: [ItemService, BatchService, SuppliersService],
   exports: [ItemService, BatchService],

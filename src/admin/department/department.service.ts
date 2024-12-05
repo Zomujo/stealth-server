@@ -67,6 +67,7 @@ export class DepartmentService {
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
+      distinct: true,
     };
     const { rows, count } = await this.departmentRepo.findAndCountAll(filter);
 

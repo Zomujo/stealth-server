@@ -107,7 +107,7 @@ module.exports = {
           ],
           password: hashedPassword,
           account_activated: true,
-          status: 'Accepted',
+          status: 'Active',
           deactivated_by: null,
           deleted_at: null,
           deleted_by: null,

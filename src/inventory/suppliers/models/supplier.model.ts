@@ -109,6 +109,9 @@ export class Supplier extends BaseModel {
   })
   status: StatusType;
 
+  @Column({ type: DataType.VIRTUAL })
+  totalItems: number;
+
   @HasMany(() => Batch)
   batches: Batch[];
 
@@ -119,17 +122,28 @@ export class Supplier extends BaseModel {
     if (!suppliers) {
       return;
     }
+
     if (!Array.isArray(suppliers)) {
       suppliers = [suppliers];
     }
 
     suppliers.forEach((supplier: Supplier) => {
-      const addressList = supplier.physicalAddress.split(',');
-      const city =
-        addressList[
-          addressList.length - 2 < 0 ? 0 : addressList.length - 2
-        ].trim();
-      supplier.city = city;
+      const totalItems = supplier.batches
+        ? supplier.batches.reduce((accumulator, batch) => {
+            return accumulator + (batch.quantity || 0);
+          }, 0)
+        : 0;
+
+      supplier.totalItems = totalItems;
+
+      if (supplier.physicalAddress) {
+        const addressList = supplier.physicalAddress.split(',');
+        const city =
+          addressList[
+            addressList.length - 2 < 0 ? 0 : addressList.length - 2
+          ].trim();
+        supplier.city = city;
+      }
     });
   }
 }

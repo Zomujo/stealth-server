@@ -59,6 +59,7 @@ export class ItemCategoryService {
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
       include: [Item],
+      distinct: true,
     };
     const categories = await this.itemCategoryRepo.findAndCountAll(filter);
     this.logger.log(`Retrieved ${categories.count} items categories`);
