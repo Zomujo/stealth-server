@@ -77,18 +77,18 @@ export class SuppliersService {
     if (!supplier) {
       throw new NotFoundException(`supplier with id: ${id} not found`);
     }
-    const modifiedSupplier: Supplier = supplier.get({ plain: true });
-    delete modifiedSupplier.totalItems;
-    if (modifiedSupplier.paymentType == 'Bank') {
-      delete modifiedSupplier.provider;
-      delete modifiedSupplier.mobileMoneyPhoneNumber;
-    } else {
-      delete modifiedSupplier.bankName;
-      delete modifiedSupplier.accountType;
-      delete modifiedSupplier.accountNumber;
-    }
+    // const modifiedSupplier: Supplier = supplier.get({ plain: true });
+    // delete modifiedSupplier.totalItems;
+    // if (modifiedSupplier.paymentType == 'Bank') {
+    //   delete modifiedSupplier.provider;
+    //   delete modifiedSupplier.mobileMoneyPhoneNumber;
+    // } else {
+    //   delete modifiedSupplier.bankName;
+    //   delete modifiedSupplier.accountType;
+    //   delete modifiedSupplier.accountNumber;
+    // }
     this.logger.log(`Found suppliier with ID: ${id}`);
-    return modifiedSupplier;
+    return supplier;
   }
 
   async update(id: string, dto: UpdateSupplierDto) {
