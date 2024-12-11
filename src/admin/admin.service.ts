@@ -6,14 +6,18 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AccountState, User } from '../auth/models/user.model';
-import { literal, Op } from 'sequelize';
+import { literal } from 'sequelize';
 import { ChangeRoleDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../notification/mail/mail.service';
 import { Department } from './department/models/department.model';
+import { CreateUserDto } from '../user/dto';
+import * as roles from './data/roles.json';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
+  private SALT_OR_ROUNDS: number = 10;
   private logger: Logger;
   constructor(
     private configService: ConfigService,
@@ -23,21 +27,39 @@ export class AdminService {
     this.logger = new Logger(AdminService.name);
   }
 
-  async findFaciltyPersonnel(facilityId: string) {
-    this.logger.log(`Retrieving facilities personnel`);
-    const admins = await this.userRepository.findAndCountAll({
-      where: {
-        facilityId,
-        departmentId: { [Op.is]: null },
-      },
-      attributes: ['id', 'fullName', 'role', 'status'],
+  async createPersonnel(dto: CreateUserDto, facilityId: string) {
+    dto.status = 'Pending';
+    const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
+    const user = await this.userRepository.create({
+      ...dto,
+      password: hashPassword,
+      status: dto.status,
+      facilityId,
     });
-    return admins;
+    this.sendUserCreatedMail(user);
+
+    const response = await this.userRepository.findByPk(user.id, {
+      attributes: { exclude: ['password', 'accountActivated'] },
+    });
+    return response;
   }
 
-  async findDepartmentPersonnel(facilityId: string) {
+  retrieveStarterRoles() {
+    return roles.roles;
+  }
+
+  async findFaciltyPersonnel(
+    facilityId: string,
+    departmentId: string,
+    userId: string,
+  ) {
+    this.logger.log(`Retrieving facilities personnel`);
+    const departmentIdObj = departmentId ? { departmentId } : {};
     const users = await this.userRepository.findAndCountAll({
-      where: { facilityId, departmentId: { [Op.ne]: null } },
+      where: {
+        facilityId,
+        ...departmentIdObj,
+      },
       order: [
         [
           literal(`
@@ -53,9 +75,35 @@ export class AdminService {
         ],
       ],
       include: [{ model: Department, attributes: ['id', 'name'] }],
-      attributes: ['id', 'fullName', 'status'],
+      attributes: ['id', 'fullName', 'role', 'status'],
+      distinct: true,
     });
-    return users;
+
+    const modifiedUsers = users.rows.filter((user) => user.id != userId);
+    return { rows: modifiedUsers, count: users.count };
+  }
+
+  async retrieveUser(userId: string) {
+    const user = await this.userRepository.findByPk(userId, {
+      attributes: [
+        'id',
+        'createdAt',
+        'updatedAt',
+        'imageUrl',
+        'fullName',
+        'email',
+        'phoneNumber',
+        'facilityId',
+        'departmentId',
+        'role',
+        'permissions',
+        'status',
+      ],
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async changeUserRole(
@@ -67,63 +115,27 @@ export class AdminService {
     if (!personnel) {
       throw new NotFoundException('personnel not found');
     }
-    if (personnel.role == dto.role) {
-      throw new BadRequestException('role already exists');
-    }
+
     personnel.role = dto.role;
+    personnel.permissions = dto.permissions;
     personnel.updatedBy = adminId;
     await personnel.save();
-
-    const role = personnel.role
-      .replace('_', ' ')
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
 
     this.sendChangeRoleConfirmationMail(
       personnel.email,
       personnel.fullName,
-      role,
+      personnel.role,
       personnel.updatedAt.toUTCString(),
     );
     return;
   }
 
-  async acceptUser(personnelId: string, adminId: string) {
-    const user = await this.changeUserState(
-      true,
-      AccountState.ACCEPTED,
-      personnelId,
-      adminId,
-    );
-
-    const role = user.role
-      .replace('_', ' ')
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-
-    this.sendApprovedAccountConfirmation(user.email, user.fullName, role);
-    return;
-  }
-
-  async rejectUser(personnelId: string, adminId: string) {
-    const user = await this.changeUserState(
-      false,
-      AccountState.DECLINED,
-      personnelId,
-      adminId,
-    );
-    this.sendRejectedAccountConfirmation(user.email, user.fullName);
-    return;
-  }
-
   async deactivateUser(personnelId: string, adminId: string) {
     const user = await this.changeUserState(
-      false,
       AccountState.INACTIVE,
       personnelId,
       adminId,
+      'deactivated',
     );
     user.deactivatedAt = new Date();
     user.deactivatedBy = adminId;
@@ -138,10 +150,10 @@ export class AdminService {
 
   async activateUser(personnelId: string, adminId: string) {
     const user = await this.changeUserState(
-      true,
       AccountState.ACTIVE,
       personnelId,
       adminId,
+      'activated',
     );
     this.sendActivatedAccountConfirmation(user.email);
     return;
@@ -162,51 +174,36 @@ export class AdminService {
   }
 
   private async changeUserState(
-    accountApproved: boolean,
     status: AccountState,
     personnelId: string,
     adminId: string,
+    changedState: string,
   ) {
     const personnel = await this.userRepository.findByPk(personnelId);
     if (!personnel) {
       throw new NotFoundException('personnel not found');
     }
-    personnel.accountApproved = accountApproved;
+    if (personnel.status == AccountState.PENDING) {
+      throw new BadRequestException(`account cannot be ${changedState}`);
+    }
     personnel.status = status;
     personnel.updatedBy = adminId;
     await personnel.save();
     return personnel;
   }
 
-  private sendApprovedAccountConfirmation(
-    mail: string,
-    fullName: string,
-    role: string,
-  ) {
+  private sendUserCreatedMail(user: User) {
+    const updatedAt = new Date(user.updatedAt).toUTCString();
     const email = {
       from: this.configService.get<string>('EMAIL_FROM'),
-      to: mail,
-      subject: 'Account Approved ✅ - Welcome to Stealth!',
-      template: './signupConfirmation',
+      to: user.email,
+      subject: 'Welcome 👋 - Stealth',
+      template: './userCreated',
       context: {
-        email: mail,
-        fullName,
-        role,
-      },
-    };
-
-    this.mailService.send(email);
-  }
-
-  private sendRejectedAccountConfirmation(mail: string, fullName: string) {
-    const email = {
-      from: this.configService.get<string>('EMAIL_FROM'),
-      to: mail,
-      subject: 'Account Rejected ❌ - Stealth',
-      template: './rejectedConfirmation',
-      context: {
-        email: mail,
-        fullName,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        updatedAt,
       },
     };
 

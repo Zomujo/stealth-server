@@ -5,6 +5,7 @@ import { Department } from './models/department.model';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
 import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
 import { NotificationService } from '../../notification/notification.service';
+import { User } from '../../auth/models/user.model';
 
 @Injectable()
 export class DepartmentService {
@@ -12,6 +13,8 @@ export class DepartmentService {
   constructor(
     @InjectModel(Department)
     private readonly departmentRepo: typeof Department,
+    @InjectModel(User)
+    private readonly userRepo: typeof User,
     private readonly notificationService: NotificationService,
   ) {
     this.logger = new Logger(DepartmentService.name);
@@ -30,10 +33,14 @@ export class DepartmentService {
     facilityId: string,
     adminId: string,
   ): Promise<Department> {
+    const user = await this.userRepo.findByPk(adminId, {
+      attributes: ['id', 'fullName'],
+    });
+
     const department = await this.departmentRepo.create({
       ...createDepartmentDto,
       facilityId,
-      createdBy: adminId,
+      createdBy: user,
     });
     this.notificationService.notifyAdmin({
       message: 'Department has been created successfully',
@@ -60,6 +67,7 @@ export class DepartmentService {
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
+      distinct: true,
     };
     const { rows, count } = await this.departmentRepo.findAndCountAll(filter);
 

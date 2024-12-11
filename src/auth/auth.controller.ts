@@ -1,19 +1,22 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpException,
   HttpStatus,
   InternalServerErrorException,
   Logger,
+  Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDto, GetUserDto, UpdateUserDto } from '../user/dto';
+import { GetUserDto, UpdateUserDto } from '../user/dto';
 import { AuthService } from './auth.service';
 import { User } from './models/user.model';
 import {
@@ -50,6 +53,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateLoginSessionDto } from './dto/login-session.dto';
+import { CustomApiResponse } from '../shared/docs/decorators';
+import { AdminSignUpDto } from '../user/dto/signup.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -73,7 +78,7 @@ export class AuthController {
     description: 'An unexpected error occured',
   })
   @Post('signup')
-  async signUp(@Body() dto: CreateUserDto) {
+  async signUp(@Body() dto: AdminSignUpDto) {
     try {
       const response = await this.authService.register(dto);
       return new ApiSuccessResponseDto<User>(
@@ -467,6 +472,30 @@ export class AuthController {
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'user password changed successfully',
+      );
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.error(
+          `An error occured: ${error.name} :: ${error.message}`,
+          error.stack,
+        );
+        throw new InternalServerErrorException(error.message, error);
+      }
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize'], {
+    message: 'Session deleted successfully',
+  })
+  @Delete('/session/:id')
+  async deleteSession(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      await this.authService.removeSession(id);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'session deleted successfully',
       );
     } catch (error) {
       if (error instanceof HttpException) {

@@ -99,20 +99,18 @@ export class AuthService {
     }
 
     const authorized =
-      user.status === AccountState.ACCEPTED ||
+      user.status === AccountState.PENDING ||
       user.status === AccountState.ACTIVE;
 
     if (!authorized) {
       throw new UnauthorizedException('Account is not authorized');
     }
-    if (!user.accountApproved) {
-      throw new ForbiddenException('User has not been approved by admin');
-    }
-    const sessionData = await this.getSessionDetails(dto, user.id);
-    const token = await this.generateTokens(user, sessionData.id);
-    if (user.status != AccountState.ACTIVE) {
-      user.status = AccountState.ACTIVE;
-      await user.save();
+    let token: TokenDto;
+    if (dto.loginSessionMeta) {
+      const sessionData = await this.getSessionDetails(dto, user.id);
+      token = await this.generateTokens(user, sessionData.id);
+    } else {
+      token = await this.generateTokens(user, null);
     }
 
     return new LoginTokenDto(user, token);
@@ -131,7 +129,7 @@ export class AuthService {
         'facilityId',
         'departmentId',
         'role',
-        'accountApproved',
+        'permissions',
         'status',
       ],
     });
@@ -154,7 +152,7 @@ export class AuthService {
       ],
     });
     const response = sessions.map((session: LoginSession) => {
-      const { id, browser, location, activity } = session.get({ plain: true }); // Get plain object
+      const { id, browser, location, activity } = session.get({ plain: true });
       return { id, browser, location, activity };
     });
     return response;
@@ -170,15 +168,19 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const loginSession = await this.loginSessionRepository.findOne({
-      where: {
-        id: sessionId,
-      },
-    });
-    loginSession.status = StatusType.ACTIVE;
-    await loginSession.save();
+    if (sessionId) {
+      const loginSession = await this.loginSessionRepository.findOne({
+        where: {
+          id: sessionId,
+        },
+      });
+      loginSession.status = StatusType.ACTIVE;
+      await loginSession.save();
 
-    return this.generateTokens(user, sessionId);
+      return this.generateTokens(user, sessionId);
+    } else {
+      return this.generateTokens(user, null);
+    }
   }
 
   async sendResetPasswordCode(mail: string) {
@@ -322,8 +324,23 @@ export class AuthService {
       this.SALT_OR_ROUNDS,
     );
     user.password = newHashedPassword;
+
+    if (user.status != AccountState.ACTIVE) {
+      user.status = AccountState.ACTIVE;
+    }
     await user.save();
+
     this.sendchangePasswordEmail(user.email);
+    return;
+  }
+
+  async removeSession(id: string) {
+    const session = await this.loginSessionRepository.destroy({
+      where: { id },
+    });
+    if (session == 0) {
+      throw new NotFoundException('Session not found');
+    }
     return;
   }
 
@@ -416,7 +433,7 @@ export class AuthService {
         audience: this.jwtConfiguration.audience,
         issuer: this.jwtConfiguration.issuer,
         secret: this.jwtConfiguration.secret,
-        expiresIn: this.jwtConfiguration.accessTokenTtl ?? expiresIn,
+        expiresIn: expiresIn,
       },
     );
   }
@@ -438,6 +455,7 @@ export class AuthService {
         {
           email: user.email,
           facility: user.facilityId,
+          name: user.fullName,
           department: user.departmentId,
           role: user.role,
           permissions: user.permissions,

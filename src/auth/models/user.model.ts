@@ -2,6 +2,7 @@ import {
   BelongsTo,
   Column,
   DataType,
+  Default,
   DeletedAt,
   ForeignKey,
   HasMany,
@@ -59,8 +60,9 @@ export class User extends BaseModel {
   @Column
   password: string;
 
-  @Column({ defaultValue: false })
-  accountApproved: boolean;
+  @Default(true)
+  @Column
+  accountActivated: boolean;
 
   @Column({ defaultValue: AccountState.PENDING })
   status: string; //Pending | Accepted | Declined

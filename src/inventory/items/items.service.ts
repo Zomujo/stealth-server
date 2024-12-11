@@ -5,23 +5,25 @@ import {
   NotFoundException,
   NotImplementedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
+import { User } from '../../auth/models/user.model';
+import { BatchService } from './batch.service';
 import {
   CreateItemDto,
   ItemPaginationDto,
-  ManyItem as ManyItem,
+  ManyItem,
   OneItem,
   UpdateItemDto,
 } from './dto';
-import { InjectModel } from '@nestjs/sequelize';
-import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { Batch, Item, ItemStatus } from './models';
-import { BatchService } from './batch.service';
 
 @Injectable()
 export class ItemService {
   private readonly logger: Logger;
   constructor(
     @InjectModel(Item) private readonly itemRepo: typeof Item,
+    @InjectModel(User) private readonly userRepo: typeof User,
     private readonly batchService: BatchService,
   ) {
     this.logger = new Logger(ItemService.name);
@@ -184,6 +186,7 @@ export class ItemService {
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
       include: [Batch],
+      distinct: true,
     };
   }
 }

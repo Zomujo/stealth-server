@@ -60,6 +60,7 @@ export class StockAdjustmentsController {
     try {
       !dto.facilityId && (dto.facilityId = user.facility);
       !dto.departmentId && (dto.departmentId = user.department);
+      dto.createdBy = user.name;
       const createdAdjustment = await this.stockAdjustmentsService.create(dto);
       return new ApiSuccessResponseDto(
         createdAdjustment,

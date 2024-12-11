@@ -1,12 +1,12 @@
+import { ApiProperty, ApiResponseProperty, PickType } from '@nestjs/swagger';
 import {
-  IsString,
-  IsNumber,
   IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
   IsUUID,
   Matches,
-  IsOptional,
 } from 'class-validator';
-import { ApiProperty, PickType } from '@nestjs/swagger';
 import { DosageForm } from '../models/item.model';
 
 export class CreateItemDto {
@@ -123,11 +123,9 @@ export class CreateItemDto {
   @IsString()
   storageReq: string;
 
-  @ApiProperty({
+  @ApiResponseProperty({
     example: 'Kratos',
-    description: 'The name of the user',
   })
-  @IsString()
   createdBy: string;
 
   @ApiProperty({
@@ -144,20 +142,16 @@ export class CreateItemDto {
   @IsUUID()
   supplierId: string;
 
-  @ApiProperty({
+  @ApiResponseProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
-    description: "Add facility ID if it's a facility item",
   })
   @IsUUID()
   @IsOptional()
   facilityId: string;
 
-  @ApiProperty({
+  @ApiResponseProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
-    description: 'Add department ID if it is a department item',
   })
-  @IsUUID()
-  @IsOptional()
   departmentId: string;
 }
 

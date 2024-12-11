@@ -41,7 +41,7 @@ export class ItemController {
     this.logger = new Logger(ItemController.name);
   }
 
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['created', 'authorize'], {
     type: OneItem,
     message: 'Item created successfully',
   })
@@ -51,6 +51,7 @@ export class ItemController {
     try {
       !dto.facilityId && (dto.facilityId = user.facility);
       !dto.departmentId && (dto.departmentId = user.department);
+      dto.createdBy = user.name;
       const createdItem = await this.itemsService.create(dto);
       return new ApiSuccessResponseDto(
         createdItem,

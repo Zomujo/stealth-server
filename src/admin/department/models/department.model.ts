@@ -1,8 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import {
   BelongsTo,
   Column,
+  DataType,
   ForeignKey,
   HasMany,
   Table,
@@ -49,16 +50,18 @@ export class Department extends BaseModel {
   @HasMany(() => DepartmentRequest)
   departmentRequests: DepartmentRequest[];
 
-  @Column({ field: 'created_by', allowNull: true })
-  createdBy: string;
+  @ApiResponseProperty({
+    example: {
+      id: 'b7a3fb48-6b76-4998-9cd3-4de5b8a18837',
+      name: 'Some Admin',
+    },
+  })
+  @Column({ field: 'created_by', allowNull: true, type: DataType.JSON })
+  createdBy: User;
 
-  @Column({ field: 'updated_by', allowNull: true })
-  updatedBy: string;
-
-  // @ApiProperty({
-  //   example: [],
-  //   description: 'List of items available in the department',
-  // })
-  // @HasMany(() => Item)
-  // items: Item[];
+  @ApiResponseProperty({
+    example: null,
+  })
+  @Column({ field: 'updated_by', allowNull: true, type: DataType.JSON })
+  updatedBy: User;
 }

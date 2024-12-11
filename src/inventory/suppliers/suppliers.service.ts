@@ -1,14 +1,10 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  NotImplementedException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { StatusType, Supplier } from './models/supplier.model';
 import { CreateSupplierDto, UpdateSupplierDto } from './dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { FindAndCountOptions, literal, Op } from 'sequelize';
+import { Batch } from '../items/models';
 
 @Injectable()
 export class SuppliersService {
@@ -52,10 +48,19 @@ export class SuppliersService {
         'city',
         'physicalAddress',
       ],
+      include: { model: Batch, attributes: ['quantity'] },
+      distinct: true,
     };
     const suppliers = await this.supplierRepo.findAndCountAll(filter);
+
+    const modifiedSuppliers = suppliers.rows.map((supplier) => {
+      const modified: Supplier = supplier.get({ plain: true });
+      delete modified.batches;
+      return modified;
+    });
+
     this.logger.log(`Retrieved ${suppliers.count} supplier(s)`);
-    return [suppliers.rows, suppliers.count];
+    return [modifiedSuppliers, suppliers.count];
   }
 
   async exists(id: string): Promise<boolean> {
@@ -65,17 +70,39 @@ export class SuppliersService {
 
   async findOne(id: string): Promise<Supplier> {
     this.logger.log(`Finding supplier with ID: ${id}`);
-    const supplier = await this.supplierRepo.findByPk(id, {});
+    const supplier = await this.supplierRepo.findByPk(id, {
+      attributes: { exclude: ['status'] },
+      include: { model: Batch, attributes: ['quantity'] },
+    });
 
     if (!supplier) {
       throw new NotFoundException(`supplier with id: ${id} not found`);
     }
+    const modifiedSupplier: Supplier = supplier.get({ plain: true });
+    // delete modifiedSupplier.totalItems;
+    delete modifiedSupplier.batches;
+    // if (modifiedSupplier.paymentType == 'Bank') {
+    //   delete modifiedSupplier.provider;
+    //   delete modifiedSupplier.mobileMoneyPhoneNumber;
+    // } else {
+    //   delete modifiedSupplier.bankName;
+    //   delete modifiedSupplier.accountType;
+    //   delete modifiedSupplier.accountNumber;
+    // }
     this.logger.log(`Found suppliier with ID: ${id}`);
-    return supplier;
+    return modifiedSupplier;
   }
 
-  update(_id: string, _updateSupplierDto: UpdateSupplierDto) {
-    throw new NotImplementedException('Updating supplier not implemented');
+  async update(id: string, dto: UpdateSupplierDto) {
+    const updatedSupplier = await this.supplierRepo.update(
+      { ...dto },
+      { where: { id } },
+    );
+
+    if (updatedSupplier[0] == 0) {
+      throw new NotFoundException('Supplier Not found');
+    }
+    return;
   }
 
   async changeStatus(id: string, status: StatusType) {
@@ -90,8 +117,6 @@ export class SuppliersService {
     return;
   }
 
-  //TODO:: Implement delete and update for supplier feature.
-  //TODO:: `There should be a delete endpoint that accepts an array of ids to delete them
   async remove(id: string) {
     const supplier = await this.supplierRepo.destroy({
       where: { id },

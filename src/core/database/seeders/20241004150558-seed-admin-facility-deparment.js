@@ -51,6 +51,7 @@ module.exports = {
     );
 
     let departmentId;
+    const createdBy = { id: adminId, name: 'Foster Asare' };
     if (!existingDepartment) {
       departmentId = uuidv4();
 
@@ -59,7 +60,7 @@ module.exports = {
           id: departmentId,
           name: 'Department A',
           facility_id: facilityId,
-          created_by: adminId,
+          created_by: JSON.stringify(createdBy),
           updated_by: null,
           ...baseModelColumns,
         },
@@ -86,12 +87,12 @@ module.exports = {
       await queryInterface.bulkInsert('users', [
         {
           id: adminId,
-          full_name: 'John Doe',
-          email: 'example@email.com',
+          full_name: 'Foster Asare',
+          email: 'asare4ster@gmail.com',
           phone_number: '0244335567',
           facility_id: facilityId,
           department_id: null,
-          role: 'hospital_admin',
+          role: 'Central Admin',
           permissions: [
             'items:READ_WRITE_DELETE',
             'item_categories:READ_WRITE_DELETE',
@@ -101,10 +102,40 @@ module.exports = {
             'suppliers:READ_WRITE_DELETE',
             'sales:READ_WRITE_DELETE',
             'department_requests:READ_WRITE_DELETE',
+            'departments:READ_WRITE_DELETE',
+            'users:READ_WRITE_DELETE',
           ],
           password: hashedPassword,
-          account_approved: true,
-          status: 'Accepted',
+          account_activated: true,
+          status: 'Active',
+          deactivated_by: null,
+          deleted_at: null,
+          deleted_by: null,
+          ...baseModelColumnsWithoutId,
+        },
+        {
+          id: uuidv4(),
+          full_name: 'Jack Frost',
+          email: 'example@email.com',
+          phone_number: '0244335567',
+          facility_id: facilityId,
+          department_id: null,
+          role: 'Central Admin',
+          permissions: [
+            'items:READ_WRITE_DELETE',
+            'item_categories:READ_WRITE_DELETE',
+            'stock_adjustment:READ_WRITE_DELETE',
+            'item_orders:READ_WRITE_DELETE',
+            'reports:READ_WRITE_DELETE',
+            'suppliers:READ_WRITE_DELETE',
+            'sales:READ_WRITE_DELETE',
+            'department_requests:READ_WRITE_DELETE',
+            'departments:READ_WRITE_DELETE',
+            'users:READ_WRITE_DELETE',
+          ],
+          password: hashedPassword,
+          account_activated: true,
+          status: 'Active',
           deactivated_by: null,
           deleted_at: null,
           deleted_by: null,

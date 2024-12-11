@@ -11,12 +11,17 @@ import jwtConfig from '../interface/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { AUTHORIZE_KEY, IS_PUBLIC_KEY } from '../decorator';
+import { InjectModel } from '@nestjs/sequelize';
+import { LoginSession } from '../models/login-session.model';
+import { IUserPayload } from '../interface/payload.interface';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private jwtService: JwtService,
+    @InjectModel(LoginSession)
+    private loginSessionRepository: typeof LoginSession,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
@@ -38,15 +43,27 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('TOKEN_ABSENT');
     }
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
+      const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
         secret: this.jwtConfiguration.secret,
       });
       request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException('unauthenticated user');
+      if (payload.session) {
+        const session = await this.loginSessionRepository.findByPk(
+          payload.session,
+        );
+        if (!session) {
+          throw new UnauthorizedException('CLOSED_SESSION');
+        }
+      }
+    } catch (error: any) {
+      if (error.message == 'CLOSED_SESSION') {
+        throw new UnauthorizedException(error.message);
+      } else {
+        throw new UnauthorizedException('TOKEN_EXPIRED');
+      }
     }
     return true;
   }

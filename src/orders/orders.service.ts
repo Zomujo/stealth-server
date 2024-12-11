@@ -51,6 +51,7 @@ export class ItemOrdersService {
     // Define query options
     const queryOptions: any = {
       where: {},
+      distinct: true,
       order: [[orderBy, orderDirection.toUpperCase()]],
       limit: pageSize,
       offset: (page - 1) * pageSize,

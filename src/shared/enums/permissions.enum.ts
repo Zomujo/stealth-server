@@ -1,12 +1,14 @@
 export enum Features {
   ITEMS = 'items',
-  ITEMS_CATEGORIES = 'item_catgories',
+  ITEMS_CATEGORIES = 'item_categories',
   STOCK_ADJUSTMENT = 'stock_adjustment',
   DRUG_ORDERS = 'item_orders',
   REPORTS = 'reports',
   SUPPLIERS = 'suppliers',
   SALES = 'sales',
   DEPARTMENT_REQUESTS = 'department_requests',
+  DEPARTMENTS = 'departments',
+  USERS = 'users',
 }
 
 export enum PermissionLevel {

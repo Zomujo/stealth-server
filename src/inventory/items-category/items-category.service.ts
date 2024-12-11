@@ -51,7 +51,7 @@ export class ItemCategoryService {
    */
   async findAll(
     query: PaginationRequestDto,
-  ): Promise<[ItemCategoryResponse[], number]> {
+  ): Promise<[ItemCategory[], number]> {
     const filter: FindAndCountOptions<ItemCategory> = {
       where:
         (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {},
@@ -59,11 +59,19 @@ export class ItemCategoryService {
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
       include: [Item],
+      distinct: true,
     };
     const categories = await this.itemCategoryRepo.findAndCountAll(filter);
-
     this.logger.log(`Retrieved ${categories.count} items categories`);
-    return [categories.rows, categories.count];
+
+    const plainCategories: ItemCategory[] = categories.rows.map((category) =>
+      category.get({ plain: true }),
+    );
+    const modifiedCategories = plainCategories.map((category) => {
+      delete category.items;
+      return category;
+    });
+    return [modifiedCategories, categories.count];
   }
 
   /**
@@ -83,7 +91,9 @@ export class ItemCategoryService {
       throw new NotFoundException(`Category with id: ${id} not found`);
     }
     this.logger.log(`Found items category with ID: ${id}`);
-    return category;
+    const plainCategory: ItemCategory = category.get({ plain: true });
+    delete plainCategory.items;
+    return plainCategory;
   }
 
   /**
