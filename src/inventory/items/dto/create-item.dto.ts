@@ -1,5 +1,12 @@
-import { IsString, IsNumber, IsEnum, IsUUID, Matches } from 'class-validator';
 import { ApiProperty, ApiResponseProperty, PickType } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+} from 'class-validator';
 import { DosageForm } from '../models/item.model';
 
 export class CreateItemDto {
@@ -138,6 +145,8 @@ export class CreateItemDto {
   @ApiResponseProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
   })
+  @IsUUID()
+  @IsOptional()
   facilityId: string;
 
   @ApiResponseProperty({

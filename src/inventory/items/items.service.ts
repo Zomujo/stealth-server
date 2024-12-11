@@ -5,19 +5,18 @@ import {
   NotFoundException,
   NotImplementedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
+import { User } from '../../auth/models/user.model';
+import { BatchService } from './batch.service';
 import {
   CreateItemDto,
   ItemPaginationDto,
-  ManyItem as ManyItem,
+  ManyItem,
   OneItem,
   UpdateItemDto,
 } from './dto';
-import { InjectModel } from '@nestjs/sequelize';
-import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { Batch, Item, ItemStatus } from './models';
-import { BatchService } from './batch.service';
-import { IUserPayload } from '../../auth/interface/payload.interface';
-import { User } from '../../auth/models/user.model';
 
 @Injectable()
 export class ItemService {
@@ -37,17 +36,10 @@ export class ItemService {
    * @returns A promise that resolves to the created item.
    * @throws If any error occurs during the creation process.
    */
-  async create(
-    createItemDto: CreateItemDto,
-    user: IUserPayload,
-  ): Promise<OneItem> {
+  async create(createItemDto: CreateItemDto): Promise<OneItem> {
     try {
-      const admin = await this.userRepo.findByPk(user.sub);
       const createdItem = await this.itemRepo.create({
         ...createItemDto,
-        facilityId: user.facility,
-        departmentId: user.department,
-        createdBy: admin.fullName,
         status: ItemStatus.STOCKED,
       });
 
