@@ -7,12 +7,13 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
+import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { User } from '../../auth/models/user.model';
+import { Supplier } from '../suppliers/models/supplier.model';
 import { BatchService } from './batch.service';
 import {
   CreateItemDto,
   ItemPaginationDto,
-  ManyItem,
   OneItem,
   UpdateItemDto,
 } from './dto';
@@ -71,23 +72,28 @@ export class ItemService {
    * @returns A promise that resolves to an array of OneItem and the total count of items.
    * @throws Throws an error if there was an issue retrieving the items.
    */
-  async findAll(query: ItemPaginationDto): Promise<[ManyItem[], number]> {
+  async findAll(query: ItemPaginationDto) {
     const filter = this.applyFilter(query);
     const items = await this.itemRepo.findAndCountAll(filter);
 
-    const itemList = [];
-
-    items.rows.forEach((item) => {
-      item.batches.forEach((batch) => {
-        delete item.dataValues.batches;
-        const itemData = item.toJSON() as ManyItem;
-        itemData.batch = batch;
-        itemList.push(itemData);
-      });
-    });
+    // const itemList = [];
+    //
+    // items.rows.forEach((item) => {
+    //   item.batches.forEach((batch) => {
+    //     delete item.dataValues.batches;
+    //     const itemData = item.toJSON() as ManyItem;
+    //     itemData.batch = batch;
+    //     itemList.push(itemData);
+    //   });
+    // });
 
     this.logger.log(`Retrieved ${items.count} items`);
-    return [itemList, items.count];
+    return new PaginatedDataResponseDto(
+      items.rows,
+      query.page || 1,
+      query.pageSize || 10,
+      items.count,
+    );
   }
 
   /**
@@ -181,11 +187,23 @@ export class ItemService {
       ],
     };
     return {
+      attributes: ['name'],
       where: whereOptions,
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
       order: query.orderBy && [[query.orderBy, 'ASC']],
-      include: [Batch],
+      include: [
+        {
+          model: Batch,
+          attributes: [],
+          include: [
+            {
+              model: Supplier,
+              attributes: [],
+            },
+          ],
+        },
+      ],
       distinct: true,
     };
   }
