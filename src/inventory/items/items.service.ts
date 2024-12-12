@@ -12,11 +12,12 @@ import { BatchService } from './batch.service';
 import {
   CreateItemDto,
   ItemPaginationDto,
-  ManyItem,
   OneItem,
   UpdateItemDto,
 } from './dto';
 import { Batch, Item, ItemStatus } from './models';
+import { ItemCategory } from '../items-category/models/items-category.model';
+import { Supplier } from '../suppliers/models/supplier.model';
 
 @Injectable()
 export class ItemService {
@@ -71,22 +72,25 @@ export class ItemService {
    * @returns A promise that resolves to an array of OneItem and the total count of items.
    * @throws Throws an error if there was an issue retrieving the items.
    */
-  async findAll(query: ItemPaginationDto): Promise<[ManyItem[], number]> {
+  async findAll(query: ItemPaginationDto): Promise<[object[], number]> {
     const filter = this.applyFilter(query);
     const items = await this.itemRepo.findAndCountAll(filter);
 
-    const itemList = [];
+    const itemList = items.rows.map((item) => {
+      const modItem: Item = item.get({ plain: true });
 
-    items.rows.forEach((item) => {
-      item.batches.forEach((batch) => {
-        delete item.dataValues.batches;
-        const itemData = item.toJSON() as ManyItem;
-        itemData.batch = batch;
-        itemList.push(itemData);
-      });
+      const totalStock = modItem.batches.reduce(
+        (total, batch) => total + batch.quantity,
+        0,
+      );
+      const suppliers = modItem.batches.map((batch) => batch.supplier);
+      // const supplier =
+      delete modItem.batches;
+      return { ...modItem, suppliers, totalStock };
     });
 
     this.logger.log(`Retrieved ${items.count} items`);
+    // this.logger.log(itemList);
     return [itemList, items.count];
   }
 
@@ -184,8 +188,24 @@ export class ItemService {
       where: whereOptions,
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy && [[query.orderBy, 'ASC']],
-      include: [Batch],
+      order: query.orderBy
+        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
+        : [['updatedAt', 'DESC']],
+      attributes: [
+        'id',
+        'name',
+        'status',
+        'reorderPoint',
+        'createdAt',
+        'updatedAt',
+      ],
+      include: [
+        {
+          model: Batch,
+          include: [{ model: Supplier, attributes: ['id', 'name'] }],
+        },
+        { model: ItemCategory, attributes: ['id', 'name'] },
+      ],
       distinct: true,
     };
   }
