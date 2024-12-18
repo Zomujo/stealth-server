@@ -1,14 +1,15 @@
 import {
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FindAndCountOptions, Op, Sequelize, WhereOptions } from 'sequelize';
+import { FindOptions, Op, Sequelize, WhereOptions } from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { User } from '../../auth/models/user.model';
+import { ItemCategory } from '../items-category/models/items-category.model';
+import { Supplier } from '../suppliers/models/supplier.model';
 import { BatchService } from './batch.service';
 import {
   CreateItemDto,
@@ -17,8 +18,6 @@ import {
   UpdateItemDto,
 } from './dto';
 import { Batch, Item, ItemStatus } from './models';
-import { ItemCategory } from '../items-category/models/items-category.model';
-import { Supplier } from '../suppliers/models/supplier.model';
 
 @Injectable()
 export class ItemService {
@@ -39,31 +38,14 @@ export class ItemService {
    * @throws If any error occurs during the creation process.
    */
   async create(createItemDto: CreateItemDto): Promise<OneItem> {
-    try {
-      const createdItem = await this.itemRepo.create({
-        ...createItemDto,
-        status: ItemStatus.STOCKED,
-      });
+    const createdItem = await this.itemRepo.create({
+      ...createItemDto,
+      status: ItemStatus.OUT_OF_STOCK,
+    });
 
-      const batch = await this.batchService.create({
-        ...createItemDto,
-        itemId: createdItem.id,
-      });
-      const oneItem = createdItem.toJSON() as OneItem;
-      oneItem.batches = [batch];
-      this.logger.log(`Item added successfully. id: ${createdItem.id}`);
-      return oneItem;
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        const id = JSON.parse(error.message).id;
-        this.logger.log(`Item already existed. ID: ${id}`);
-        await this.batchService.create({
-          ...createItemDto,
-          itemId: id,
-        });
-        return await this.findOne(id);
-      }
-    }
+    const oneItem = createdItem.toJSON() as OneItem;
+    this.logger.log(`Item added successfully. id: ${createdItem.id}`);
+    return oneItem;
   }
 
   /**
@@ -180,76 +162,29 @@ export class ItemService {
    * @throws {NotFoundException} If the item with the given ID is not found.
    */
   async remove(id: string): Promise<void> {
-    try {
-      const res = await this.itemRepo.destroy({ where: { id: id } });
-      if (res == 0) {
-        throw new NotFoundException(`item with id ${id} not found`);
-      }
-      this.logger.log(`Deleted Item with id: ${id}`);
-      return;
-    } catch (error) {
-      throw error;
+    const res = await this.itemRepo.destroy({ where: { id: id } });
+    if (res == 0) {
+      throw new NotFoundException(`item with id ${id} not found`);
     }
+    this.logger.log(`Deleted Item with id: ${id}`);
   }
 
   async getAnalytics() {
     return new NotImplementedException(`Retrieving analytics not implemented`);
   }
 
-  /**
-   * Applies the filter options to construct the FindAndCountOptions object for querying items.
-   *
-   * @param query - The ItemPaginationDto object containing the filter options.
-   * @returns The FindAndCountOptions object with the applied filter options.
-   */
-  private applyFilter(query: ItemPaginationDto): FindAndCountOptions<Item> {
-    const whereOptions: WhereOptions<Item> = {
-      [Op.and]: [
-        query.facilityId && { facilityId: query.facilityId },
-        query.departmentId && { departmentId: query.departmentId },
-        query.search && {
-          [Op.or]: [
-            { name: { [Op.iLike]: `%${query.search}%` } },
-            { brandName: { [Op.iLike]: `%${query.search}` } },
-          ],
-        },
-        query.categories && {
-          category: {
-            name: { [Op.in]: query.categories },
-          },
-        },
-        query.supplierId && {
-          batches: {
-            supplierId: query.supplierId,
-          },
-        },
-      ],
-    };
-    return {
-      where: whereOptions,
-      limit: query.pageSize || 10,
-      offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy
-        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
-        : [['updatedAt', 'DESC']],
+  async getItemCount() {
+    const options: FindOptions<Item> = {
       attributes: [
-        'id',
-        'name',
+        [Sequelize.fn('COUNT', 'Item'), 'totalItem'],
+        [Sequelize.col('batches.quantity'), 'quantity'],
         'status',
-        'reorderPoint',
-        'createdAt',
-        'updatedAt',
-        [Sequelize.col('category.name'), 'categoryName'],
-        [Sequelize.col('category.id'), 'categoryId'],
       ],
-      include: [
-        // {
-        //   model: Batch,
-        //   include: [{ model: Supplier, attributes: ['id', 'name'] }],
-        // },
-        { model: ItemCategory, attributes: [] },
-      ],
-      distinct: true,
+      include: [{ model: Batch, attributes: [] }],
+      group: ['status', 'batches.quantity', 'Item.id'],
     };
+    const res = await this.itemRepo.findAll(options);
+
+    return res;
   }
 }
