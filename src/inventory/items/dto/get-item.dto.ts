@@ -2,11 +2,12 @@ import {
   IntersectionType,
   ApiPropertyOptional,
   ApiProperty,
+  ApiResponseProperty,
 } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { Item, Batch, ItemStatus } from '../models';
+import { Batch, Item, ItemStatus } from '../models';
 
 export class ItemPaginationDto extends IntersectionType(PaginationRequestDto) {
   @IsUUID()
@@ -72,8 +73,17 @@ export class ItemAnalytics {
 }
 
 export class OneItem extends IntersectionType(Item, GenericResponseDto) {
-  @ApiProperty({ description: 'The batches of the item', type: () => Batch })
-  batches: Batch[];
+  @ApiResponseProperty({
+    example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
+  })
+  createdBy: string;
+}
+
+export class OneBatch extends IntersectionType(Batch, GenericResponseDto) {
+  @ApiResponseProperty({
+    example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
+  })
+  createdBy: string;
 }
 
 export class ManyItem {

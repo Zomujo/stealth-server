@@ -7,8 +7,8 @@ import { InventoryModule } from '../../inventory/inventory.module';
 import { NotificationModule } from '../../notification/notification.module';
 import { ReportsModule } from '../../reports/reports.module';
 import { UserModule } from '../../user/user.module';
-import { OrdersModule } from 'src/reports/orders/orders.module';
 import { SalesModule } from 'src/sales/sales.module';
+import { OrdersModule } from '../../orders/orders.module';
 
 export const IndexModules = [
   NotificationModule,

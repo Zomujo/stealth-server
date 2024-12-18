@@ -15,23 +15,11 @@ export class ItemOrdersService {
 
   // Create a new item order
   public async createItemOrder(dto: CreateItemOrderDto): Promise<ItemOrder> {
-    // Convert DTO to a plain object to match the Sequelize model format
-    const orderData: any = {
-      itemName: dto.itemName,
-      orderNumber: generateOrderNumber(),
-      supplier: dto.supplier,
-      date: dto.dateCreated,
-      quantity: dto.quantity,
-      status: dto.status,
-    };
-
-    // Include optional fields only if they are defined
-    if (dto.expectedDeliveryDate) {
-      orderData.expectedDeliveryDate = dto.expectedDeliveryDate;
+    if (!dto.orderNumber) {
+      dto.orderNumber = generateOrderNumber();
     }
 
-    // Use the plain object to create a new order
-    return this.itemOrderModel.create(orderData);
+    return this.itemOrderModel.create({ ...dto });
   }
 
   // Fetch multiple item orders with optional filters

@@ -28,12 +28,13 @@ import {
   ItemAnalytics,
   ItemPaginationDto,
   ManyItem,
+  OneBatch,
   OneItem,
   UpdateBatchDto,
   UpdateItemDto,
 } from './dto';
 import { ItemService } from './items.service';
-import { Batch } from './models';
+
 import { BatchService } from './batch.service';
 
 @ApiTags('Items')
@@ -70,7 +71,7 @@ export class ItemController {
   }
 
   @CustomApiResponse(['created', 'authorize'], {
-    type: Batch,
+    type: OneBatch,
     message: 'Batch created successfully',
   })
   @Permission(Features.ITEMS, PermissionLevel.READ_WRITE)

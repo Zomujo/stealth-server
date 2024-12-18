@@ -32,8 +32,8 @@ export class ItemOrdersController {
   constructor(private readonly orderService: ItemOrdersService) {}
 
   @ApiOperation({ summary: 'Create a new item order' })
-  @CustomApiResponse(['authorize', 'success'], {
-    type: ItemOrder,
+  @CustomApiResponse(['authorize', 'created'], {
+    type: CreateItemOrderDto,
     message: 'Item order created successfully',
   })
   @Permission(Features.DRUG_ORDERS, PermissionLevel.READ_WRITE)

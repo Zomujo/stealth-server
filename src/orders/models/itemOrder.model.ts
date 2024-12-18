@@ -1,34 +1,57 @@
 import { BaseModel } from 'src/shared/models/base.model';
-import { Table, Column, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  ForeignKey,
+  BelongsTo,
+  AllowNull,
+} from 'sequelize-typescript';
 import { OrderStatus } from 'src/shared/enums/itemOrder.enum';
+import { Item } from '../../inventory/items/models';
+import { Supplier } from '../../inventory/suppliers/models/supplier.model';
 @Table({
   tableName: 'item_orders',
   underscored: true,
-  paranoid: true,
 })
 export class ItemOrder extends BaseModel {
-  @Column({ type: DataType.STRING, field: 'item_name' })
-  itemName: string;
+  @ForeignKey(() => Item)
+  @Column
+  itemId: string;
 
-  @Column({ unique: true, field: 'order_number' })
+  @BelongsTo(() => Item)
+  item: Item;
+
+  @Column({ unique: true })
   orderNumber: string;
 
-  @Column({ type: DataType.STRING })
-  supplier: string;
+  @ForeignKey(() => Supplier)
+  @Column
+  supplierId: string;
 
-  @Column({ type: DataType.DATE })
-  date: Date;
+  @BelongsTo(() => Supplier)
+  supplier: Supplier;
 
-  @Column({ type: DataType.STRING })
-  quantity: string;
+  @Column
+  quantity: number;
 
   @Column({
-    type: DataType.DATE,
     allowNull: true,
-    field: 'expected_delivery_date',
   })
   expectedDeliveryDate: Date;
 
-  @Column({ type: DataType.STRING, defaultValue: OrderStatus.DRAFT })
+  @Column
+  paymentMethod: string;
+
+  @Column
+  deliveryMethod: string;
+
+  @Column
+  deliveryAddress: string;
+
+  @AllowNull
+  @Column
+  additionalNotes: string;
+
+  @Column({ defaultValue: OrderStatus.DRAFT })
   status: OrderStatus;
 }

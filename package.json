@@ -14,7 +14,7 @@
     "db:seed:reset": "yarn migrate:undo:all && yarn migrate:up && yarn seed:all",
     "migrate:gen": "yarn sequelize-cli migration:generate --name ",
     "migrate:up": "yarn sequelize-cli db:migrate",
-    "migrate:undo": "yarn sequelize-cli db:migrate:undo",
+    "migrate:undo": "yarn sequelize-cli db:migrate:undo --name ",
     "migrate:undo:all": "yarn sequelize-cli db:migrate:undo:all",
     "seed:gen": "yarn sequelize-cli seed:generate --name ",
     "seed:all": "yarn sequelize-cli db:seed:all",

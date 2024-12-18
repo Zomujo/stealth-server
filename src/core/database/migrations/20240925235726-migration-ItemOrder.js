@@ -7,16 +7,15 @@ const baseModelColumns = require('../migration-base.js');
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('item_orders', {
-      id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+      ...baseModelColumns,
+      itemId: {
+        references: {
+          model: 'items',
+          key: 'id',
+        },
+        type: Sequelize.UUID,
         allowNull: false,
-      },
-      itemName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        field: 'item_name',
+        field: 'item_id',
       },
       orderNumber: {
         type: Sequelize.STRING,
@@ -24,29 +23,49 @@ module.exports = {
         unique: true,
         field: 'order_number',
       },
-      supplier: {
-        type: Sequelize.STRING,
+      supplierId: {
+        references: {
+          model: 'suppliers',
+          key: 'id',
+        },
+        type: Sequelize.UUID,
         allowNull: false,
-      },
-      date: {
-        type: Sequelize.DATE,
-        allowNull: false,
+        field: 'supplier_id',
       },
       quantity: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       expectedDeliveryDate: {
         type: Sequelize.DATE,
         allowNull: true,
-        field: 'expected_delivery_name',
+        field: 'expected_delivery_date',
+      },
+      paymentMethod: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        field: 'payment_method',
+      },
+      deliveryMethod: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        field: 'delivery_method',
+      },
+      deliveryAddress: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        field: 'delivery_address',
+      },
+      additionalNotes: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        field: 'additional_notes',
       },
       status: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: 'draft', // Default value set to 'draft'
+        defaultValue: 'draft',
       },
-      ...baseModelColumns,
     });
   },
 
