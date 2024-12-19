@@ -18,6 +18,7 @@
     "migrate:undo:all": "yarn sequelize-cli db:migrate:undo:all",
     "seed:gen": "yarn sequelize-cli seed:generate --name ",
     "seed:all": "yarn sequelize-cli db:seed:all",
+    "seed": "yarn sequelize-cli db:seed --seed ",
     "seed:undo:all": "yarn sequelize-cli db:seed:undo:all",
     "start": "nest start",
     "start:dev": "nest start --watch",

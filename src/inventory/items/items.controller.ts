@@ -136,6 +136,26 @@ export class ItemController {
   }
 
   @CustomApiResponse(['success', 'authorize'], {
+    type: ManyItem,
+    isArray: true,
+    message: 'Items retrieved successfully',
+  })
+  @Permission(Features.ITEMS, PermissionLevel.READ)
+  @Get('no-paginate')
+  async findAllNoPaginate() {
+    try {
+      const items = await this.itemsService.findWithNoPaginate();
+      return new ApiSuccessResponseDto(
+        items,
+        HttpStatus.OK,
+        'Items retrieved successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['success', 'authorize'], {
     type: ItemAnalytics,
     message: 'Item analytics retrieved successfully',
   })

@@ -1,4 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  ApiResponseProperty,
+} from '@nestjs/swagger';
 import { OrderStatus } from '../../shared/enums/itemOrder.enum';
 import {
   IsEnum,
@@ -35,8 +39,7 @@ export class CreateItemOrderDto extends GenericResponseDto {
   @IsUUID(4)
   supplierId: string;
 
-  @ApiPropertyOptional({
-    description: 'The order number',
+  @ApiResponseProperty({
     example: '4456677383',
   })
   @IsOptional()

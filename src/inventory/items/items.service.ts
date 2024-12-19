@@ -49,6 +49,43 @@ export class ItemService {
   }
 
   /**
+   * Retrieves all items with no pagination
+   *
+   * @returns A promise that resolves to an array of OneItem and the total count of items.
+   * @throws Throws an error if there was an issue retrieving the items.
+   */
+  async findWithNoPaginate() {
+    const batches = await this.batchService.findBySpecs({
+      where: {},
+      attributes: [
+        'batchNumber',
+        'quantity',
+        'itemId',
+        'validity',
+        'supplierId',
+        [Sequelize.col('item.name'), 'name'],
+        [Sequelize.col('item.brand_name'), 'brandName'],
+        [Sequelize.col('item.status'), 'status'],
+        [Sequelize.col('item.reorder_point'), 'reorderPoint'],
+        [Sequelize.col('item.created_at'), 'createdAt'],
+        [Sequelize.col('supplier.name'), 'supplierName'],
+        [Sequelize.col('item.category.name'), 'category'],
+        [Sequelize.col('item.category.id'), 'categoryId'],
+      ],
+      include: [
+        { model: Supplier, attributes: [] },
+        {
+          model: Item,
+
+          attributes: [],
+          include: [{ model: ItemCategory, attributes: [] }],
+        },
+      ],
+    });
+    return batches.rows;
+  }
+
+  /**
    * Retrieves all items based on the provided query parameters.
    *
    * @param query - The query parameters for filtering items.
