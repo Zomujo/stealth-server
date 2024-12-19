@@ -114,3 +114,63 @@ export class ManyItem {
   @ApiProperty()
   createdAt: Date;
 }
+class CategoryDto {
+  @ApiResponseProperty({
+    example: '52159509-1aee-4d47-8475-47906250423a',
+  })
+  id: string;
+
+  @ApiResponseProperty({
+    example: 'Analgesics',
+  })
+  name: string;
+}
+
+class SupplierDto {
+  @ApiResponseProperty({
+    example: '6bc6b563-b136-4e5e-ad7c-3624e0bb3986',
+  })
+  id: string;
+
+  @ApiResponseProperty({
+    example: 'Supplier B',
+  })
+  name: string;
+}
+
+export class GetItemsResponseDto extends GenericResponseDto {
+  @ApiResponseProperty({
+    example: 'Analgesics Item 2',
+  })
+  name: string;
+
+  @ApiResponseProperty({
+    example: 'STOCKED',
+  })
+  status: string;
+
+  @ApiResponseProperty({
+    example: 87,
+  })
+  reorderPoint: number;
+
+  @ApiResponseProperty({
+    type: CategoryDto,
+  })
+  category: CategoryDto;
+
+  @ApiResponseProperty({
+    type: SupplierDto,
+  })
+  supplier: SupplierDto;
+
+  @ApiResponseProperty({
+    example: 2,
+  })
+  supplierRemainder: number;
+
+  @ApiResponseProperty({
+    example: 1497,
+  })
+  totalStock: number;
+}

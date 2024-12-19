@@ -5,7 +5,13 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FindOptions, Op, Sequelize, WhereOptions } from 'sequelize';
+import {
+  FindAndCountOptions,
+  FindOptions,
+  Op,
+  Sequelize,
+  WhereOptions,
+} from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
@@ -72,65 +78,96 @@ export class ItemService {
    * @throws Throws an error if there was an issue retrieving the items.
    */
   async findAll(query: ItemPaginationDto) {
-    // const filter = this.applyFilter(query);
-    const whereOptions: WhereOptions<Item> = {
-      [Op.and]: [
-        query.facilityId && { facilityId: query.facilityId },
-        query.departmentId && { departmentId: query.departmentId },
-        query.search && {
-          [Op.or]: [
-            { name: { [Op.iLike]: `%${query.search}%` } },
-            { brandName: { [Op.iLike]: `%${query.search}` } },
-          ],
-        },
-        query.categories && {
-          category: {
-            name: { [Op.in]: query.categories },
-          },
-        },
-      ],
-    };
-    // const items = await this.itemRepo.findAndCountAll(filter);
-    const batches = await this.batchService.findBySpecs({
-      where: {
-        [Op.and]: [query.supplierId && { supplierId: query.supplierId }],
-      },
-      attributes: [
-        'batchNumber',
-        'quantity',
-        'itemId',
-        'validity',
-        'supplierId',
-        [Sequelize.col('item.name'), 'name'],
-        [Sequelize.col('item.brand_name'), 'brandName'],
-        [Sequelize.col('item.status'), 'status'],
-        [Sequelize.col('item.reorder_point'), 'reorderPoint'],
-        [Sequelize.col('item.created_at'), 'createdAt'],
-        [Sequelize.col('supplier.name'), 'supplierName'],
-        [Sequelize.col('item.category.name'), 'category'],
-        [Sequelize.col('item.category.id'), 'categoryId'],
-      ],
-      include: [
-        { model: Supplier, attributes: [] },
-        {
-          model: Item,
-          where: whereOptions,
-          attributes: [],
-          include: [{ model: ItemCategory, attributes: [] }],
-        },
-      ],
-      limit: query.pageSize || 10,
-      offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy
-        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
-        : [['updatedAt', 'DESC']],
+    const filter = this.applyFilter(query);
+    const items = await this.itemRepo.findAndCountAll(filter);
+
+    const itemList = items.rows.map((item) => {
+      const modItem: Item = item.get({ plain: true });
+
+      const totalStock = modItem.batches.reduce(
+        (total, batch) => total + batch.quantity,
+        0,
+      );
+      const suppliers = modItem.batches.map((batch) => batch.supplier);
+      delete modItem.batches;
+      return {
+        ...modItem,
+        supplier: suppliers[0],
+        ...(suppliers.length > 1 && {
+          supplierRemainder: suppliers.length - 1,
+        }),
+        totalStock,
+      };
     });
+
+    this.logger.log(`Retrieved ${items.count} items`);
+
     return new PaginatedDataResponseDto(
-      batches.rows,
+      itemList,
       query.page || 1,
       query.pageSize || 10,
-      batches.count,
+      items.count,
     );
+
+    // return new PaginatedDataResponseDto(
+    //   batches.rows,
+    //   query.page || 1,
+    //   query.pageSize || 10,
+    //   batches.count,
+    // );
+
+    // const whereOptions: WhereOptions<Item> = {
+    //   [Op.and]: [
+    //     query.facilityId && { facilityId: query.facilityId },
+    //     query.departmentId && { departmentId: query.departmentId },
+    //     query.search && {
+    //       [Op.or]: [
+    //         { name: { [Op.iLike]: `%${query.search}%` } },
+    //         { brandName: { [Op.iLike]: `%${query.search}` } },
+    //       ],
+    //     },
+    //     query.categories && {
+    //       category: {
+    //         name: { [Op.in]: query.categories },
+    //       },
+    //     },
+    //   ],
+    // };
+
+    // const batches = await this.batchService.findBySpecs({
+    //   where: {
+    //     [Op.and]: [query.supplierId && { supplierId: query.supplierId }],
+    //   },
+    //   attributes: [
+    //     'batchNumber',
+    //     'quantity',
+    //     'itemId',
+    //     'validity',
+    //     'supplierId',
+    //     [Sequelize.col('item.name'), 'name'],
+    //     [Sequelize.col('item.brand_name'), 'brandName'],
+    //     [Sequelize.col('item.status'), 'status'],
+    //     [Sequelize.col('item.reorder_point'), 'reorderPoint'],
+    //     [Sequelize.col('item.created_at'), 'createdAt'],
+    //     [Sequelize.col('supplier.name'), 'supplierName'],
+    //     [Sequelize.col('item.category.name'), 'category'],
+    //     [Sequelize.col('item.category.id'), 'categoryId'],
+    //   ],
+    //   include: [
+    //     { model: Supplier, attributes: [] },
+    //     {
+    //       model: Item,
+    //       where: whereOptions,
+    //       attributes: [],
+    //       include: [{ model: ItemCategory, attributes: [] }],
+    //     },
+    //   ],
+    //   limit: query.pageSize || 10,
+    //   offset: query.pageSize * (query.page - 1) || 0,
+    //   order: query.orderBy
+    //     ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
+    //     : [['updatedAt', 'DESC']],
+    // });
   }
 
   /**
@@ -202,5 +239,60 @@ export class ItemService {
     const res = await this.itemRepo.findAll(options);
 
     return res;
+  }
+
+  /**
+   * Applies the filter options to construct the FindAndCountOptions object for querying items.
+   *
+   * @param query - The ItemPaginationDto object containing the filter options.
+   * @returns The FindAndCountOptions object with the applied filter options.
+   */
+  private applyFilter(query: ItemPaginationDto): FindAndCountOptions<Item> {
+    const whereOptions: WhereOptions<Item> = {
+      [Op.and]: [
+        query.facilityId && { facilityId: query.facilityId },
+        query.departmentId && { departmentId: query.departmentId },
+        query.search && {
+          [Op.or]: [
+            { name: { [Op.iLike]: `%${query.search}%` } },
+            { brandName: { [Op.iLike]: `%${query.search}` } },
+          ],
+        },
+        query.categories && {
+          category: {
+            name: { [Op.in]: query.categories },
+          },
+        },
+        query.supplierId && {
+          batches: {
+            supplierId: query.supplierId,
+          },
+        },
+      ],
+    };
+    return {
+      where: whereOptions,
+      limit: query.pageSize || 10,
+      offset: query.pageSize * (query.page - 1) || 0,
+      order: query.orderBy
+        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
+        : [['updatedAt', 'DESC']],
+      attributes: [
+        'id',
+        'name',
+        'status',
+        'reorderPoint',
+        'createdAt',
+        'updatedAt',
+      ],
+      include: [
+        {
+          model: Batch,
+          include: [{ model: Supplier, attributes: ['id', 'name'] }],
+        },
+        { model: ItemCategory, attributes: ['id', 'name'] },
+      ],
+      distinct: true,
+    };
   }
 }

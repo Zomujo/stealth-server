@@ -25,9 +25,9 @@ import {
   AdjustPriceDto,
   CreateBatchDto,
   CreateItemDto,
+  GetItemsResponseDto,
   ItemAnalytics,
   ItemPaginationDto,
-  ManyItem,
   OneBatch,
   OneItem,
   UpdateBatchDto,
@@ -112,7 +112,7 @@ export class ItemController {
   }
 
   @CustomApiResponse(['paginated', 'authorize'], {
-    type: ManyItem,
+    type: GetItemsResponseDto,
     isArray: true,
     message: 'Items retrieved successfully',
   })
