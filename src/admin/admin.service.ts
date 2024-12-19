@@ -36,7 +36,9 @@ export class AdminService {
       status: dto.status,
       facilityId,
     });
-    this.sendUserCreatedMail(user);
+    if (user.id) {
+      this.sendUserCreatedMail(user);
+    }
 
     const response = await this.userRepository.findByPk(user.id, {
       attributes: { exclude: ['password', 'accountActivated'] },

@@ -20,20 +20,17 @@ export function throwError(logger: Logger, error: any) {
   if (error instanceof UniqueConstraintError) {
     const err = error.errors[0];
     logger.warn(`${err.value} already exists`);
-    return new BadRequestException(
-      `${err.path}: ${err.message}, ${err.value} already exists`,
-      JSON.stringify(err),
-    );
+    throw new BadRequestException(`${err.value} already exists`);
   }
   if (error instanceof ForeignKeyConstraintError) {
-    return new BadRequestException((error.original as any).detail);
+    throw new BadRequestException((error.original as any).detail);
   }
   if (error instanceof HttpException) {
-    return error;
+    throw error;
   }
   logger.error(
     `An error occured: ${error.name} :: ${error.message}`,
     error.stack,
   );
-  return new InternalServerErrorException(error.message, error);
+  throw new InternalServerErrorException(error.message, error);
 }
