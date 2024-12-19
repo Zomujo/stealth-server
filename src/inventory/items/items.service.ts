@@ -55,34 +55,13 @@ export class ItemService {
    * @throws Throws an error if there was an issue retrieving the items.
    */
   async findWithNoPaginate() {
-    const batches = await this.batchService.findBySpecs({
-      where: {},
-      attributes: [
-        'batchNumber',
-        'quantity',
-        'itemId',
-        'validity',
-        'supplierId',
-        [Sequelize.col('item.name'), 'name'],
-        [Sequelize.col('item.brand_name'), 'brandName'],
-        [Sequelize.col('item.status'), 'status'],
-        [Sequelize.col('item.reorder_point'), 'reorderPoint'],
-        [Sequelize.col('item.created_at'), 'createdAt'],
-        [Sequelize.col('supplier.name'), 'supplierName'],
-        [Sequelize.col('item.category.name'), 'category'],
-        [Sequelize.col('item.category.id'), 'categoryId'],
-      ],
-      include: [
-        { model: Supplier, attributes: [] },
-        {
-          model: Item,
-
-          attributes: [],
-          include: [{ model: ItemCategory, attributes: [] }],
-        },
-      ],
+    const items = await this.itemRepo.findAndCountAll({
+      attributes: ['id', 'name'],
     });
-    return batches.rows;
+
+    this.logger.log(`Retrieved ${items.count} items`);
+    // this.logger.log(itemList);
+    return items.rows;
   }
 
   /**

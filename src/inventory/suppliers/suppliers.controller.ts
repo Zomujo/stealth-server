@@ -32,6 +32,7 @@ import { StatusType } from './models/supplier.model';
 import { Permission } from '../../auth/decorator';
 import { DeleteItemsDto } from '../../shared/docs/dto/delete.dto';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
+import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
 
 @ApiTags('Suppliers')
 @Controller('suppliers')
@@ -86,7 +87,7 @@ export class SuppliersController {
   }
 
   @CustomApiResponse(['success', 'authorize'], {
-    type: GetSuppliersResponse,
+    type: GetNoPaginateDto,
     isArray: true,
     message: 'Suppliers retrieved successfully',
   })
@@ -94,9 +95,9 @@ export class SuppliersController {
   @Get('no-paginate')
   async findAllNoPaginate() {
     try {
-      const suppliers = await this.suppliersService.findAll();
+      const suppliers = await this.suppliersService.findAllNoPaginate();
       return new ApiSuccessResponseDto(
-        suppliers[0],
+        suppliers,
         HttpStatus.OK,
         'Suppliers retrieved successfully',
       );

@@ -21,6 +21,17 @@ export class SuppliersService {
     return supplier;
   }
 
+  async findAllNoPaginate(): Promise<Supplier[]> {
+    const filter: FindAndCountOptions<Supplier> = {
+      attributes: ['id', 'name'],
+      distinct: true,
+    };
+    const suppliers = await this.supplierRepo.findAndCountAll(filter);
+
+    this.logger.log(`Retrieved ${suppliers.count} supplier(s)`);
+    return suppliers.rows;
+  }
+
   async findAll(query?: PaginationRequestDto): Promise<[Supplier[], number]> {
     // todo: refactor filter
     const paginateObject = query

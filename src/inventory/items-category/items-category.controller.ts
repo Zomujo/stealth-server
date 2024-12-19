@@ -28,6 +28,7 @@ import {
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
+import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
 
 @ApiTags('Item Category')
 @Controller('item-categories')
@@ -81,7 +82,7 @@ export class ItemCategoryController {
   }
 
   @CustomApiResponse(['success', 'authorize'], {
-    type: ItemCategoryResponse,
+    type: GetNoPaginateDto,
     isArray: true,
     message: 'Item categories retrieved successfully',
   })
@@ -89,9 +90,9 @@ export class ItemCategoryController {
   @Get('no-paginate')
   async findAllNoPaginate() {
     try {
-      const categories = await this.itemCategoryService.findAll();
+      const categories = await this.itemCategoryService.findAllNoPaginate();
       return new ApiSuccessResponseDto(
-        categories[0],
+        categories,
         HttpStatus.OK,
         'Item categories retrieved successfully',
       );

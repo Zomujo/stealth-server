@@ -36,6 +36,7 @@ import {
 import { ItemService } from './items.service';
 
 import { BatchService } from './batch.service';
+import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
 
 @ApiTags('Items')
 @Controller('items')
@@ -136,7 +137,7 @@ export class ItemController {
   }
 
   @CustomApiResponse(['success', 'authorize'], {
-    type: ManyItem,
+    type: GetNoPaginateDto,
     isArray: true,
     message: 'Items retrieved successfully',
   })

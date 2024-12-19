@@ -54,7 +54,9 @@ export class ItemCategory extends BaseModel {
   static async calculateItemCount(instance: ItemCategory[] | ItemCategory) {
     if (Array.isArray(instance)) {
       for (const category of instance) {
-        category.itemCount = category.items ? category.items.length : 0;
+        if (category.items) {
+          category.itemCount = category.items ? category.items.length : 0;
+        }
       }
     } else {
       instance.itemCount = instance.items ? instance.items.length : 0;

@@ -128,13 +128,15 @@ export class Supplier extends BaseModel {
     }
 
     suppliers.forEach((supplier: Supplier) => {
-      const totalItems = supplier.batches
-        ? supplier.batches.reduce((accumulator, batch) => {
-            return accumulator + (batch.quantity || 0);
-          }, 0)
-        : 0;
+      if (supplier.batches) {
+        const totalItems = supplier.batches
+          ? supplier.batches.reduce((accumulator, batch) => {
+              return accumulator + (batch.quantity || 0);
+            }, 0)
+          : 0;
 
-      supplier.totalItems = totalItems;
+        supplier.totalItems = totalItems;
+      }
 
       if (supplier.physicalAddress) {
         const addressList = supplier.physicalAddress.split(',');

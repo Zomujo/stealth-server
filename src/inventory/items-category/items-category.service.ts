@@ -83,6 +83,23 @@ export class ItemCategoryService {
   }
 
   /**
+   * Retrieves all items categories.
+   *
+   * @param limit - The maximum number of categories to retrieve.
+   * @returns A promise that resolves to an array of itemsCategoryResponse objects.
+   * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
+   */
+  async findAllNoPaginate(): Promise<ItemCategory[]> {
+    const filter: FindAndCountOptions<ItemCategory> = {
+      attributes: ['id', 'name'],
+    };
+    const categories = await this.itemCategoryRepo.findAndCountAll(filter);
+    this.logger.log(`Retrieved ${categories.count} items categories`);
+
+    return categories.rows;
+  }
+
+  /**
    * Finds a items category by its ID.
    *
    * @param id - The ID of the items category to find.
