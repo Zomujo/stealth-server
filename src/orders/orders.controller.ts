@@ -12,21 +12,26 @@ import {
 } from '@nestjs/common';
 import {
   ApiSuccessResponseDto,
+  ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from '../utils/responses/success.response';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { UpdateItemOrderDto, CreateItemOrderDto, GetOrdersDto } from './dto';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import {
+  UpdateItemOrderDto,
+  CreateItemOrderDto,
+  GetOrdersDto,
+  GetItemOrdersResponseDto,
+  GetItemOrderResponseDto,
+} from './dto';
 import { ItemOrdersService } from './orders.service';
 import { ItemOrder } from './models/itemOrder.model';
-import { Authorize, Permission } from 'src/auth/decorator';
+import { Permission } from 'src/auth/decorator';
 import { CustomApiResponse } from 'src/shared/docs/decorators';
 import { throwError } from '../utils/responses/error.response';
 import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
 
 @ApiTags('Item Orders')
 @Controller('item-orders')
-@ApiBearerAuth('access-token')
-@Authorize()
 export class ItemOrdersController {
   private readonly logger = new Logger(ItemOrdersController.name);
   constructor(private readonly orderService: ItemOrdersService) {}
@@ -55,7 +60,7 @@ export class ItemOrdersController {
 
   @ApiOperation({ summary: 'Retrieve multiple item orders' })
   @CustomApiResponse(['paginated', 'authorize'], {
-    type: ItemOrder,
+    type: GetItemOrdersResponseDto,
     message: 'Multiple item orders retrieved successfully',
   })
   @Permission(Features.DRUG_ORDERS, PermissionLevel.READ)
@@ -77,7 +82,7 @@ export class ItemOrdersController {
 
   @ApiOperation({ summary: 'Get a specific item order by ID' })
   @CustomApiResponse(['success', 'notfound', 'authorize'], {
-    type: ItemOrder,
+    type: GetItemOrderResponseDto,
     message: 'Item order retrieved successfully',
   })
   @Permission(Features.DRUG_ORDERS, PermissionLevel.READ)
@@ -99,7 +104,7 @@ export class ItemOrdersController {
   }
 
   @ApiOperation({ summary: 'Update a item order by ID' })
-  @CustomApiResponse(['success', 'notfound', 'authorize'], {
+  @CustomApiResponse(['successNull', 'notfound', 'authorize'], {
     type: ItemOrder,
     message: 'Item order updated successfully',
   })
@@ -110,10 +115,9 @@ export class ItemOrdersController {
     @Body() dto: UpdateItemOrderDto,
   ): Promise<ApiSuccessResponseDto<ItemOrder>> {
     try {
-      const result = await this.orderService.updateItemOrder(id, dto);
-      return new ApiSuccessResponseDto<ItemOrder>(
-        result,
-        HttpStatus.ACCEPTED,
+      const _result = await this.orderService.updateItemOrder(id, dto);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
         'Item order updated successfully',
       );
     } catch (error) {
@@ -122,7 +126,7 @@ export class ItemOrdersController {
   }
 
   @ApiOperation({ summary: 'Delete a item order by ID' })
-  @CustomApiResponse(['success', 'notfound', 'authorize'], {
+  @CustomApiResponse(['successNull', 'notfound', 'authorize'], {
     type: ItemOrder,
     message: 'Multiple item orders retrieved successfully',
   })

@@ -2,9 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateItemOrderDto, GetOrdersDto, UpdateItemOrderDto } from './dto';
 import { ItemOrder } from './models/itemOrder.model';
-import { Op } from 'sequelize'; // Sequelize operators for filtering
+import { FindAndCountOptions, literal } from 'sequelize'; // Sequelize operators for filtering
 import { generateOrderNumber } from 'src/orders/utils/orders.utils';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
+import { Supplier } from '../inventory/suppliers/models/supplier.model';
+import { Item } from '../inventory/items/models';
 
 @Injectable()
 export class ItemOrdersService {
@@ -14,7 +16,7 @@ export class ItemOrdersService {
   ) {}
 
   // Create a new item order
-  public async createItemOrder(dto: CreateItemOrderDto): Promise<ItemOrder> {
+  async createItemOrder(dto: CreateItemOrderDto): Promise<ItemOrder> {
     if (!dto.orderNumber) {
       dto.orderNumber = generateOrderNumber();
     }
@@ -23,46 +25,61 @@ export class ItemOrdersService {
   }
 
   // Fetch multiple item orders with optional filters
-  public async findItemOrders(
+  async findItemOrders(
     dto: GetOrdersDto,
   ): Promise<PaginatedDataResponseDto<ItemOrder[]>> {
     const {
       page = 1,
       pageSize = 10,
-      orderBy = 'createdAt',
+      orderBy,
       orderDirection = 'DESC',
       status,
-      supplier,
-      itemName,
+      supplierId,
+      itemId,
     } = dto;
 
     // Define query options
-    const queryOptions: any = {
-      where: {},
+    const queryOptions: FindAndCountOptions<ItemOrder> = {
+      where: {
+        ...(status && { status }),
+        ...(supplierId && { supplierId }),
+        ...(itemId && { itemId }),
+      },
       distinct: true,
-      order: [[orderBy, orderDirection.toUpperCase()]],
+      order: [
+        !orderBy
+          ? [
+              literal(`
+              CASE 
+                WHEN "ItemOrder"."status" = 'draft' THEN 1
+                WHEN "ItemOrder"."status" = 'requested' THEN 2
+                WHEN "ItemOrder"."status" = 'delivering' THEN 3
+                WHEN "ItemOrder"."status" = 'received' THEN 4
+                WHEN "ItemOrder"."status" = 'cancelled' THEN 5
+              END
+            `),
+              'ASC',
+            ]
+          : [
+              orderBy && orderBy,
+              orderDirection && orderDirection.toUpperCase(),
+            ],
+      ],
       limit: pageSize,
       offset: (page - 1) * pageSize,
+      attributes: [
+        'id',
+        'orderNumber',
+        ['updated_at', 'date'],
+        'quantity',
+        'expectedDeliveryDate',
+        'status',
+      ],
+      include: [
+        { model: Supplier, attributes: ['id', 'name'] },
+        { model: Item, attributes: ['id', 'name'] },
+      ],
     };
-
-    // Apply status filter if provided
-    if (status) {
-      queryOptions.where.status = status;
-    }
-
-    // Apply supplier filter if provided
-    if (supplier) {
-      queryOptions.where.supplier = {
-        [Op.like]: `%${supplier}%`,
-      };
-    }
-
-    // Apply item name filter if provided
-    if (itemName) {
-      queryOptions.where.itemName = {
-        [Op.like]: `%${itemName}%`,
-      };
-    }
 
     const orders = await this.itemOrderModel.findAndCountAll(queryOptions);
     return new PaginatedDataResponseDto(
@@ -74,9 +91,13 @@ export class ItemOrdersService {
   }
 
   // Fetch a specific item order by ID
-  public async findItemOrder(id: string): Promise<ItemOrder> {
+  async findItemOrder(id: string): Promise<ItemOrder> {
     const res = await this.itemOrderModel.findOne({
       where: { id },
+      include: [
+        { model: Supplier, attributes: ['id', 'name'] },
+        { model: Item, attributes: ['id', 'name'] },
+      ],
     });
 
     if (!res) {
@@ -86,7 +107,7 @@ export class ItemOrdersService {
   }
 
   // Update a specific item order by ID
-  public async updateItemOrder(
+  async updateItemOrder(
     id: string,
     dto: UpdateItemOrderDto,
   ): Promise<ItemOrder> {
@@ -94,11 +115,12 @@ export class ItemOrdersService {
     if (!itemOrder) {
       throw new NotFoundException('User not found');
     }
-    return itemOrder.update(dto);
+    await itemOrder.update(dto);
+    return;
   }
 
   // Delete a specific item order by ID
-  public async deleteItemOrder(id: string) {
+  async deleteItemOrder(id: string) {
     const rows = await this.itemOrderModel.destroy({ where: { id } });
     if (rows == 0) {
       throw new NotFoundException('User not found');
