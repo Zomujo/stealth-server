@@ -22,12 +22,9 @@ export class GetDepartmentRequestDto extends GenericResponseDto {
   @IsNotEmpty()
   itemId: string;
 
-  @ApiProperty({
+  @ApiResponseProperty({
     example: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-    description: 'The Id of the selected department',
   })
-  @IsUUID(4)
-  @IsNotEmpty()
   departmentId: string;
 
   @ApiProperty({
