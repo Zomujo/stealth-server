@@ -13,6 +13,7 @@ import { AdminModels } from './models';
     DepartmentModule,
     FacilityModule,
     SequelizeModule.forFeature([User, ...AdminModels]),
+    FacilityModule,
   ],
   controllers: [AdminController],
   providers: [AdminService, DepartmentService],

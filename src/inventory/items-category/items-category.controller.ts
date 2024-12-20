@@ -20,7 +20,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { Permission } from 'src/auth/decorator';
+import { GetUser, Permission } from 'src/auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
@@ -63,9 +63,15 @@ export class ItemCategoryController {
   })
   @Permission(Features.ITEMS_CATEGORIES, PermissionLevel.READ)
   @Get()
-  async findAll(@Query() query?: PaginationRequestDto) {
+  async findAll(
+    @GetUser('facility') facilityId: string,
+    @Query() query?: PaginationRequestDto,
+  ) {
     try {
-      const categories = await this.itemCategoryService.findAll(query);
+      const categories = await this.itemCategoryService.findAll(
+        facilityId,
+        query,
+      );
       return new ApiSuccessResponseDto(
         new PaginatedDataResponseDto(
           categories[0],
@@ -88,9 +94,10 @@ export class ItemCategoryController {
   })
   @Permission(Features.ITEMS_CATEGORIES, PermissionLevel.READ)
   @Get('no-paginate')
-  async findAllNoPaginate() {
+  async findAllNoPaginate(@GetUser('facility') facilityId: string) {
     try {
-      const categories = await this.itemCategoryService.findAllNoPaginate();
+      const categories =
+        await this.itemCategoryService.findAllNoPaginate(facilityId);
       return new ApiSuccessResponseDto(
         categories,
         HttpStatus.OK,

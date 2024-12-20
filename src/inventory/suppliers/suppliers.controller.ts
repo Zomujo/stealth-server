@@ -29,7 +29,7 @@ import {
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import { StatusType } from './models/supplier.model';
-import { Permission } from '../../auth/decorator';
+import { GetUser, Permission } from '../../auth/decorator';
 import { DeleteItemsDto } from '../../shared/docs/dto/delete.dto';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
@@ -68,9 +68,12 @@ export class SuppliersController {
   })
   @Permission(Features.SUPPLIERS, PermissionLevel.READ)
   @Get()
-  async findAll(@Query() query: PaginationRequestDto) {
+  async findAll(
+    @GetUser('facility') facilityId: string,
+    @Query() query: PaginationRequestDto,
+  ) {
     try {
-      const suppliers = await this.suppliersService.findAll(query);
+      const suppliers = await this.suppliersService.findAll(facilityId, query);
       return new ApiSuccessResponseDto(
         new PaginatedDataResponseDto(
           suppliers[0],
@@ -93,9 +96,10 @@ export class SuppliersController {
   })
   @Permission(Features.SUPPLIERS, PermissionLevel.READ)
   @Get('no-paginate')
-  async findAllNoPaginate() {
+  async findAllNoPaginate(@GetUser('facility') facilityId: string) {
     try {
-      const suppliers = await this.suppliersService.findAllNoPaginate();
+      const suppliers =
+        await this.suppliersService.findAllNoPaginate(facilityId);
       return new ApiSuccessResponseDto(
         suppliers,
         HttpStatus.OK,

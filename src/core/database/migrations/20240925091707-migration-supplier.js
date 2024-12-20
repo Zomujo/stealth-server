@@ -127,6 +127,17 @@ module.exports = {
         type: Sequelize.ENUM('Active', 'Deactivated'),
         defaultValue: 'Active',
       },
+      facilityId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        field: 'facility_id',
+        references: {
+          model: 'facilities',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
     });
   },
 

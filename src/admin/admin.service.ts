@@ -14,6 +14,7 @@ import { Department } from './department/models/department.model';
 import { CreateUserDto } from '../user/dto';
 import * as roles from './data/roles.json';
 import * as bcrypt from 'bcrypt';
+import { FacilityService } from './facility/facility.service';
 
 @Injectable()
 export class AdminService {
@@ -23,13 +24,18 @@ export class AdminService {
     private configService: ConfigService,
     private readonly mailService: MailService,
     @InjectModel(User) private userRepository: typeof User,
+    private readonly facilityService: FacilityService,
   ) {
     this.logger = new Logger(AdminService.name);
   }
 
   async createPersonnel(dto: CreateUserDto, facilityId: string) {
     dto.status = 'Pending';
-    const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
+    const facility = await this.facilityService.findOne(facilityId);
+    const hashPassword = await bcrypt.hash(
+      facility.password,
+      this.SALT_OR_ROUNDS,
+    );
     const user = await this.userRepository.create({
       ...dto,
       password: hashPassword,

@@ -1,13 +1,16 @@
 import {
   AfterFind,
   AllowNull,
+  BelongsTo,
   Column,
   DataType,
+  ForeignKey,
   HasMany,
   Table,
 } from 'sequelize-typescript';
 import { Batch } from 'src/inventory/items/models';
 import { BaseModel } from 'src/shared/models/base.model';
+import { Facility } from '../../../admin/facility/models/facility.model';
 
 export enum StatusType {
   ACTIVE = 'Active',
@@ -108,6 +111,13 @@ export class Supplier extends BaseModel {
     defaultValue: StatusType.ACTIVE,
   })
   status: StatusType;
+
+  @ForeignKey(() => Facility)
+  @Column
+  facilityId: string;
+
+  @BelongsTo(() => Facility)
+  facility: Facility;
 
   @Column({ type: DataType.VIRTUAL })
   totalItems: number;

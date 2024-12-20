@@ -37,16 +37,13 @@ export class FacilityController {
   }
 
   @Post()
-  @CustomApiResponse(['success', 'authorize'], {
+  @CustomApiResponse(['created'], {
     type: FacilityResponse,
     message: 'Facility created successfully',
   })
-  async addFacility(
-    @Body() dto: CreateFacilityDto,
-    @GetUser('sub') adminId: string,
-  ) {
+  async addFacility(@Body() dto: CreateFacilityDto) {
     try {
-      const response = await this.facilityService.create(dto, adminId);
+      const response = await this.facilityService.create(dto);
       return new ApiSuccessResponseDto<Facility>(
         response,
         HttpStatus.CREATED,

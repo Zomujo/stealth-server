@@ -3,13 +3,14 @@ import {
   ApiResponseProperty,
   IntersectionType,
 } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, Matches } from 'class-validator';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
+import { CreateFacilityDto } from '../../admin/facility/dto';
 
-enum FacilityType {
-  HOSPITAL = 'hospital',
-  PHARMACY = 'pharmacy',
-}
+// enum FacilityType {
+//   HOSPITAL = 'hospital',
+//   PHARMACY = 'pharmacy',
+// }
 export class AdminSignUpDto extends IntersectionType(GenericResponseDto) {
   @ApiProperty({
     example: 'Jack Frost',
@@ -26,19 +27,26 @@ export class AdminSignUpDto extends IntersectionType(GenericResponseDto) {
   @IsEmail()
   email: string;
 
-  @ApiProperty({
-    example: 'hospital',
-    enum: FacilityType,
-    description:
-      'The kind of facility whether it will be hospital or local pharmacy',
-  })
-  @IsNotEmpty()
-  @IsEnum(FacilityType)
-  facilityType: string;
+  // @ApiProperty({
+  //   example: 'hospital',
+  //   enum: FacilityType,
+  //   description:
+  //     'The kind of facility whether it will be hospital or local pharmacy',
+  // })
+  // @IsNotEmpty()
+  // @IsEnum(FacilityType)
+  // facilityType: string;
 
   @ApiProperty({
-    example: 'XT(v2EiTqQZ',
-    description: 'The password for the user',
+    description: 'The name of the facility',
+    type: CreateFacilityDto,
+  })
+  @IsNotEmpty()
+  facility: CreateFacilityDto;
+
+  @ApiProperty({
+    example: 'rh.YEqFT1zyT!Qu',
+    description: 'The password for the new admin',
   })
   @IsNotEmpty()
   @Matches(
@@ -49,20 +57,6 @@ export class AdminSignUpDto extends IntersectionType(GenericResponseDto) {
     },
   )
   password: string;
-
-  @ApiProperty({
-    example: 'L5NRjcTUQFt8zt2',
-    description: 'The password for the facility',
-  })
-  @IsNotEmpty()
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,!@#$^&*()_-])[a-zA-Z\d.,!@#$^&*()_-]{8,32}$/gm,
-    {
-      message:
-        'Password must be between 8 and 32 characters long with at least 1 special character and an uppercase character',
-    },
-  )
-  facillityPassword: string;
 
   @ApiResponseProperty({
     example: 'Central Admin',
@@ -76,10 +70,16 @@ export class AdminSignUpDto extends IntersectionType(GenericResponseDto) {
 
   @ApiResponseProperty({
     example: [
-      'items:READ',
-      'item_categories:READ_WRITE',
+      'items:READ_WRITE_DELETE',
+      'item_categories:READ_WRITE_DELETE',
       'stock_adjustment:READ_WRITE_DELETE',
       'item_orders:READ_WRITE_DELETE',
+      'reports:READ_WRITE_DELETE',
+      'suppliers:READ_WRITE_DELETE',
+      'sales:READ_WRITE_DELETE',
+      'department_requests:READ_WRITE_DELETE',
+      'departments:READ_WRITE_DELETE',
+      'users:READ_WRITE_DELETE',
     ],
   })
   permissions: string[];

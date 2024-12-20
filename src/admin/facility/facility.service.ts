@@ -26,12 +26,14 @@ export class FacilityService {
    */
   async create(
     createFacilityDto: CreateFacilityDto,
-    adminId: string,
+    adminId?: string,
   ): Promise<FacilityResponse> {
     this.logger.log('Creating a facility');
     const facility = await this.facilityRepo.create({
       ...createFacilityDto,
-      createdBy: adminId,
+      location: null,
+      region: null,
+      createdBy: adminId || 'system',
     });
     return facility;
   }

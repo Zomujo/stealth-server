@@ -45,7 +45,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Authorize, GetUser } from './decorator';
-import { ApiErrorResponse } from '../utils/responses/error.response';
+import {
+  ApiErrorResponse,
+  throwError,
+} from '../utils/responses/error.response';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
@@ -66,7 +69,7 @@ export class AuthController {
   ) {}
 
   @ApiCreatedSuccessResponse({
-    type: GetUserDto,
+    type: LoginTokenDto,
     description: 'User created successfully',
   })
   @ApiBadRequestResponse({
@@ -81,21 +84,13 @@ export class AuthController {
   async signUp(@Body() dto: AdminSignUpDto) {
     try {
       const response = await this.authService.register(dto);
-      return new ApiSuccessResponseDto<User>(
+      return new ApiSuccessResponseDto<LoginTokenDto>(
         response,
         HttpStatus.CREATED,
-        'User created successfully awaiting approval from admin',
+        'User created successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 

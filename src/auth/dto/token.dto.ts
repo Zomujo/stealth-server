@@ -66,7 +66,7 @@ export class LoginTokenDto {
   departmentId: string;
 
   @ApiResponseProperty({
-    example: 'healthcare_worker',
+    example: 'Central Admin',
     enum: Role,
   })
   role: Role;

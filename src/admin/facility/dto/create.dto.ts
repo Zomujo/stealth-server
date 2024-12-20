@@ -3,6 +3,5 @@ import { Facility } from '../models/facility.model';
 
 export class CreateFacilityDto extends PickType(Facility, [
   'name',
-  'region',
-  'location',
+  'password',
 ]) {}

@@ -2,13 +2,16 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import {
   AfterFind,
+  BelongsTo,
   Column,
   DataType,
+  ForeignKey,
   HasMany,
   Table,
 } from 'sequelize-typescript';
 import { Item } from 'src/inventory/items/models/item.model';
 import { BaseModel } from 'src/shared/models/base.model';
+import { Facility } from '../../../admin/facility/models/facility.model';
 
 export enum ItemCategoryStatus {
   ACTIVE = 'ACTIVE',
@@ -39,6 +42,13 @@ export class ItemCategory extends BaseModel {
     enum: ItemCategoryStatus,
   })
   status: ItemCategoryStatus;
+
+  @ForeignKey(() => Facility)
+  @Column
+  facilityId: string;
+
+  @BelongsTo(() => Facility)
+  facility: Facility;
 
   @HasMany(() => Item)
   items: Item[];

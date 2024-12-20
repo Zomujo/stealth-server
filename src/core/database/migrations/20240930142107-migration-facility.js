@@ -6,9 +6,10 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('facilities', {
       ...baseModelColumns,
-      name: { type: Sequelize.STRING },
-      region: { type: Sequelize.STRING },
-      location: { type: Sequelize.STRING },
+      name: { type: Sequelize.STRING, unique: true },
+      password: { type: Sequelize.STRING },
+      region: { type: Sequelize.STRING, allowNull: true },
+      location: { type: Sequelize.STRING, allowNull: true },
       createdBy: {
         type: Sequelize.STRING,
         allowNull: true,

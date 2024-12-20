@@ -1,8 +1,8 @@
-import { Column, HasMany, Table } from 'sequelize-typescript';
+import { AllowNull, Column, HasMany, Table } from 'sequelize-typescript';
 import { BaseModel } from 'src/shared/models/base.model';
 import { User } from 'src/auth/models/user.model';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 // import { Item } from '../../../inventory/items/models/item.model';
 import { Department } from '../../department/models/department.model';
 import { StockAdjustment } from 'src/stock-adjustments/model/stock-adjustment.model';
@@ -22,18 +22,30 @@ export class Facility extends BaseModel {
   name: string;
 
   @ApiProperty({
-    example: 'North',
-    description: 'The region where the hospital is located',
+    example: '@kRhCnlAtrqe1gr',
+    description: 'The password for the facility',
   })
-  @IsString()
   @IsNotEmpty()
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,!@#$^&*()_-])[a-zA-Z\d.,!@#$^&*()_-]{8,32}$/gm,
+    {
+      message:
+        'Password must be between 8 and 32 characters long with at least 1 special character and an uppercase character',
+    },
+  )
+  @Column
+  password: string;
+
+  @AllowNull
   @Column
   region: string;
 
-  @ApiProperty({
-    example: '123 Main St',
-    description: 'The physical location of the hospital',
-  })
+  // @ApiProperty({
+  //   example: '123 Main St',
+  //   description: 'The physical location of the hospital',
+  // })
+  // @IsNotEmpty()
+  @AllowNull
   @Column
   location: string;
 

@@ -4,13 +4,7 @@ import {
   ApiResponseProperty,
   IntersectionType,
 } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  Matches,
-} from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
 
 export class CreateUserDto extends IntersectionType(GenericResponseDto) {
@@ -43,19 +37,19 @@ export class CreateUserDto extends IntersectionType(GenericResponseDto) {
   @IsEmail()
   email: string;
 
-  @ApiProperty({
-    example: 'XT(v2EiTqQZ',
-    description: 'The password for the user',
-  })
-  @IsNotEmpty()
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,!@#$^&*()_-])[a-zA-Z\d.,!@#$^&*()_-]{8,32}$/gm,
-    {
-      message:
-        'Password must be between 8 and 32 characters long with at least 1 special character and an uppercase character',
-    },
-  )
-  password: string;
+  // @ApiProperty({
+  //   example: 'XT(v2EiTqQZ',
+  //   description: 'The password for the user',
+  // })
+  // @IsNotEmpty()
+  // @Matches(
+  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,!@#$^&*()_-])[a-zA-Z\d.,!@#$^&*()_-]{8,32}$/gm,
+  //   {
+  //     message:
+  //       'Password must be between 8 and 32 characters long with at least 1 special character and an uppercase character',
+  //   },
+  // )
+  // password: string;
 
   @ApiProperty({
     example: [

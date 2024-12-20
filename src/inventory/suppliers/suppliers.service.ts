@@ -21,8 +21,9 @@ export class SuppliersService {
     return supplier;
   }
 
-  async findAllNoPaginate(): Promise<Supplier[]> {
+  async findAllNoPaginate(facilityId: string): Promise<Supplier[]> {
     const filter: FindAndCountOptions<Supplier> = {
+      where: { facilityId },
       attributes: ['id', 'name'],
       distinct: true,
     };
@@ -32,13 +33,20 @@ export class SuppliersService {
     return suppliers.rows;
   }
 
-  async findAll(query?: PaginationRequestDto): Promise<[Supplier[], number]> {
+  async findAll(
+    facilityId: string,
+    query?: PaginationRequestDto,
+  ): Promise<[Supplier[], number]> {
     // todo: refactor filter
     const paginateObject = query
       ? {
-          where:
-            (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) ||
-            {},
+          where: {
+            facilityId,
+            ...((query.search && {
+              name: { [Op.iLike]: `%${query.search}%` },
+            }) ||
+              {}),
+          },
           limit: query.pageSize || 10,
           offset: query.pageSize * (query.page - 1) || 0,
         }

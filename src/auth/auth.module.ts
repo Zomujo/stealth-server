@@ -13,12 +13,14 @@ import { RolesGuard } from './guards/roles.guard';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { LoginSession } from './models/login-session.model';
 import { PermissionGuard } from './guards/permissions.guard';
+import { FacilityModule } from '../admin/facility/facility.module';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([User, LoginSession]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    FacilityModule,
   ],
   controllers: [AuthController],
   providers: [

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AccountState, User } from './models/user.model';
-import { CreateUserDto, UpdateUserDto } from '../user/dto';
+import { UpdateUserDto } from '../user/dto';
 import { LoginDto, LoginTokenDto, TokenDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -29,6 +29,8 @@ import {
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { LoginSession, StatusType } from './models/login-session.model';
 import { Op } from 'sequelize';
+import { AdminSignUpDto } from '../user/dto/signup.dto';
+import { FacilityService } from '../admin/facility/facility.service';
 
 @Injectable()
 export class AuthService {
@@ -45,44 +47,37 @@ export class AuthService {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly mailService: MailService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly facilityService: FacilityService,
   ) {
     this.logger = new Logger(AuthService.name);
   }
 
-  async register(dto: CreateUserDto) {
+  async register(dto: AdminSignUpDto) {
+    const facility = await this.facilityService.create(dto.facility);
     const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
     const user = await this.userRepository.create({
       ...dto,
+      facilityId: facility.id,
+      role: 'Central Admin',
+      permissions: [
+        'items:READ_WRITE_DELETE',
+        'item_categories:READ_WRITE_DELETE',
+        'stock_adjustment:READ_WRITE_DELETE',
+        'item_orders:READ_WRITE_DELETE',
+        'reports:READ_WRITE_DELETE',
+        'suppliers:READ_WRITE_DELETE',
+        'sales:READ_WRITE_DELETE',
+        'department_requests:READ_WRITE_DELETE',
+        'departments:READ_WRITE_DELETE',
+        'users:READ_WRITE_DELETE',
+      ],
       password: hashPassword,
     });
-    const createdUser = await this.userRepository.findByPk(user.id, {
-      attributes: [
-        'id',
-        'createdAt',
-        'updatedAt',
-        'imageUrl',
-        'fullName',
-        'email',
-        'phoneNumber',
-        'facilityId',
-        'departmentId',
-        'role',
-        'accountApproved',
-        'status',
-      ],
-    });
-    this.sendAccountCreationConfirmation(
-      dto.email,
-      dto.fullName,
-      dto.role
-        .replace('_', ' ')
-        .split(' ')
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-        )
-        .join(' '),
-    );
-    return createdUser;
+
+    this.sendAccountCreationConfirmation(dto.email, user.fullName, user.role);
+    const token = await this.generateTokens(user, null);
+    return new LoginTokenDto(user, token);
+    // return createdUser;
   }
 
   async login(dto: LoginDto) {

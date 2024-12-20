@@ -50,13 +50,18 @@ export class ItemCategoryService {
    * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
    */
   async findAll(
+    facilityId: string,
     query?: PaginationRequestDto,
   ): Promise<[ItemCategory[], number]> {
     const paginateObject = query
       ? {
-          where:
-            (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) ||
-            {},
+          where: {
+            facilityId,
+            ...((query.search && {
+              name: { [Op.iLike]: `%${query.search}%` },
+            }) ||
+              {}),
+          },
           limit: query.pageSize || 10,
           offset: query.pageSize * (query.page - 1) || 0,
         }
@@ -67,6 +72,7 @@ export class ItemCategoryService {
         ? query.orderBy && [[query.orderBy, 'ASC']]
         : [['updatedAt', 'DESC']],
       include: [Item],
+      attributes: { exclude: ['facilityId'] },
       distinct: true,
     };
     const categories = await this.itemCategoryRepo.findAndCountAll(filter);
@@ -89,8 +95,9 @@ export class ItemCategoryService {
    * @returns A promise that resolves to an array of itemsCategoryResponse objects.
    * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
    */
-  async findAllNoPaginate(): Promise<ItemCategory[]> {
+  async findAllNoPaginate(facilityId: string): Promise<ItemCategory[]> {
     const filter: FindAndCountOptions<ItemCategory> = {
+      where: { facilityId },
       attributes: ['id', 'name'],
     };
     const categories = await this.itemCategoryRepo.findAndCountAll(filter);
