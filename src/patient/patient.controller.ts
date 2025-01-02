@@ -28,7 +28,7 @@ import { CustomApiResponse } from '../shared/docs/decorators';
 import { GetUser, Permission } from '../auth/decorator';
 import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
 import { throwError } from '../utils/responses/error.response';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Patients')
 @Controller('patients')
@@ -78,15 +78,23 @@ export class PatientController {
     }
   }
 
+  @ApiQuery({
+    name: 'populateSale',
+    type: Boolean,
+    required: false,
+  })
   @CustomApiResponse(['success', 'authorize', 'notfound'], {
     type: RetrievePatientDto,
     message: 'Patient retrieved successfully',
   })
   @Permission(Features.SALES, PermissionLevel.READ)
   @Get(':id')
-  async findPatient(@Param('id', ParseUUIDPipe) id: string) {
+  async findPatient(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('populateSale') populateSale?: boolean,
+  ) {
     try {
-      const response = await this.patientService.findOne(id);
+      const response = await this.patientService.findOne(id, populateSale);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,

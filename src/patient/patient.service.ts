@@ -22,9 +22,13 @@ export class PatientService {
     return patients;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, populate: boolean) {
+    let includeOption: any = {};
+    if (populate) {
+      includeOption = { include: [Sale] };
+    }
     const patient = await this.patientRepository.findByPk(id, {
-      include: [Sale],
+      ...includeOption,
     });
     if (!patient) {
       throw new NotFoundException('Patient not found');
