@@ -45,7 +45,7 @@ export class SalesService {
     const filter: FindAndCountOptions<Batch> = {
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
-      order: [['updatedAt', 'DESC']],
+      order: [['validity', 'ASC']],
       attributes: [['id', 'batchId'], 'batchNumber', 'validity', 'quantity'],
       include: [
         {
