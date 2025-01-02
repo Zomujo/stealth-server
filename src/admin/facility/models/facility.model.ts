@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Matches } from 'class-validator';
 // import { Item } from '../../../inventory/items/models/item.model';
 import { Department } from '../../department/models/department.model';
-import { StockAdjustment } from 'src/stock-adjustments/model/stock-adjustment.model';
+import { StockAdjustment } from 'src/inventory/models/stock-adjustment.model';
 
 @Table({
   tableName: 'facilities',

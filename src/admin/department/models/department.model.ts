@@ -13,7 +13,7 @@ import { User } from '../../../auth/models/user.model';
 // import { Item } from '../../../inventory/items/models/item.model';
 import { Facility } from '../../facility/models/facility.model';
 import { DepartmentRequest } from 'src/department-requests/models/department-requests.model';
-import { StockAdjustment } from 'src/stock-adjustments/model/stock-adjustment.model';
+import { StockAdjustment } from 'src/inventory/models/stock-adjustment.model';
 
 @Table({
   tableName: 'departments',

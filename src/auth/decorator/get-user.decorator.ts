@@ -16,4 +16,5 @@ type Payload =
   | 'department'
   | 'role'
   | 'permissions'
-  | 'session';
+  | 'session'
+  | 'stamp';

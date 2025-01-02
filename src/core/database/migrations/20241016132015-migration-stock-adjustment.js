@@ -8,6 +8,14 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('stock_adjustments', {
       ...baseModelColumns,
+      quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      type: {
+        type: Sequelize.ENUM('REDUCTION', 'INCREMENT'),
+        allowNull: false,
+      },
       reason: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -20,28 +28,10 @@ module.exports = {
         type: Sequelize.ENUM('SUBMITTED', 'ADJUSTED', 'REJECTED'),
         allowNull: false,
       },
-      type: {
-        type: Sequelize.ENUM('REDUCTION', 'INCREMENT'),
-        allowNull: false,
-      },
       createdBy: {
         type: Sequelize.STRING,
         allowNull: false,
         field: 'created_by',
-      },
-      affected: {
-        type: Sequelize.JSONB,
-        allowNull: false,
-      },
-      dateAdded: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        field: 'date_added',
-      },
-      deletedAt: {
-        type: Sequelize.DATE,
-        allowNull: true,
-        field: 'deleted_at',
       },
 
       // relationships
@@ -51,6 +41,18 @@ module.exports = {
         field: 'item_id',
         references: {
           model: 'items',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+
+      batchId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        field: 'batch_id',
+        references: {
+          model: 'batches',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -71,6 +73,7 @@ module.exports = {
 
       departmentId: {
         type: Sequelize.UUID,
+        allowNull: true,
         field: 'department_id',
         references: {
           model: 'departments',
@@ -83,6 +86,22 @@ module.exports = {
   },
 
   async down(queryInterface) {
+    await queryInterface.removeConstraint(
+      'stock_adjustments',
+      'stock_adjustments_item_id_fkey',
+    );
+    await queryInterface.removeConstraint(
+      'stock_adjustments',
+      'stock_adjustments_batch_id_fkey',
+    );
+    await queryInterface.removeConstraint(
+      'stock_adjustments',
+      'stock_adjustments_facility_id_fkey',
+    );
+    await queryInterface.removeConstraint(
+      'stock_adjustments',
+      'stock_adjustments_department_id_fkey',
+    );
     await queryInterface.dropTable('stock_adjustments');
   },
 };

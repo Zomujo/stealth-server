@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   GetSalesPaginationDto,
   CreateSaleDto,
   UpdateSalesDto,
-  GetSalesDto,
+  FindItemDto,
 } from './dto/';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sale } from './models/sales.models';
@@ -11,33 +11,99 @@ import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { FindAndCountOptions } from 'sequelize';
 import { Op } from 'sequelize';
 import { ItemService } from '../inventory/items/items.service';
+import { BatchService } from '../inventory/items/batch.service';
+import { Patient } from '../patient/models/patient.model';
+import { Batch, Item } from '../inventory/items/models';
+import { IUserPayload } from '../auth/interface/payload.interface';
 
 @Injectable()
 export class SalesService {
+  private logger: Logger = new Logger(SalesService.name);
   constructor(
     @InjectModel(Sale)
     private saleRepository: typeof Sale,
 
     private itemService: ItemService,
+    private batchService: BatchService,
   ) {}
 
-  async create(dto: CreateSaleDto) {
-    await this.itemService.findOne(dto.itemId);
+  async fetchItems(query: FindItemDto, user: IUserPayload) {
+    const itemWhereConditions: Record<string, Record<any, any>> = {};
+
+    itemWhereConditions.facilityId = { [Op.eq]: user.facility };
+
+    if (user.department) {
+      itemWhereConditions.departmentId = { [Op.eq]: user.department };
+    }
+
+    if (query.search) {
+      itemWhereConditions.name = {
+        [Op.like]: `%${query.search}%`,
+      };
+    }
+
+    const filter: FindAndCountOptions<Batch> = {
+      limit: query.pageSize || 10,
+      offset: query.pageSize * (query.page - 1) || 0,
+      order: [['updatedAt', 'DESC']],
+      attributes: [['id', 'batchId'], 'batchNumber', 'validity', 'quantity'],
+      include: [
+        {
+          model: Item,
+          attributes: ['name', 'brandName', 'sellingPrice'],
+          where: itemWhereConditions,
+        },
+      ],
+      distinct: true,
+    };
+
+    const { rows, count } = await this.batchService.findBySpecs(filter);
+
+    return { rows, count };
+  }
+
+  async create(dto: CreateSaleDto, user: IUserPayload) {
+    const saleItems = await Promise.all(
+      dto.saleItems.map(async (saleItem) => {
+        const batch = await this.batchService.findIndividual(saleItem.batchId);
+        await this.batchService.removeStock(
+          saleItem.batchId,
+          saleItem.quantity,
+        );
+        const modBatch = batch.get({ plain: true });
+        return { ...modBatch, quantity: saleItem.quantity };
+      }),
+    );
+
+    const subTotal = saleItems.reduce((total: number, saleItem: any) => {
+      return total + saleItem.item.sellingPrice * saleItem.quantity;
+    }, 0);
 
     dto.saleNumber = `S-${new Date().getTime()}`;
+    dto.subTotal = subTotal.toFixed(2);
+    dto.total = subTotal.toFixed(2);
 
     const sale = await this.saleRepository.create({
       ...dto,
+      saleItems,
+      departmentId: user.department,
+      facilityId: user.facility,
     });
 
     return sale;
   }
 
-  async fetchAll(query: GetSalesPaginationDto) {
+  async fetchAll(query: GetSalesPaginationDto, user: IUserPayload) {
     const whereConditions: Record<string, Record<any, any>> = {};
+    whereConditions.facilityId = { [Op.eq]: user.facility };
 
+    if (user.department) {
+      whereConditions.departmentId = { [Op.eq]: user.department };
+    }
     if (query.search) {
-      whereConditions.patientName = { [Op.like]: `%${query.search}%` };
+      whereConditions.saleNumber = {
+        [Op.like]: `%${query.search}%`,
+      };
     }
 
     if (query.status) {
@@ -48,14 +114,40 @@ export class SalesService {
       where: whereConditions,
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy && [[query.orderBy, 'ASC']],
+      order: query.orderBy
+        ? [[query.orderBy, query.orderDirection ?? 'ASC']]
+        : [['updatedAt', 'DESC']],
+      attributes: [
+        'id',
+        'saleItems',
+        'saleNumber',
+        'total',
+        'createdAt',
+        'status',
+      ],
+      include: [
+        { model: Patient, attributes: ['id', 'cardIdentificationNumber'] },
+      ],
       distinct: true,
     };
 
     const { rows, count } = await this.saleRepository.findAndCountAll(filter);
 
-    const response = new PaginatedDataResponseDto<GetSalesDto[]>(
-      rows,
+    const modRows = rows.map((sale) => {
+      const modSale: Sale = sale.get({ plain: true });
+      const saleItem: any = modSale.saleItems[0];
+      const remainderItems = modSale.saleItems.length - 1;
+      const totalQuantity = modSale.saleItems.reduce(
+        (total, saleItem: any) => total + saleItem.quantity,
+        0,
+      );
+      delete modSale.saleItems;
+      delete saleItem.quantity;
+      return { ...modSale, saleItem, remainderItems, totalQuantity };
+    });
+
+    const response = new PaginatedDataResponseDto<object[]>(
+      modRows,
       query.page || 1,
       query.pageSize,
       count,
@@ -80,7 +172,12 @@ export class SalesService {
   }
 
   async fetchOne(id: string) {
-    const sale = await this.saleRepository.findByPk(id);
+    const sale = await this.saleRepository.findByPk(id, {
+      attributes: { exclude: ['patientId', 'deletedAt', 'deletedBy'] },
+      include: [
+        { model: Patient, attributes: ['id', 'cardIdentificationNumber'] },
+      ],
+    });
     if (!sale) {
       throw new NotFoundException('Sale not found');
     }

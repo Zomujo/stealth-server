@@ -1,52 +1,82 @@
 import {
+  AllowNull,
   BelongsTo,
   Column,
   DataType,
+  Default,
   DeletedAt,
   ForeignKey,
   Table,
 } from 'sequelize-typescript';
-import { Item } from 'src/inventory/items/models';
 import { BaseModel } from 'src/shared/models/base.model';
+import { Patient } from '../../patient/models/patient.model';
+import { Department } from '../../admin/department/models/department.model';
+import { Facility } from '../../admin/facility/models/facility.model';
 
 export enum PaymentStatus {
   PAID = 'PAID',
   UNPAID = 'UNPAID',
 }
 
-export type PaymentStatusType = keyof typeof PaymentStatus;
+export enum SalePaymentType {
+  CASH = 'CASH',
+  ONLINE = 'ONLINE',
+}
 
 @Table({
   tableName: 'sales',
   underscored: true,
 })
 export class Sale extends BaseModel {
-  @ForeignKey(() => Item)
-  @Column({ type: DataType.UUID, field: 'item_id' })
-  itemId: string;
-
-  @BelongsTo(() => Item, 'item_id')
-  item: Item;
-
-  @Column({ type: DataType.STRING, field: 'patient_name' })
-  patientName: string;
-
-  @Column({ type: DataType.STRING, field: 'sale_number' })
+  @Column({ type: DataType.STRING })
   saleNumber: string;
 
-  @Column({ type: DataType.NUMBER, field: 'quantity' })
-  quantity: number;
+  @Column
+  paymentType: string;
 
-  @Column({
-    type: DataType.ENUM(...Object.values(PaymentStatus)),
-    field: 'status',
-  })
-  status: PaymentStatusType;
+  @Column(DataType.ARRAY(DataType.JSONB))
+  saleItems: object[];
+
+  @Column
+  subTotal: number;
+
+  @Column
+  total: number;
+
+  @Column(DataType.TEXT)
+  notes: string;
+
+  @Default(PaymentStatus.PAID)
+  @Column
+  status: string;
 
   @DeletedAt
-  @Column({ type: DataType.DATE, field: 'deleted_at' })
+  @Column(DataType.DATE)
   deletedAt: Date;
 
-  @Column({ type: DataType.STRING, field: 'deleted_by' })
+  @Column
   deletedBy: string;
+
+  @ForeignKey(() => Patient)
+  @AllowNull
+  @Column(DataType.UUID)
+  patientId: string;
+
+  @BelongsTo(() => Patient)
+  patient: Patient;
+
+  @ForeignKey(() => Department)
+  @AllowNull
+  @Column(DataType.UUID)
+  departmentId: string;
+
+  @BelongsTo(() => Department)
+  department: Department;
+
+  @ForeignKey(() => Facility)
+  @Column(DataType.UUID)
+  facilityId: string;
+
+  @BelongsTo(() => Facility)
+  facility: Facility;
 }

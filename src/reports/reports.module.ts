@@ -3,15 +3,10 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ReportModels } from './models';
-import { StockAdjustmentsModule } from 'src/stock-adjustments/stock-adjustments.module';
-import { ItemsModule } from 'src/inventory/items/items.module';
+import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature(ReportModels),
-    StockAdjustmentsModule,
-    ItemsModule,
-  ],
+  imports: [SequelizeModule.forFeature(ReportModels), InventoryModule],
   controllers: [ReportsController],
   providers: [ReportsService],
 })

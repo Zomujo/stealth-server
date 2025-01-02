@@ -3,6 +3,7 @@ import {
   ApiPropertyOptional,
   ApiProperty,
   ApiResponseProperty,
+  PickType,
 } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
@@ -85,6 +86,11 @@ export class OneBatch extends IntersectionType(Batch, GenericResponseDto) {
   })
   createdBy: string;
 }
+
+export class BatchesNoPaginate extends IntersectionType(
+  PickType(Batch, ['batchNumber', 'quantity']),
+  PickType(GenericResponseDto, ['id']),
+) {}
 
 export class ManyItem {
   @ApiProperty()

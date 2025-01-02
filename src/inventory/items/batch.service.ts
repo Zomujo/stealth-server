@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Batch } from './models';
+import { Batch, Item } from './models';
 import { CreateBatchDto, UpdateBatchDto } from './dto';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { SuppliersService } from '../suppliers/suppliers.service';
@@ -54,15 +54,39 @@ export class BatchService {
     return this.batchRepo.findAll({ include: [Supplier] });
   }
 
+  async findAllNoPaginate(itemId: string) {
+    return this.batchRepo.findAll({
+      where: { itemId },
+      attributes: ['id', 'batchNumber', 'quantity'],
+    });
+  }
+
   async findBySpecs(options?: FindAndCountOptions<Batch>) {
     return this.batchRepo.findAndCountAll(options);
   }
 
   async findOne(id: string): Promise<Batch> {
-    const batch = await this.batchRepo.findByPk(id, { include: [Supplier] });
+    const batch = await this.batchRepo.findByPk(id, {
+      include: [Supplier],
+    });
     if (!batch) {
       throw new NotFoundException(`Batch with ID ${id} not found`);
     }
+    return batch;
+  }
+
+  async findIndividual(id: string) {
+    this.logger.log(`finding a batch`);
+    const batch = await this.batchRepo.findByPk(id, {
+      attributes: [['id', 'batchId'], 'batchNumber'],
+      include: [
+        { model: Item, attributes: ['name', 'brandName', 'sellingPrice'] },
+      ],
+    });
+    if (!batch) {
+      throw new NotFoundException(`batch not found`);
+    }
+
     return batch;
   }
 

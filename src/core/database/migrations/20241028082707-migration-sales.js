@@ -10,32 +10,40 @@ module.exports = {
     await queryInterface.createTable('sales', {
       ...baseModelColumns,
 
-      itemId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        field: 'item_id',
-        references: {
-          model: 'items',
-          key: 'id',
-        },
-      },
-
-      patientName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        field: 'patient_name',
-      },
-
       saleNumber: {
         type: Sequelize.STRING,
         allowNull: false,
         field: 'sale_number',
       },
 
-      quantity: {
-        type: Sequelize.INTEGER,
+      paymentType: {
+        type: Sequelize.ENUM('CASH', 'ONLINE'),
         allowNull: false,
-        field: 'quantity',
+        field: 'payment_type',
+      },
+
+      saleItems: {
+        type: Sequelize.ARRAY(Sequelize.JSONB),
+        allowNull: false,
+        field: 'sale_items',
+      },
+
+      subTotal: {
+        type: Sequelize.DOUBLE(20, 3),
+        allowNull: false,
+        field: 'sub_total',
+      },
+
+      total: {
+        type: Sequelize.DOUBLE(20, 3),
+        allowNull: false,
+        field: 'total',
+      },
+
+      notes: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+        field: 'notes',
       },
 
       status: {
@@ -55,11 +63,36 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+
+      departmentId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        field: 'department_id',
+        references: {
+          model: 'departments',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+
+      facilityId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        field: 'facility_id',
+        references: {
+          model: 'facilities',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
     });
   },
 
   async down(queryInterface, _) {
-    await queryInterface.removeConstraint('sales', 'sales_item_id_fkey');
+    await queryInterface.removeConstraint('sales', 'sales_facility_id_fkey');
+    await queryInterface.removeConstraint('sales', 'sales_department_id_fkey');
     await queryInterface.dropTable('sales');
   },
 };

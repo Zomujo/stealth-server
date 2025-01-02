@@ -3,9 +3,9 @@ import { InventoryModels } from 'src/inventory/models';
 import { UserModels } from '../../auth/models';
 import { AdminModels } from '../../admin/models';
 import { DepartmentRequestModels } from '../../department-requests/models';
-import { StockAdjustment } from 'src/stock-adjustments/model';
 import { SalesModels } from 'src/sales/models';
 import { ItemOrderModels } from '../../orders/models';
+import { PatientModels } from '../../patient/models';
 
 export const IndexModels = [
   ...AdminModels,
@@ -15,5 +15,5 @@ export const IndexModels = [
   ...InventoryModels,
   ...DepartmentRequestModels,
   ...SalesModels,
-  StockAdjustment,
+  ...PatientModels,
 ];

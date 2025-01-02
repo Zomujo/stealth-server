@@ -23,6 +23,7 @@ import {
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import {
   AdjustPriceDto,
+  BatchesNoPaginate,
   CreateBatchDto,
   CreateItemDto,
   GetItemsResponseDto,
@@ -85,6 +86,28 @@ export class ItemController {
         createdItem,
         HttpStatus.CREATED,
         'Batch created successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['success', 'authorize'], {
+    type: BatchesNoPaginate,
+    isArray: true,
+    message: 'Batches retrieved successfully',
+  })
+  @Permission(Features.ITEMS, PermissionLevel.READ)
+  @Get('batches/:itemId/no-paginate')
+  async retrieveBatchesNoPaginate(
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+  ) {
+    try {
+      const batches = await this.batchService.findAllNoPaginate(itemId);
+      return new ApiSuccessResponseDto(
+        batches,
+        HttpStatus.OK,
+        'Batches retrieved successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);

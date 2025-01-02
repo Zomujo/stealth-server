@@ -20,7 +20,9 @@ export function throwError(logger: Logger, error: any) {
   if (error instanceof UniqueConstraintError) {
     const err = error.errors[0];
     logger.warn(`${err.path} ${err.value} already exists`);
-    throw new BadRequestException(`${err.path} ${err.value} is already in use`);
+    throw new BadRequestException(
+      `${err.path.replaceAll('_', ' ')} ${err.value} is already in use`,
+    );
   }
   if (error instanceof ForeignKeyConstraintError) {
     throw new BadRequestException((error.original as any).detail);

@@ -6,10 +6,10 @@ import { GetReportDto, GetReportPaginationDto } from './dto/get.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { UpdateReportDto } from './dto/edit.dto';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
-import { StockAdjustmentsService } from 'src/stock-adjustments/stock-adjustments.service';
-import { StockAdjustmentPaginationDto } from 'src/stock-adjustments/dto';
 import { plainToInstance } from 'class-transformer';
 import { ItemService } from 'src/inventory/items/items.service';
+import { StockAdjustmentsService } from '../inventory/inventory.service';
+import { StockAdjustmentPaginationDto } from '../inventory/dto';
 
 @Injectable()
 export class ReportsService {

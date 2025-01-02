@@ -15,7 +15,7 @@ import { BaseModel } from 'src/shared/models/base.model';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Batch } from '.';
-import { StockAdjustment } from 'src/stock-adjustments/model';
+import { StockAdjustment } from '../../models/stock-adjustment.model';
 
 export enum DosageForm {
   SOLIDS = 'SOLIDS',
