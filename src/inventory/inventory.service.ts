@@ -47,20 +47,13 @@ export class StockAdjustmentsService {
 
     let quantity: number;
     if (dto.type === StockAdjustmentType.REDUCTION) {
-      quantity = batch.quantity - dto.quantity;
-      if (quantity < 0) {
-        throw new BadRequestException(
-          'Cannot be reduced. Required quantity exceeds actual quantity',
-        );
-      }
+      await this.batchService.removeStock(dto.batchId, dto.quantity);
     } else if (dto.type === StockAdjustmentType.INCREMENT) {
       quantity = batch.quantity + dto.quantity;
+      await this.batchService.update(dto.batchId, { quantity });
     } else {
       throw new BadRequestException('unknown adjustment type');
     }
-
-    await this.batchService.update(dto.batchId, { quantity });
-
     dto.status = StockAdjustmentStatus.ADJUSTED;
     dto.createdBy = user.stamp;
     dto.facilityId = user.facility;
