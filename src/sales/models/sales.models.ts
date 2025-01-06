@@ -7,11 +7,13 @@ import {
   DeletedAt,
   ForeignKey,
   Table,
+  Unique,
 } from 'sequelize-typescript';
 import { BaseModel } from 'src/shared/models/base.model';
 import { Patient } from '../../patient/models/patient.model';
 import { Department } from '../../admin/department/models/department.model';
 import { Facility } from '../../admin/facility/models/facility.model';
+import { BatchResponseDto } from '../dto';
 
 export enum PaymentStatus {
   PAID = 'PAID',
@@ -28,6 +30,7 @@ export enum SalePaymentType {
   underscored: true,
 })
 export class Sale extends BaseModel {
+  @Unique
   @Column({ type: DataType.STRING })
   saleNumber: string;
 
@@ -35,7 +38,7 @@ export class Sale extends BaseModel {
   paymentType: string;
 
   @Column(DataType.ARRAY(DataType.JSONB))
-  saleItems: object[];
+  saleItems: BatchResponseDto[];
 
   @Column
   subTotal: number;

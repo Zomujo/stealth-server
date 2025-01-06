@@ -28,6 +28,7 @@ import {
   CreateItemDto,
   GetItemsResponseDto,
   ItemAnalytics,
+  ItemCounts,
   ItemPaginationDto,
   OneBatch,
   OneBatchResponseDto,
@@ -210,15 +211,19 @@ export class ItemController {
   }
 
   @CustomApiResponse(['success', 'authorize'], {
-    type: ItemAnalytics,
+    type: ItemCounts,
     message: 'Item counts retrieved successfully',
   })
   @Permission(Features.ITEMS, PermissionLevel.READ)
   @Get('/counts')
-  async itemCounts() {
+  async itemCounts(@GetUser() user: IUserPayload) {
     try {
-      const res = await this.itemsService.getItemCount();
-      return res;
+      const response = await this.itemsService.getItemCount(user);
+      return new ApiSuccessResponseDto(
+        response,
+        HttpStatus.OK,
+        'item counts retrieved successfully',
+      );
     } catch (error) {
       throw throwError(this.logger, error);
     }

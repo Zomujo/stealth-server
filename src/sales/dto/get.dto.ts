@@ -11,6 +11,30 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { PaymentStatus } from '../models/sales.models';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
 
+export class ItemDto {
+  @ApiResponseProperty({ example: 'Some Item' })
+  name: string;
+
+  @ApiResponseProperty({ example: 'Some Item Brand' })
+  brandName: string;
+
+  @ApiResponseProperty({ example: 85.01 })
+  sellingPrice: number;
+}
+
+export class BatchResponseDto {
+  @ApiResponseProperty({ type: ItemDto })
+  item: ItemDto;
+
+  @ApiResponseProperty({ example: 'e0ef0214-d468-49a8-8f6e-45334e2da751b' })
+  batchId: string;
+
+  @ApiResponseProperty({ example: 2 })
+  quantity: number;
+
+  @ApiResponseProperty({ example: 'BATCH3464e1' })
+  batchNumber: string;
+}
 export class GetSalesDto extends IntersectionType(
   OmitType(CreateSaleDto, [
     'subTotal',
@@ -39,7 +63,7 @@ export class GetSalesDto extends IntersectionType(
       batchNumber: 'BATCH3464e1',
     },
   })
-  saleItem: object;
+  saleItem: BatchResponseDto;
 
   @ApiResponseProperty({
     example: 0,
@@ -80,7 +104,7 @@ export class GetSaleDto extends OmitType(CreateSaleResponseDto, [
       },
     ],
   })
-  saleItems: object[];
+  saleItems: BatchResponseDto[];
 }
 
 export class GetSalesPaginationDto extends PaginationRequestDto {

@@ -35,25 +35,16 @@ export class ItemPaginationDto extends IntersectionType(PaginationRequestDto) {
 
 export class ItemAnalytics {
   @ApiProperty({
-    example: 100,
+    example: 4500,
     description: 'The total number of items in the system',
   })
   totalItems: number;
 
-  @ApiProperty({ example: 10, description: 'The number of item requests' })
-  itemRequests: number;
-
   @ApiProperty({
-    example: 5,
-    description: 'The percentage increment of item requests',
+    example: 1200,
+    description: 'The total items in stock in the system',
   })
-  itemIncrement: number;
-
-  @ApiProperty({
-    example: 10,
-    description: 'The number of item request increments',
-  })
-  requestIncrement: number;
+  totalInStock: number;
 
   @ApiProperty({
     example: 20,
@@ -63,9 +54,40 @@ export class ItemAnalytics {
 
   @ApiProperty({
     example: 50,
-    description: 'The number of items that are in stock',
+    description: 'The number of items that are high in stock',
   })
-  stocked: number;
+  highStocked: number;
+
+  @ApiProperty({
+    example: 80,
+    description: 'The number of items that are low in stock',
+  })
+  lowStocked: number;
+}
+export class ItemCounts {
+  @ApiProperty({
+    example: 4500,
+    description: 'The total number of items in the system',
+  })
+  totalItems: number;
+
+  @ApiProperty({
+    example: 1200,
+    description: 'The total items in stock in the system',
+  })
+  totalInStock: number;
+
+  @ApiProperty({
+    example: 20,
+    description: 'The number of items that are out of stock',
+  })
+  outOfStock: number;
+
+  @ApiProperty({
+    example: 50,
+    description: 'The number of items that are high in stock',
+  })
+  highStocked: number;
 
   @ApiProperty({
     example: 80,

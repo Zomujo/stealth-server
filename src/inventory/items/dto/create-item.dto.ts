@@ -8,7 +8,7 @@ import {
   IsUUID,
   MaxDate,
 } from 'class-validator';
-import { DosageForm } from '../models/item.model';
+import { DosageForm, ItemStatus } from '../models/item.model';
 import { format } from 'date-fns';
 import { Type } from 'class-transformer';
 
@@ -126,6 +126,12 @@ export class CreateItemDto {
     example: '44220956-0962-4dd0-9e65-1564c585563c',
   })
   departmentId: string;
+
+  @ApiResponseProperty({
+    example: ItemStatus.OUT_OF_STOCK,
+    enum: ItemStatus,
+  })
+  status: ItemStatus;
 }
 
 export class CreateBatchDto extends PickType(CreateItemDto, ['createdBy']) {

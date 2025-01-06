@@ -20,6 +20,7 @@ import {
   StockAdjustmentPaginationDto,
   UpdateStockAdjustmentDto,
 } from './dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class StockAdjustmentsService {
@@ -28,6 +29,7 @@ export class StockAdjustmentsService {
     @InjectModel(StockAdjustment)
     private readonly stockAdjustmentRepo: typeof StockAdjustment,
     private readonly batchService: BatchService,
+    private eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(StockAdjustmentsService.name);
   }
@@ -43,14 +45,10 @@ export class StockAdjustmentsService {
     dto: CreateStockAdjustmentDto,
     user: IUserPayload,
   ): Promise<StockAdjustment> {
-    const batch = await this.batchService.findOne(dto.batchId);
-
-    let quantity: number;
     if (dto.type === StockAdjustmentType.REDUCTION) {
       await this.batchService.removeStock(dto.batchId, dto.quantity);
     } else if (dto.type === StockAdjustmentType.INCREMENT) {
-      quantity = batch.quantity + dto.quantity;
-      await this.batchService.update(dto.batchId, { quantity });
+      await this.batchService.increaseStock(dto.batchId, dto.quantity);
     } else {
       throw new BadRequestException('unknown adjustment type');
     }

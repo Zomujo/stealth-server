@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { IndexModels } from './shared/models/index.models';
 import { IndexModules } from './shared/modules/index.modules';
-import { PatientModule } from './patient/patient.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -30,8 +30,8 @@ import { PatientModule } from './patient/patient.module';
       logging: false,
       models: [...IndexModels],
     }),
+    EventEmitterModule.forRoot(),
     ...IndexModules,
-    PatientModule,
   ],
 })
 export class AppModule {}

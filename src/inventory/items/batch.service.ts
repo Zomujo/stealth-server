@@ -10,6 +10,7 @@ import { CreateBatchDto, UpdateBatchDto } from './dto';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { SuppliersService } from '../suppliers/suppliers.service';
 import { FindAndCountOptions } from 'sequelize';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class BatchService {
@@ -18,6 +19,7 @@ export class BatchService {
   constructor(
     @InjectModel(Batch) private readonly batchRepo: typeof Batch,
     private readonly supplierService: SuppliersService,
+    private eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(BatchService.name);
   }
@@ -35,6 +37,10 @@ export class BatchService {
     this.logger.log(`Creating batch for itemId: ${createBatchDto.itemId}...`);
     const batch = await this.batchRepo.create({ ...createBatchDto });
     this.logger.log(`Batch created successfully. ID: ${batch.id}`);
+
+    this.eventEmitter.emit('quantity.changed', {
+      itemId: createBatchDto.itemId,
+    });
     return batch;
   }
 
@@ -45,6 +51,11 @@ export class BatchService {
     );
     if (result[0] == 0) {
       throw new NotFoundException(`batch with id ${id} not found`);
+    }
+
+    if (dto.quantity) {
+      const batch = await this.findOne(id);
+      this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
     }
     this.logger.log(`Updated item with ID: ${id}`);
     return;
@@ -102,13 +113,25 @@ export class BatchService {
 
   async removeStock(id: string, qty: number): Promise<void> {
     const batch = await this.findOne(id);
+    const itemId = batch.itemId;
     if (batch.quantity - qty < 0)
       throw new BadRequestException('Insufficient stock in batch');
 
     batch.quantity -= qty;
     await batch.save();
     if (batch.quantity - qty == 0) await batch.destroy();
+    this.eventEmitter.emit('quantity.changed', { itemId: itemId });
     this.logger.log(`Stock removed from batch. ID: ${id}`);
+  }
+
+  async increaseStock(id: string, qty: number): Promise<void> {
+    const batch = await this.findOne(id);
+    const itemId = batch.itemId;
+
+    batch.quantity += qty;
+    await batch.save();
+    this.eventEmitter.emit('quantity.changed', { itemId: itemId });
+    this.logger.log(`Stock added to batch. ID: ${id}`);
   }
 
   // async update(id: string, updateBatchDto: UpdateBatchDto): Promise<Batch> {
@@ -120,6 +143,7 @@ export class BatchService {
 
   async remove(id: string): Promise<void> {
     const batch = await this.findOne(id);
+    this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
     await batch.destroy();
     this.logger.log(`Batch deleted successfully. ID: ${id}`);
   }

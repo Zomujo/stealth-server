@@ -5,25 +5,23 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import {
-  FindAndCountOptions,
-  FindOptions,
-  Op,
-  Sequelize,
-  WhereOptions,
-} from 'sequelize';
+import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { Supplier } from '../suppliers/models/supplier.model';
 import { BatchService } from './batch.service';
 import {
+  ChangeQuantityEvent,
   CreateItemDto,
+  ItemCounts,
   ItemPaginationDto,
   OneItem,
   UpdateItemDto,
 } from './dto';
 import { Batch, Item, ItemStatus } from './models';
+import { IUserPayload } from '../../auth/interface/payload.interface';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ItemService {
@@ -111,66 +109,6 @@ export class ItemService {
       query.pageSize || 10,
       items.count,
     );
-
-    // return new PaginatedDataResponseDto(
-    //   batches.rows,
-    //   query.page || 1,
-    //   query.pageSize || 10,
-    //   batches.count,
-    // );
-
-    // const whereOptions: WhereOptions<Item> = {
-    //   [Op.and]: [
-    //     query.facilityId && { facilityId: query.facilityId },
-    //     query.departmentId && { departmentId: query.departmentId },
-    //     query.search && {
-    //       [Op.or]: [
-    //         { name: { [Op.iLike]: `%${query.search}%` } },
-    //         { brandName: { [Op.iLike]: `%${query.search}` } },
-    //       ],
-    //     },
-    //     query.categories && {
-    //       category: {
-    //         name: { [Op.in]: query.categories },
-    //       },
-    //     },
-    //   ],
-    // };
-
-    // const batches = await this.batchService.findBySpecs({
-    //   where: {
-    //     [Op.and]: [query.supplierId && { supplierId: query.supplierId }],
-    //   },
-    //   attributes: [
-    //     'batchNumber',
-    //     'quantity',
-    //     'itemId',
-    //     'validity',
-    //     'supplierId',
-    //     [Sequelize.col('item.name'), 'name'],
-    //     [Sequelize.col('item.brand_name'), 'brandName'],
-    //     [Sequelize.col('item.status'), 'status'],
-    //     [Sequelize.col('item.reorder_point'), 'reorderPoint'],
-    //     [Sequelize.col('item.created_at'), 'createdAt'],
-    //     [Sequelize.col('supplier.name'), 'supplierName'],
-    //     [Sequelize.col('item.category.name'), 'category'],
-    //     [Sequelize.col('item.category.id'), 'categoryId'],
-    //   ],
-    //   include: [
-    //     { model: Supplier, attributes: [] },
-    //     {
-    //       model: Item,
-    //       where: whereOptions,
-    //       attributes: [],
-    //       include: [{ model: ItemCategory, attributes: [] }],
-    //     },
-    //   ],
-    //   limit: query.pageSize || 10,
-    //   offset: query.pageSize * (query.page - 1) || 0,
-    //   order: query.orderBy
-    //     ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
-    //     : [['updatedAt', 'DESC']],
-    // });
   }
 
   /**
@@ -180,7 +118,7 @@ export class ItemService {
    * @returns A promise that resolves to the found item.
    * @throws {NotFoundEception} If the item with the given ID is not found.
    */
-  async findOne(id: string): Promise<OneItem> {
+  async findOne(id: string) {
     this.logger.log(`finding item with id: ${id}`);
     const item = await this.itemRepo.findByPk(id, { include: [Batch] });
     if (!item) {
@@ -229,19 +167,48 @@ export class ItemService {
     return new NotImplementedException(`Retrieving analytics not implemented`);
   }
 
-  async getItemCount() {
-    const options: FindOptions<Item> = {
-      attributes: [
-        [Sequelize.fn('COUNT', 'Item'), 'totalItem'],
-        [Sequelize.col('batches.quantity'), 'quantity'],
-        'status',
-      ],
-      include: [{ model: Batch, attributes: [] }],
-      group: ['status', 'batches.quantity', 'Item.id'],
-    };
-    const res = await this.itemRepo.findAll(options);
+  async getItemCount(user: IUserPayload) {
+    const whereOptions: any = { facilityId: user.facility };
+    if (user.department) {
+      whereOptions.departmentId = user.department;
+    }
 
-    return res;
+    const totalItems = await this.itemRepo.count({
+      where: { ...whereOptions },
+    });
+    const totalInStock = await this.itemRepo.count({
+      include: [
+        {
+          model: Batch,
+          as: 'batches',
+          required: false,
+        },
+      ],
+      where: {
+        '$batches.id$': {
+          [Op.ne]: null,
+        },
+        ...whereOptions,
+      },
+      distinct: true,
+    });
+    const outOfStock = totalItems - totalInStock;
+    const highStocked = await this.itemRepo.count({
+      where: {
+        ...whereOptions,
+        status: ItemStatus.STOCKED,
+      },
+    });
+    const lowStocked = totalInStock - highStocked;
+
+    const itemAnalytics = new ItemCounts();
+    itemAnalytics.totalItems = totalItems;
+    itemAnalytics.totalInStock = totalInStock;
+    itemAnalytics.outOfStock = outOfStock;
+    itemAnalytics.highStocked = highStocked;
+    itemAnalytics.lowStocked = lowStocked;
+
+    return itemAnalytics;
   }
 
   /**
@@ -297,5 +264,34 @@ export class ItemService {
       ],
       distinct: true,
     };
+  }
+
+  @OnEvent('quantity.changed')
+  async handleQuantityChangedEvent(payload: ChangeQuantityEvent) {
+    this.logger.log(`quantity.changed event; itemId: ${payload.itemId}`);
+    let quantity = 0;
+    const batches = await this.batchService.findBySpecs({
+      where: { itemId: payload.itemId },
+    });
+    if (batches.count) {
+      quantity = batches.rows.reduce(
+        (total, batch) => total + batch.quantity,
+        0,
+      );
+    }
+    const item = await this.findOne(payload.itemId);
+
+    let itemStatus;
+    if (quantity === 0) {
+      itemStatus = ItemStatus.OUT_OF_STOCK;
+    } else if (quantity < item.reorderPoint) {
+      itemStatus = ItemStatus.LOW;
+    } else {
+      itemStatus = ItemStatus.STOCKED;
+    }
+
+    await this.update(payload.itemId, {
+      status: itemStatus,
+    });
   }
 }

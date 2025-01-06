@@ -80,8 +80,8 @@ export class SalesService {
     }, 0);
 
     dto.saleNumber = `S-${new Date().getTime()}`;
-    dto.subTotal = subTotal.toFixed(2);
-    dto.total = subTotal.toFixed(2);
+    dto.subTotal = parseFloat(subTotal.toFixed(2));
+    dto.total = parseFloat(subTotal.toFixed(2));
 
     const sale = await this.saleRepository.create({
       ...dto,
@@ -156,21 +156,6 @@ export class SalesService {
     return response;
   }
 
-  async update(id: string, dto: UpdateSalesDto) {
-    const [rowsUpdated] = await this.saleRepository.update(
-      { ...dto },
-      {
-        where: { id },
-      },
-    );
-
-    if (rowsUpdated == 0) {
-      throw new NotFoundException(`Sale not found`);
-    }
-
-    return rowsUpdated;
-  }
-
   async fetchOne(id: string) {
     const sale = await this.saleRepository.findByPk(id, {
       attributes: { exclude: ['patientId', 'deletedAt', 'deletedBy'] },
@@ -183,6 +168,69 @@ export class SalesService {
     }
 
     return sale;
+  }
+
+  async update(id: string, dto: UpdateSalesDto) {
+    const saleItemsBody: any = {};
+
+    if (dto.saleItems) {
+      const sale = await this.fetchOne(id);
+      const saleItems = await Promise.all(
+        dto.saleItems.map(async (saleItem) => {
+          const savedSaleItem = sale.saleItems.find(
+            (savedSaleItem) => savedSaleItem.batchId === saleItem.batchId,
+          );
+          const batch = await this.batchService.findIndividual(
+            saleItem.batchId,
+          );
+
+          if (savedSaleItem) {
+            if (savedSaleItem.quantity !== saleItem.quantity) {
+              if (saleItem.quantity > savedSaleItem.quantity) {
+                const deductBy = saleItem.quantity - savedSaleItem.quantity;
+                await this.batchService.removeStock(saleItem.batchId, deductBy);
+              } else {
+                const increaseBy = savedSaleItem.quantity - saleItem.quantity;
+                await this.batchService.increaseStock(
+                  saleItem.batchId,
+                  increaseBy,
+                );
+              }
+            }
+          } else {
+            await this.batchService.removeStock(
+              saleItem.batchId,
+              saleItem.quantity,
+            );
+          }
+
+          const modBatch = batch.get({ plain: true });
+          return { ...modBatch, quantity: saleItem.quantity };
+        }),
+      );
+
+      const subTotal = saleItems.reduce((total: number, saleItem: any) => {
+        return total + saleItem.item.sellingPrice * saleItem.quantity;
+      }, 0);
+
+      dto.subTotal = parseFloat(subTotal.toFixed(2));
+      dto.total = parseFloat(subTotal.toFixed(2));
+
+      saleItemsBody.saleItems = saleItems;
+    }
+
+    const [rowsUpdated] = await this.saleRepository.update(
+      { ...dto, ...saleItemsBody },
+      {
+        where: { id },
+      },
+    );
+
+    if (rowsUpdated == 0) {
+      throw new NotFoundException(`Sale not found`);
+    }
+
+    return;
   }
 
   async removeOne(id: string) {
