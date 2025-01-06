@@ -124,23 +124,23 @@ export class StockAdjustmentsService {
    * @throws InternalServerErrorException if an error occurs during the update process.
    */
   async edit(id: string, dto: UpdateStockAdjustmentDto) {
-    const batch = await this.batchService.findOne(dto.batchId);
+    // const batch = await this.batchService.findOne(dto.batchId);
 
-    let quantity: number;
-    if (dto.type === StockAdjustmentType.REDUCTION) {
-      quantity = batch.quantity - dto.quantity;
-      if (quantity < 0) {
-        throw new BadRequestException(
-          'Cannot be reduced. Required quantity exceeds actual quantity',
-        );
-      }
-    } else if (dto.type === StockAdjustmentType.INCREMENT) {
-      quantity = batch.quantity + dto.quantity;
-    } else {
-      throw new BadRequestException('unknown adjustment type');
-    }
+    // let quantity: number;
+    // if (dto.type === StockAdjustmentType.REDUCTION) {
+    //   quantity = batch.quantity - dto.quantity;
+    //   if (quantity < 0) {
+    //     throw new BadRequestException(
+    //       'Cannot be reduced. Required quantity exceeds actual quantity',
+    //     );
+    //   }
+    // } else if (dto.type === StockAdjustmentType.INCREMENT) {
+    //   quantity = batch.quantity + dto.quantity;
+    // } else {
+    //   throw new BadRequestException('unknown adjustment type');
+    // }
 
-    await this.batchService.update(dto.batchId, { quantity });
+    // await this.batchService.update(dto.batchId, { quantity });
 
     const updatedAdjustment = await this.stockAdjustmentRepo.update(dto, {
       where: { id },

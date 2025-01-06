@@ -4,8 +4,9 @@ import {
   IntersectionType,
 } from '@nestjs/swagger';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, MaxDate } from 'class-validator';
 import { Type } from 'class-transformer';
+import { format } from 'date-fns';
 
 export class CreatePatientDto {
   @ApiProperty({
@@ -23,11 +24,12 @@ export class CreatePatientDto {
   cardIdentificationNumber: string;
 
   @ApiProperty({
-    example: new Date(),
+    example: format(new Date(), 'yyyy-MM-dd'),
     description: 'Date of birth of the patient',
   })
   @IsNotEmpty()
   @Type(() => Date)
+  @MaxDate(new Date())
   dateOfBirth: Date;
 }
 

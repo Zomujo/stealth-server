@@ -1,13 +1,16 @@
 import { ApiProperty, ApiResponseProperty, PickType } from '@nestjs/swagger';
 import {
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  Matches,
+  MaxDate,
 } from 'class-validator';
 import { DosageForm } from '../models/item.model';
+import { format } from 'date-fns';
+import { Type } from 'class-transformer';
 
 export class CreateItemDto {
   @ApiProperty({
@@ -148,10 +151,12 @@ export class CreateBatchDto extends PickType(CreateItemDto, ['createdBy']) {
   quantity: number;
 
   @ApiProperty({
-    example: '2022-12-31',
+    example: format(new Date(), 'yyyy-MM-dd'),
     description: 'The validity of the item',
   })
-  @Matches(/\d{4}-\d{2}-\d{2}/, { message: 'Invalid date format: YYYY-MM-DD' })
+  @IsNotEmpty()
+  @Type(() => Date)
+  @MaxDate(new Date())
   validity: Date;
 
   @ApiProperty({

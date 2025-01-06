@@ -65,9 +65,19 @@ export class BatchService {
     return this.batchRepo.findAndCountAll(options);
   }
 
-  async findOne(id: string): Promise<Batch> {
+  async findOne(id: string, isPopulated: boolean = false): Promise<Batch> {
+    let options = {};
+    if (isPopulated) {
+      options = {
+        attributes: ['id', 'createdAt', 'validity', 'batchNumber', 'quantity'],
+        include: [
+          { model: Supplier, attributes: ['id', 'name'] },
+          { model: Item, attributes: ['id', 'name'] },
+        ],
+      };
+    }
     const batch = await this.batchRepo.findByPk(id, {
-      include: [Supplier],
+      ...options,
     });
     if (!batch) {
       throw new NotFoundException(`Batch with ID ${id} not found`);

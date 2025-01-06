@@ -30,6 +30,7 @@ import {
   ItemAnalytics,
   ItemPaginationDto,
   OneBatch,
+  OneBatchResponseDto,
   OneItem,
   UpdateBatchDto,
   UpdateItemDto,
@@ -114,7 +115,26 @@ export class ItemController {
     }
   }
 
-  @CustomApiResponse(['successNull', 'authorize'], {
+  @CustomApiResponse(['success', 'authorize', 'notfound'], {
+    type: OneBatchResponseDto,
+    message: 'Batch retrieved successfully',
+  })
+  @Permission(Features.ITEMS, PermissionLevel.READ)
+  @Get('batches/:id')
+  async retrieveBatch(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      const batches = await this.batchService.findOne(id, true);
+      return new ApiSuccessResponseDto(
+        batches,
+        HttpStatus.OK,
+        'Batches retrieved successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize', 'notfound'], {
     message: 'batch updated successfully',
   })
   @Permission(Features.ITEMS, PermissionLevel.READ_WRITE)
@@ -262,7 +282,7 @@ export class ItemController {
     }
   }
 
-  @CustomApiResponse(['successNull', 'authorize'], {
+  @CustomApiResponse(['successNull', 'authorize', 'notfound'], {
     message: 'Item deleted successfully',
   })
   @Permission(Features.ITEMS, PermissionLevel.READ_WRITE_DELETE)

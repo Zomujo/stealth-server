@@ -9,6 +9,7 @@ import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { Batch, Item, ItemStatus } from '../models';
+import { GetNoPaginateDto } from '../../../shared/docs/dto/get-no_paginate.dto';
 
 export class ItemPaginationDto extends IntersectionType(PaginationRequestDto) {
   @IsUUID()
@@ -85,6 +86,26 @@ export class OneBatch extends IntersectionType(Batch, GenericResponseDto) {
     example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
   })
   createdBy: string;
+}
+
+export class OneBatchResponseDto extends IntersectionType(
+  PickType(OneBatch, [
+    'id',
+    'createdAt',
+    'validity',
+    'batchNumber',
+    'quantity',
+  ]),
+) {
+  @ApiResponseProperty({
+    type: GetNoPaginateDto,
+  })
+  supplier: GetNoPaginateDto;
+
+  @ApiResponseProperty({
+    type: GetNoPaginateDto,
+  })
+  item: GetNoPaginateDto;
 }
 
 export class BatchesNoPaginate extends IntersectionType(
