@@ -1,17 +1,22 @@
-import { ApiProperty, ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   IsUUID,
-  MaxDate,
 } from 'class-validator';
-import { DosageForm, ItemStatus } from '../models/item.model';
-import { format } from 'date-fns';
-import { Type } from 'class-transformer';
 
+export enum DosageForm {
+  SOLIDS = 'SOLIDS',
+  LIQUIDS = 'LIQUIDS',
+}
+
+export enum ItemStatus {
+  LOW = 'LOW',
+  STOCKED = 'STOCKED',
+  OUT_OF_STOCK = 'OUT_OF_STOCK',
+}
 export class CreateItemDto {
   @ApiProperty({
     example: 'Item Name',
@@ -46,6 +51,7 @@ export class CreateItemDto {
     enum: DosageForm,
     description: 'The dosage form of the item',
   })
+  @IsNotEmpty()
   @IsEnum(DosageForm)
   dosageForm: DosageForm;
 
@@ -69,6 +75,7 @@ export class CreateItemDto {
   })
   @IsString()
   ISO: string;
+
   @ApiProperty({
     example: 10,
     description: 'The reorder point of the item',
@@ -104,22 +111,21 @@ export class CreateItemDto {
   @IsString()
   storageReq: string;
 
-  @ApiResponseProperty({
-    example: 'Kratos',
-  })
-  createdBy: string;
-
   @ApiProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
     description: 'The category ID of the item',
   })
   @IsUUID()
   categoryId: string;
+
+  @ApiResponseProperty({
+    example: 'Kratos',
+  })
+  createdBy: string;
+
   @ApiResponseProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
   })
-  @IsUUID()
-  @IsOptional()
   facilityId: string;
 
   @ApiResponseProperty({
@@ -132,43 +138,4 @@ export class CreateItemDto {
     enum: ItemStatus,
   })
   status: ItemStatus;
-}
-
-export class CreateBatchDto extends PickType(CreateItemDto, ['createdBy']) {
-  @ApiProperty({
-    example: '44220956-0962-4dd0-9e65-1564c585563c',
-    description: 'The supplier ID of the item',
-  })
-  @IsUUID()
-  supplierId: string;
-
-  @ApiProperty({
-    example: 'BATCH123',
-    description: 'The batch number of the item',
-  })
-  @IsString()
-  batchNumber: string;
-
-  @ApiProperty({
-    example: 100,
-    description: 'The stock quantity of the item',
-  })
-  @IsNumber()
-  quantity: number;
-
-  @ApiProperty({
-    example: format(new Date(), 'yyyy-MM-dd'),
-    description: 'The validity of the item',
-  })
-  @IsNotEmpty()
-  @Type(() => Date)
-  @MaxDate(new Date())
-  validity: Date;
-
-  @ApiProperty({
-    example: '44220956-0962-4dd0-9e65-1564c585563c',
-    description: 'The item ID',
-  })
-  @IsUUID()
-  itemId: string;
 }

@@ -3,13 +3,12 @@ import {
   ApiPropertyOptional,
   ApiProperty,
   ApiResponseProperty,
-  PickType,
 } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { Batch, Item, ItemStatus } from '../models';
-import { GetNoPaginateDto } from '../../../shared/docs/dto/get-no_paginate.dto';
+import { Item } from '../models';
+import { ItemStatus } from './create-item.dto';
 
 export class ItemPaginationDto extends IntersectionType(PaginationRequestDto) {
   @IsUUID()
@@ -22,14 +21,14 @@ export class ItemPaginationDto extends IntersectionType(PaginationRequestDto) {
   @IsOptional()
   categories: string[];
 
-  @IsUUID()
-  @IsOptional()
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
   facilityId: string;
 
-  @IsUUID()
   @ApiPropertyOptional()
   @IsOptional()
+  @IsUUID()
   departmentId: string;
 }
 
@@ -102,38 +101,6 @@ export class OneItem extends IntersectionType(Item, GenericResponseDto) {
   })
   createdBy: string;
 }
-
-export class OneBatch extends IntersectionType(Batch, GenericResponseDto) {
-  @ApiResponseProperty({
-    example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
-  })
-  createdBy: string;
-}
-
-export class OneBatchResponseDto extends IntersectionType(
-  PickType(OneBatch, [
-    'id',
-    'createdAt',
-    'validity',
-    'batchNumber',
-    'quantity',
-  ]),
-) {
-  @ApiResponseProperty({
-    type: GetNoPaginateDto,
-  })
-  supplier: GetNoPaginateDto;
-
-  @ApiResponseProperty({
-    type: GetNoPaginateDto,
-  })
-  item: GetNoPaginateDto;
-}
-
-export class BatchesNoPaginate extends IntersectionType(
-  PickType(Batch, ['batchNumber', 'quantity']),
-  PickType(GenericResponseDto, ['id']),
-) {}
 
 export class ManyItem {
   @ApiProperty()

@@ -3,10 +3,11 @@ import { PatientService } from './patient.service';
 import { PatientController } from './patient.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Patient } from './models/patient.model';
+import { PatientExistsRule } from '../shared/validators';
 
 @Module({
   imports: [SequelizeModule.forFeature([Patient])],
-  providers: [PatientService],
+  providers: [PatientService, PatientExistsRule],
   controllers: [PatientController],
 })
 export class PatientModule {}

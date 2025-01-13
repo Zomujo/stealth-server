@@ -23,23 +23,25 @@ import {
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import {
   AdjustPriceDto,
-  BatchesNoPaginate,
-  CreateBatchDto,
   CreateItemDto,
   GetItemsResponseDto,
   ItemAnalytics,
   ItemCounts,
   ItemPaginationDto,
-  OneBatch,
-  OneBatchResponseDto,
   OneItem,
-  UpdateBatchDto,
   UpdateItemDto,
 } from './dto';
 import { ItemService } from './items.service';
 
-import { BatchService } from './batch.service';
+import { BatchService } from './batches/batch.service';
 import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
+import {
+  BatchesNoPaginate,
+  CreateBatchDto,
+  OneBatch,
+  OneBatchResponseDto,
+  UpdateBatchDto,
+} from './batches/dto';
 
 @ApiTags('Items')
 @Controller('items')

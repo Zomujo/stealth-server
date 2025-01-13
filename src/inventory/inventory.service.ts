@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
-import { BatchService } from 'src/inventory/items/batch.service';
+import { BatchService } from 'src/inventory/items/batches/batch.service';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { Batch, Item } from '../inventory/items/models';
 import {

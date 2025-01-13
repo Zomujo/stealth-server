@@ -43,12 +43,12 @@ export class OneStockAdjustment extends IntersectionType(
 export class StockAdjustmentPaginationDto extends IntersectionType(
   PaginationRequestDto,
 ) {
-  @IsUUID()
   @IsOptional()
+  @IsUUID()
   facilityId: string;
 
-  @IsUUID()
   @IsOptional()
+  @IsUUID()
   departmentId: string;
 
   @IsOptional()

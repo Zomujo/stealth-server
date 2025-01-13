@@ -10,16 +10,17 @@ import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { Supplier } from '../suppliers/models/supplier.model';
-import { BatchService } from './batch.service';
+import { BatchService } from './batches/batch.service';
 import {
   ChangeQuantityEvent,
   CreateItemDto,
   ItemCounts,
   ItemPaginationDto,
+  ItemStatus,
   OneItem,
   UpdateItemDto,
 } from './dto';
-import { Batch, Item, ItemStatus } from './models';
+import { Batch, Item } from './models';
 import { IUserPayload } from '../../auth/interface/payload.interface';
 import { OnEvent } from '@nestjs/event-emitter';
 

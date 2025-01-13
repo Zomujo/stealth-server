@@ -3,15 +3,21 @@ import { ItemService } from './items.service';
 import { ItemController } from './items.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Batch, Item } from './models';
-import { BatchService } from './batch.service';
-import { SuppliersService } from '../suppliers/suppliers.service';
 import { Supplier } from '../suppliers/models/supplier.model';
 import { User } from '../../auth/models/user.model';
+import { ItemExistsRule } from '../../shared/validators';
+import { BatchesModule } from './batches/batches.module';
+import { BatchService } from './batches/batch.service';
+import { SuppliersModule } from '../suppliers/suppliers.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Item, Batch, Supplier, User])],
+  imports: [
+    SequelizeModule.forFeature([Item, Batch, Supplier, User]),
+    BatchesModule,
+    SuppliersModule,
+  ],
   controllers: [ItemController],
-  providers: [ItemService, BatchService, SuppliersService],
+  providers: [ItemService, BatchService, ItemExistsRule],
   exports: [ItemService, BatchService],
 })
 export class ItemsModule {}

@@ -12,21 +12,27 @@ import {
   IsNotEmpty,
   IsOptional,
   IsUUID,
+  Min,
 } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { PaymentStatus, SalePaymentType } from '../models/sales.models';
+import { BatchExists, PatientExists } from '../../shared/validators';
 
 export class CreateSaleItemsDto {
   @ApiProperty({
     example: '43cc0259-0c07-44c6-a4f5-0201fcb2d55d',
     description: 'Id of the item batch',
   })
+  @IsNotEmpty()
+  @BatchExists()
   batchId: string;
 
   @ApiProperty({
     example: 100,
     description: 'Quantity of the item to be purchased',
   })
+  @IsNotEmpty()
+  @Min(1)
   quantity: number;
 }
 
@@ -37,6 +43,7 @@ export class CreateSaleDto {
   })
   @IsOptional()
   @IsUUID(4)
+  @PatientExists()
   patientId: string;
 
   @ApiProperty({

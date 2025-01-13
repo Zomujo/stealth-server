@@ -11,7 +11,7 @@ import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { FindAndCountOptions } from 'sequelize';
 import { Op } from 'sequelize';
 import { ItemService } from '../inventory/items/items.service';
-import { BatchService } from '../inventory/items/batch.service';
+import { BatchService } from '../inventory/items/batches/batch.service';
 import { Patient } from '../patient/models/patient.model';
 import { Batch, Item } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';

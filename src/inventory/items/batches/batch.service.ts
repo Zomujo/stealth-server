@@ -5,12 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Batch, Item } from './models';
-import { CreateBatchDto, UpdateBatchDto } from './dto';
+import { Batch, Item } from '../models';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
-import { SuppliersService } from '../suppliers/suppliers.service';
+import { SuppliersService } from '../../suppliers/suppliers.service';
 import { FindAndCountOptions } from 'sequelize';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CreateBatchDto, UpdateBatchDto } from './dto';
 
 @Injectable()
 export class BatchService {
@@ -105,7 +105,7 @@ export class BatchService {
       ],
     });
     if (!batch) {
-      throw new NotFoundException(`batch not found`);
+      throw new NotFoundException(`Batch not found`);
     }
 
     return batch;
