@@ -9,6 +9,7 @@ export enum Features {
   DEPARTMENT_REQUESTS = 'department_requests',
   DEPARTMENTS = 'departments',
   USERS = 'users',
+  STOCK_REQUESTS = 'stock_requests',
 }
 
 export enum PermissionLevel {

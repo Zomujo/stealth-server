@@ -5,15 +5,20 @@ import { NotificationsGateway } from './gateway/notification.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from '../auth/interface/jwt.config';
 import { ConfigModule } from '@nestjs/config';
+import { NotificationController } from './notification.controller';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { NotificationModel } from './models/notification.model';
 
 @Global()
 @Module({
   imports: [
+    SequelizeModule.forFeature([NotificationModel]),
     MailModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   providers: [NotificationsGateway, NotificationService],
+  controllers: [NotificationController],
   exports: [NotificationService],
 })
 export class NotificationModule {}

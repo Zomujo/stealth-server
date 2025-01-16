@@ -23,6 +23,9 @@ import {
 import { Batch, Item } from './models';
 import { IUserPayload } from '../../auth/interface/payload.interface';
 import { OnEvent } from '@nestjs/event-emitter';
+import { NotificationService } from '../../notification/notification.service';
+import { CreateNotificationDto } from '../../notification/dto';
+import { Features } from '../../shared/enums/permissions.enum';
 
 @Injectable()
 export class ItemService {
@@ -31,6 +34,7 @@ export class ItemService {
     @InjectModel(Item) private readonly itemRepo: typeof Item,
     @InjectModel(User) private readonly userRepo: typeof User,
     private readonly batchService: BatchService,
+    private notificationService: NotificationService,
   ) {
     this.logger = new Logger(ItemService.name);
   }
@@ -306,14 +310,32 @@ export class ItemService {
       );
     }
     const item = await this.findOne(payload.itemId);
-
     let itemStatus;
+    const notification = new CreateNotificationDto();
+
     if (quantity === 0) {
       itemStatus = ItemStatus.OUT_OF_STOCK;
+      notification.message = `${item.name} is out of stock.`;
+      notification.linkName = 'View Item';
+      notification.linkRoute = `/item/${item.id}`;
     } else if (quantity < item.reorderPoint) {
       itemStatus = ItemStatus.LOW;
+      notification.message = `${item.name} is running low on stock`;
+      notification.linkName = 'View Item';
+      notification.linkRoute = `/item/${item.id}`;
     } else {
       itemStatus = ItemStatus.STOCKED;
+    }
+
+    if (
+      itemStatus === ItemStatus.OUT_OF_STOCK ||
+      itemStatus === ItemStatus.LOW
+    ) {
+      await this.notificationService.sendNotification(
+        notification,
+        Features.ITEMS,
+        { facility: item.facilityId, department: item.departmentId },
+      );
     }
 
     await this.update(payload.itemId, {

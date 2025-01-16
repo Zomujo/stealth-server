@@ -9,12 +9,14 @@ import { ItemExistsRule } from '../../shared/validators';
 import { BatchesModule } from './batches/batches.module';
 import { BatchService } from './batches/batch.service';
 import { SuppliersModule } from '../suppliers/suppliers.module';
+import { NotificationModule } from '../../notification/notification.module';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([Item, Batch, Supplier, User]),
     BatchesModule,
     SuppliersModule,
+    NotificationModule,
   ],
   controllers: [ItemController],
   providers: [ItemService, BatchService, ItemExistsRule],

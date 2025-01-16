@@ -6,6 +6,7 @@ import { DepartmentRequestModels } from '../../department-requests/models';
 import { SalesModels } from 'src/sales/models';
 import { ItemOrderModels } from '../../orders/models';
 import { PatientModels } from '../../patient/models';
+import { NotificationModels } from '../../notification/models';
 
 export const IndexModels = [
   ...AdminModels,
@@ -16,4 +17,5 @@ export const IndexModels = [
   ...DepartmentRequestModels,
   ...SalesModels,
   ...PatientModels,
+  ...NotificationModels,
 ];

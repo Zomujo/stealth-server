@@ -4,6 +4,7 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/utils/responses/error.response';
@@ -55,6 +56,15 @@ export function CustomApiResponse(
           }),
         );
         break;
+      case 'successNoWrap':
+        docs.push(
+          ApiOkResponse({
+            type: options.type ?? 'any',
+            description: options.message || 'Request successful',
+            isArray: options.isArray,
+          }),
+        );
+        break;
       case 'paginated':
         docs.push(
           ...[
@@ -99,6 +109,7 @@ export type CustomResponses =
   | 'created'
   | 'success'
   | 'successNull'
+  | 'successNoWrap'
   | 'authorize'
   | 'paginated'
   | 'notfound';

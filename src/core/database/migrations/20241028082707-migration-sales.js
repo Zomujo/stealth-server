@@ -29,13 +29,13 @@ module.exports = {
       },
 
       subTotal: {
-        type: Sequelize.DOUBLE(20, 3),
+        type: Sequelize.DOUBLE,
         allowNull: false,
         field: 'sub_total',
       },
 
       total: {
-        type: Sequelize.DOUBLE(20, 3),
+        type: Sequelize.DOUBLE,
         allowNull: false,
         field: 'total',
       },
