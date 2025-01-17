@@ -7,7 +7,6 @@ import {
 } from 'sequelize-typescript';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { BaseModel } from 'src/shared/models/base.model';
-import { ApiProperty } from '@nestjs/swagger';
 import { Item } from '.';
 
 @Table({
@@ -17,10 +16,6 @@ import { Item } from '.';
   timestamps: true,
 })
 export class Batch extends BaseModel {
-  @ApiProperty({
-    description: 'Item Id of the batch',
-    example: '44220956-0962-4dd0-9e65-1564c585563c',
-  })
   @ForeignKey(() => Item)
   @Column
   itemId: string;
@@ -28,24 +23,12 @@ export class Batch extends BaseModel {
   @BelongsTo(() => Item)
   item: Item;
 
-  @ApiProperty({
-    example: '2024-12-31',
-    description: 'The expiry date of this batch',
-  })
   @Column({ type: DataType.DATE, allowNull: false })
   validity: Date;
 
-  @ApiProperty({
-    example: 'BATCH123',
-    description: 'The batch number',
-  })
   @Column
   batchNumber: string;
 
-  @ApiProperty({
-    example: 100,
-    description: 'The quantity of items in this batch',
-  })
   @Column({ type: DataType.INTEGER, allowNull: false })
   quantity: number;
 
@@ -54,10 +37,6 @@ export class Batch extends BaseModel {
 
   @ForeignKey(() => Supplier)
   @Column
-  @ApiProperty({
-    description: 'Item Id of the batch',
-    example: '44220956-0962-4dd0-9e65-1564c585563c',
-  })
   supplierId: string;
 
   @BelongsTo(() => Supplier)

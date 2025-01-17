@@ -1,13 +1,16 @@
+import { CreateBatchDto } from './create.dto';
 import {
   ApiResponseProperty,
   IntersectionType,
   PickType,
 } from '@nestjs/swagger';
 import { GenericResponseDto } from '../../../../shared/docs/dto/base.dto';
-import { Batch } from '../../models';
 import { GetNoPaginateDto } from '../../../../shared/docs/dto/get-no_paginate.dto';
 
-export class OneBatch extends IntersectionType(Batch, GenericResponseDto) {
+export class OneBatch extends IntersectionType(
+  CreateBatchDto,
+  GenericResponseDto,
+) {
   @ApiResponseProperty({
     example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
   })
@@ -35,6 +38,6 @@ export class OneBatchResponseDto extends IntersectionType(
 }
 
 export class BatchesNoPaginate extends IntersectionType(
-  PickType(Batch, ['batchNumber', 'quantity']),
+  PickType(CreateBatchDto, ['batchNumber', 'quantity']),
   PickType(GenericResponseDto, ['id']),
 ) {}

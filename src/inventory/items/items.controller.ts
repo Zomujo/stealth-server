@@ -24,7 +24,6 @@ import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import {
   AdjustPriceDto,
   CreateItemDto,
-  GetItemsResponseDto,
   ItemAnalytics,
   ItemCounts,
   ItemPaginationDto,
@@ -158,7 +157,7 @@ export class ItemController {
   }
 
   @CustomApiResponse(['paginated', 'authorize'], {
-    type: GetItemsResponseDto,
+    type: CreateItemDto,
     isArray: true,
     message: 'Items retrieved successfully',
   })
