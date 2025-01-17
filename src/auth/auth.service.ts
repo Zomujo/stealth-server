@@ -31,6 +31,7 @@ import { LoginSession, StatusType } from './models/login-session.model';
 import { Op } from 'sequelize';
 import { AdminSignUpDto } from '../user/dto/signup.dto';
 import { FacilityService } from '../admin/facility/facility.service';
+import { Facility } from '../admin/facility/models/facility.model';
 
 @Injectable()
 export class AuthService {
@@ -72,6 +73,7 @@ export class AuthService {
         'users:READ_WRITE_DELETE',
       ],
       password: hashPassword,
+      status: AccountState.ACTIVE,
     });
 
     this.sendAccountCreationConfirmation(dto.email, user.fullName, user.role);
@@ -113,6 +115,7 @@ export class AuthService {
 
   async retrieveUser(userId: string) {
     const user = await this.userRepository.findByPk(userId, {
+      include: [{ model: Facility, attributes: ['id', 'name'] }],
       attributes: [
         'id',
         'createdAt',
@@ -121,7 +124,6 @@ export class AuthService {
         'fullName',
         'email',
         'phoneNumber',
-        'facilityId',
         'departmentId',
         'role',
         'permissions',

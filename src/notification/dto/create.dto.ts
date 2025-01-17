@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateNotificationDto {
   @ApiResponseProperty({
@@ -17,14 +17,14 @@ export class CreateNotificationDto {
   @ApiResponseProperty({
     example: 'View Item',
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   linkName: string;
 
   @ApiResponseProperty({
     example: '/home',
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   linkRoute: string;
 

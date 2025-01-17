@@ -315,28 +315,24 @@ export class ItemService {
 
     if (quantity === 0) {
       itemStatus = ItemStatus.OUT_OF_STOCK;
-      notification.message = `${item.name} is out of stock.`;
-      notification.linkName = 'View Item';
+      notification.message = `${item.name} is out of stock. Restock now`;
+      notification.linkName = 'Restock';
       notification.linkRoute = `/item/${item.id}`;
     } else if (quantity < item.reorderPoint) {
       itemStatus = ItemStatus.LOW;
-      notification.message = `${item.name} is running low on stock`;
-      notification.linkName = 'View Item';
+      notification.message = `${item.name} is almost out of stock. ${quantity} pieces left`;
+      notification.linkName = 'Restock';
       notification.linkRoute = `/item/${item.id}`;
     } else {
       itemStatus = ItemStatus.STOCKED;
+      notification.message = `${item.name} just got restocked`;
     }
 
-    if (
-      itemStatus === ItemStatus.OUT_OF_STOCK ||
-      itemStatus === ItemStatus.LOW
-    ) {
-      await this.notificationService.sendNotification(
-        notification,
-        Features.ITEMS,
-        { facility: item.facilityId, department: item.departmentId },
-      );
-    }
+    await this.notificationService.sendNotification(
+      notification,
+      Features.ITEMS,
+      { facility: item.facilityId, department: item.departmentId },
+    );
 
     await this.update(payload.itemId, {
       status: itemStatus,

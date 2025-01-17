@@ -6,6 +6,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { ItemCategoryExists } from '../../../shared/validators/item-category-exists.validator';
 
 export enum DosageForm {
   SOLIDS = 'SOLIDS',
@@ -116,6 +117,7 @@ export class CreateItemDto {
     description: 'The category ID of the item',
   })
   @IsUUID()
+  @ItemCategoryExists()
   categoryId: string;
 
   @ApiResponseProperty({

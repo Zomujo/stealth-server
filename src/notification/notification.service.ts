@@ -47,8 +47,6 @@ export class NotificationService {
       feature: features,
       departmentId: user.department,
     };
-    // if (user.department) {
-    // }
 
     const notifications = await this.notifcationRepo.findAll({
       where: {

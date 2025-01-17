@@ -14,12 +14,12 @@ module.exports = {
       },
       linkName: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         field: 'link_name',
       },
       linkRoute: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         field: 'link_route',
       },
       feature: {

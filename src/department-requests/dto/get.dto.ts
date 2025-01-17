@@ -12,6 +12,7 @@ import {
   DepartmentRequestStatusType,
 } from '../models/department-requests.model';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
+import { ItemExists } from '../../shared/validators';
 
 export class GetDepartmentRequestDto extends GenericResponseDto {
   @ApiProperty({
@@ -20,6 +21,7 @@ export class GetDepartmentRequestDto extends GenericResponseDto {
   })
   @IsUUID(4)
   @IsNotEmpty()
+  @ItemExists()
   itemId: string;
 
   @ApiResponseProperty({

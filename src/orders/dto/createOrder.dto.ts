@@ -15,6 +15,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
+import { ItemExists, SupplierExists } from '../../shared/validators';
 
 export class CreateItemOrderDto extends GenericResponseDto {
   @ApiProperty({
@@ -23,6 +24,7 @@ export class CreateItemOrderDto extends GenericResponseDto {
   })
   @IsNotEmpty()
   @IsUUID(4)
+  @ItemExists()
   itemId: string;
 
   @ApiProperty({ description: 'The quantity of the item', example: 1000 })
@@ -37,6 +39,7 @@ export class CreateItemOrderDto extends GenericResponseDto {
   })
   @IsNotEmpty()
   @IsUUID(4)
+  @SupplierExists()
   supplierId: string;
 
   @ApiResponseProperty({

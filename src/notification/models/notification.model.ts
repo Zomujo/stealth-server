@@ -12,9 +12,11 @@ export class NotificationModel extends BaseModel {
   @Column
   message: string;
 
+  @AllowNull
   @Column
   linkName: string;
 
+  @AllowNull
   @Column
   linkRoute: string;
 
