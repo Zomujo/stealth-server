@@ -17,7 +17,7 @@ export class OneBatch extends IntersectionType(
   createdBy: string;
 }
 
-export class OneBatchResponseDto extends IntersectionType(
+export class BatchResponseDto extends IntersectionType(
   PickType(OneBatch, [
     'id',
     'createdAt',

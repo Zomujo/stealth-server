@@ -19,6 +19,7 @@ import { throwError } from 'src/utils/responses/error.response';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
+  PaginatedDataResponseDto,
 } from 'src/utils/responses/success.response';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import {
@@ -38,9 +39,10 @@ import {
   BatchesNoPaginate,
   CreateBatchDto,
   OneBatch,
-  OneBatchResponseDto,
+  BatchResponseDto,
   UpdateBatchDto,
 } from './batches/dto';
+import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
 
 @ApiTags('Items')
 @Controller('items')
@@ -117,8 +119,37 @@ export class ItemController {
     }
   }
 
+  @CustomApiResponse(['paginated', 'authorize'], {
+    type: BatchResponseDto,
+    isArray: true,
+    message: 'Batches retrieved successfully',
+  })
+  @Permission(Features.ITEMS, PermissionLevel.READ)
+  @Get(':id/batches')
+  async retrieveBatches(
+    @Param('id', ParseUUIDPipe) itemId: string,
+    @Query() query: PaginationRequestDto,
+  ) {
+    try {
+      const batches = await this.batchService.fetchAllPaginate(itemId, query);
+      const paginated = new PaginatedDataResponseDto(
+        batches.rows,
+        query.page || 1,
+        query.pageSize || 10,
+        batches.count,
+      );
+      return new ApiSuccessResponseDto(
+        paginated,
+        HttpStatus.OK,
+        'Batches retrieved successfully',
+      );
+    } catch (error) {
+      throw throwError(this.logger, error);
+    }
+  }
+
   @CustomApiResponse(['success', 'authorize', 'notfound'], {
-    type: OneBatchResponseDto,
+    type: BatchResponseDto,
     message: 'Batch retrieved successfully',
   })
   @Permission(Features.ITEMS, PermissionLevel.READ)

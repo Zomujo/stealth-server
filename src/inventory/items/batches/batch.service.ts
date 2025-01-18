@@ -8,9 +8,11 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Batch, Item } from '../models';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { SuppliersService } from '../../suppliers/suppliers.service';
-import { FindAndCountOptions } from 'sequelize';
+import { FindAndCountOptions, Op } from 'sequelize';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateBatchDto, UpdateBatchDto } from './dto';
+import { PaginationRequestDto } from '../../../shared/docs/dto/pagination.dto';
+import { generateFilter } from '../../../shared/factory';
 
 @Injectable()
 export class BatchService {
@@ -63,6 +65,22 @@ export class BatchService {
 
   async findAll(): Promise<Batch[]> {
     return this.batchRepo.findAll({ include: [Supplier] });
+  }
+
+  async fetchAllPaginate(itemId: string, query: PaginationRequestDto) {
+    const paginationFilter = generateFilter(query, {
+      batchNumber: { [Op.iLike]: `%${query.search}%` },
+    });
+    const { rows, count } = await this.batchRepo.findAndCountAll({
+      ...paginationFilter.pageFilter,
+      where: { itemId, ...paginationFilter.searchFilter },
+      attributes: ['id', 'createdAt', 'validity', 'batchNumber', 'quantity'],
+      include: [
+        { model: Supplier, attributes: ['id', 'name'] },
+        { model: Item, attributes: ['id', 'name'] },
+      ],
+    });
+    return { rows, count };
   }
 
   async findAllNoPaginate(itemId: string) {
