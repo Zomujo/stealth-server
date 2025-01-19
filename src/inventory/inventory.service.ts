@@ -123,23 +123,21 @@ export class StockAdjustmentsService {
    * @throws InternalServerErrorException if an error occurs during the update process.
    */
   async edit(id: string, dto: UpdateStockAdjustmentDto) {
-    // const batch = await this.batchService.findOne(dto.batchId);
+    const adjustedStock = await this.findOne(id);
 
-    // let quantity: number;
-    // if (dto.type === StockAdjustmentType.REDUCTION) {
-    //   quantity = batch.quantity - dto.quantity;
-    //   if (quantity < 0) {
-    //     throw new BadRequestException(
-    //       'Cannot be reduced. Required quantity exceeds actual quantity',
-    //     );
-    //   }
-    // } else if (dto.type === StockAdjustmentType.INCREMENT) {
-    //   quantity = batch.quantity + dto.quantity;
-    // } else {
-    //   throw new BadRequestException('unknown adjustment type');
-    // }
+    if (dto.batchId || dto.quantity || dto.type) {
+      const _oldBatch = await this.restoreStock(
+        adjustedStock.batchId,
+        adjustedStock.quantity,
+        adjustedStock.type,
+      );
 
-    // await this.batchService.update(dto.batchId, { quantity });
+      const batchId = dto.batchId ?? adjustedStock.batchId;
+      const updatingQuantity = dto.quantity ?? adjustedStock.quantity;
+      const adjustmentType = dto.type ?? adjustedStock.type;
+
+      await this.adjustOnType(batchId, updatingQuantity, adjustmentType);
+    }
 
     const updatedAdjustment = await this.stockAdjustmentRepo.update(dto, {
       where: { id },
@@ -180,6 +178,38 @@ export class StockAdjustmentsService {
 
     if (res == 0) {
       throw new NotFoundException(`Stock adjustment with id ${id} not found`);
+    }
+    return;
+  }
+
+  private async restoreStock(
+    batchId: string,
+    quantity: number,
+    type: StockAdjustmentType,
+  ) {
+    const oldBatch = await this.batchService.findOne(batchId);
+    if (type === StockAdjustmentType.REDUCTION) {
+      await this.batchService.increaseStock(batchId, quantity);
+    } else if (type === StockAdjustmentType.INCREMENT) {
+      await this.batchService.removeStock(batchId, quantity);
+    } else {
+      throw new BadRequestException('unknown adjustment type');
+    }
+    await oldBatch.save();
+    return oldBatch;
+  }
+
+  private async adjustOnType(
+    batchId: string,
+    quantity: number,
+    type: StockAdjustmentType,
+  ) {
+    if (type === StockAdjustmentType.REDUCTION) {
+      await this.batchService.removeStock(batchId, quantity);
+    } else if (type === StockAdjustmentType.INCREMENT) {
+      await this.batchService.increaseStock(batchId, quantity);
+    } else {
+      throw new BadRequestException('unknown adjustment type');
     }
     return;
   }

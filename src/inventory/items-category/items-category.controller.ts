@@ -85,7 +85,7 @@ export class ItemCategoryController {
           query.pageSize,
           categories[1],
         ),
-        HttpStatus.FOUND,
+        HttpStatus.OK,
         'Item categories retrieved successfully',
       );
     } catch (error) {
@@ -127,8 +127,8 @@ export class ItemCategoryController {
       const category = await this.itemCategoryService.findOne(id);
       return new ApiSuccessResponseDto(
         category,
-        HttpStatus.FOUND,
-        'Item retrieved successfully',
+        HttpStatus.OK,
+        'Item category retrieved successfully',
       );
     } catch (error) {
       throw throwError(this.logger, error);

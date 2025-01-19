@@ -54,7 +54,7 @@ describe('ItemsCategoryController', () => {
   //   const filter = new PaginationRequestDto();
   //   filter.pageSize = 4;
   //   const res = await controller.findAll(filter);
-  //   expect(res.statusCode).toBe(HttpStatus.FOUND);
+  //   expect(res.statusCode).toBe(HttpStatus.OK);
   //   expect(res.data.pageSize).toEqual(filter.pageSize);
   // });
 
@@ -70,7 +70,7 @@ describe('ItemsCategoryController', () => {
 
   // it('should find a item category and test updated values', async () => {
   //   const res = await controller.findOne(testCategory.id);
-  //   expect(res.statusCode).toBe(HttpStatus.FOUND);
+  //   expect(res.statusCode).toBe(HttpStatus.OK);
   //   expect(res.data.status).toBe(testCategory.status);
   //   expect(res.data.name).toBe(testCategory.name);
   // });

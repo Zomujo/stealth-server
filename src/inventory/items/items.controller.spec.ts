@@ -79,7 +79,7 @@ describe('ItemsController', () => {
   //     query.pageSize = 4;
   //     const result = await controller.findAll(query);
   //     expect(result).toBeDefined();
-  //     expect(result.statusCode).toBe(HttpStatus.FOUND);
+  //     expect(result.statusCode).toBe(HttpStatus.OK);
   //     expect(result.data.rows.length).toEqual(query.pageSize);
   //   });
   // });
