@@ -149,22 +149,6 @@ export class StockAdjustmentsService {
   }
 
   /**
-   * Updates a stock adjustment.
-   *
-   * @param id - The ID of the stock adjustment.
-   * @param status - The new status of the stock adjustment.
-   * @returns A Promise that resolves to void.
-   * @throws NotFoundException if the stock adjustment is not found.
-   * @throws InternalServerErrorException if an error occurs during the update process.
-   */
-  async update(
-    _id: string,
-    _status: StockAdjustmentStatus,
-  ): Promise<ApiSuccessResponseNoData> {
-    return;
-  }
-
-  /**
    * Removes a stock adjustment by its ID.
    *
    * @param id - The ID of the stock adjustment to remove.
@@ -174,11 +158,15 @@ export class StockAdjustmentsService {
    */
   async remove(id: string): Promise<ApiSuccessResponseNoData> {
     this.logger.log(`Removing stock adjustment with ID: ${id}`);
-    const res = await this.stockAdjustmentRepo.destroy({ where: { id: id } });
+    const adjustedStock = await this.findOne(id);
+    const _oldBatch = await this.restoreStock(
+      adjustedStock.batch.id,
+      adjustedStock.quantity,
+      adjustedStock.type,
+    );
 
-    if (res == 0) {
-      throw new NotFoundException(`Stock adjustment with id ${id} not found`);
-    }
+    await adjustedStock.destroy();
+
     return;
   }
 
