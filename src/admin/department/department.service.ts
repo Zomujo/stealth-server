@@ -108,8 +108,11 @@ export class DepartmentService {
     adminId: string,
   ) {
     this.logger.log(`Updating department`);
+    const user = await this.userRepo.findByPk(adminId, {
+      attributes: ['id', 'fullName'],
+    });
     const result = await this.departmentRepo.update(
-      { ...updateDepartmentDto, updatedBy: adminId },
+      { ...updateDepartmentDto, updatedBy: user },
       { where: { id } },
     );
     const affected = result[0];
