@@ -120,18 +120,44 @@ export class ItemAnalytics {
   oneYear: AnalyticsData;
 }
 
-export class ItemCounts {
+export enum ChangeType {
+  Increase = 'INCREASE',
+  Decrease = 'DECREASE',
+  None = 'NONE',
+}
+export class TotalItemsDto {
   @ApiProperty({
     example: 4500,
     description: 'The total number of items in the system',
   })
-  totalItems: number;
+  count: number;
+
+  @ApiProperty({
+    example: 6.93,
+    description: 'The total number of items in the system',
+  })
+  percentageDifference: number;
+
+  @ApiProperty({
+    example: 'INCREASE',
+    description:
+      'The type of change in the total number of items in the system',
+    enum: ChangeType,
+  })
+  changeType: ChangeType;
+}
+export class ItemCounts {
+  @ApiProperty({
+    type: TotalItemsDto,
+    description: 'The total number of items in the system',
+  })
+  totalItems: TotalItemsDto;
 
   @ApiProperty({
     example: 1200,
-    description: 'The total items in stock in the system',
+    description: 'The total stock of items in the system',
   })
-  totalInStock: number;
+  totalStock: number;
 
   @ApiProperty({
     example: 20,

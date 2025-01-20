@@ -94,6 +94,26 @@ export class BatchService {
     return this.batchRepo.findAndCountAll(options);
   }
 
+  async calculateTotalStock(whereOptions: any) {
+    const total = await this.batchRepo.findAll({
+      attributes: ['id', 'quantity'],
+      include: [
+        {
+          model: Item,
+          attributes: [],
+          where: {
+            ...whereOptions,
+          },
+        },
+      ],
+    });
+    const totalStock: number = total.reduce(
+      (total, batch) => total + batch.quantity,
+      0,
+    );
+    return totalStock;
+  }
+
   async findOne(id: string, isPopulated: boolean = false): Promise<Batch> {
     let options = {};
     if (isPopulated) {

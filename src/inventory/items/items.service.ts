@@ -13,11 +13,13 @@ import { Supplier } from '../suppliers/models/supplier.model';
 import { BatchService } from './batches/batch.service';
 import {
   ChangeQuantityEvent,
+  ChangeType,
   CreateItemDto,
   ItemCounts,
   ItemPaginationDto,
   ItemStatus,
   OneItem,
+  TotalItemsDto,
   UpdateItemDto,
 } from './dto';
 import { Batch, Item } from './models';
@@ -26,6 +28,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationService } from '../../notification/notification.service';
 import { CreateNotificationDto } from '../../notification/dto';
 import { Features } from '../../shared/enums/permissions.enum';
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 
 @Injectable()
 export class ItemService {
@@ -215,6 +218,7 @@ export class ItemService {
     const totalItems = await this.itemRepo.count({
       where: { ...whereOptions },
     });
+
     const totalInStock = await this.itemRepo.count({
       include: [
         {
@@ -238,16 +242,58 @@ export class ItemService {
         status: ItemStatus.STOCKED,
       },
     });
+
     const lowStocked = totalInStock - highStocked;
 
+    const totalStock =
+      await this.batchService.calculateTotalStock(whereOptions);
+
+    const totalItemsObject = await this.computeTotalItems(totalItems);
     const itemAnalytics = new ItemCounts();
-    itemAnalytics.totalItems = totalItems;
-    itemAnalytics.totalInStock = totalInStock;
+    itemAnalytics.totalItems = totalItemsObject;
+    itemAnalytics.totalStock = totalStock;
     itemAnalytics.outOfStock = outOfStock;
     itemAnalytics.highStocked = highStocked;
     itemAnalytics.lowStocked = lowStocked;
 
     return itemAnalytics;
+  }
+
+  private async computeTotalItems(total: number) {
+    const startOfPreviousMonth = startOfMonth(subMonths(new Date(), 1));
+    const endOfPreviousMonth = endOfMonth(subMonths(new Date(), 1));
+
+    const lastMonthTotal: number = await this.itemRepo.count({
+      where: {
+        updatedAt: {
+          [Op.gte]: startOfPreviousMonth,
+          [Op.lt]: endOfPreviousMonth,
+        },
+      },
+    });
+
+    let totalChange: number;
+    let changeType: ChangeType;
+
+    if (total > lastMonthTotal) {
+      totalChange = total - lastMonthTotal;
+      changeType = ChangeType.Increase;
+    } else if (total < lastMonthTotal) {
+      totalChange = lastMonthTotal - total;
+      changeType = ChangeType.Decrease;
+    } else {
+      totalChange = 0;
+      changeType = ChangeType.None;
+    }
+
+    const change = (totalChange / (lastMonthTotal || totalChange)) * 100;
+    const percentageChange = Math.round(change * 100) / 100;
+
+    const totalItemsObject = new TotalItemsDto();
+    totalItemsObject.count = total;
+    totalItemsObject.changeType = changeType;
+    totalItemsObject.percentageDifference = percentageChange;
+    return totalItemsObject;
   }
 
   /**
