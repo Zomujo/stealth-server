@@ -127,12 +127,12 @@ export class StockAdjustmentsService {
 
     if (dto.batchId || dto.quantity || dto.type) {
       const _oldBatch = await this.restoreStock(
-        adjustedStock.batchId,
+        adjustedStock.batch.id,
         adjustedStock.quantity,
         adjustedStock.type,
       );
 
-      const batchId = dto.batchId ?? adjustedStock.batchId;
+      const batchId = dto.batchId ?? adjustedStock.batch.id;
       const updatingQuantity = dto.quantity ?? adjustedStock.quantity;
       const adjustmentType = dto.type ?? adjustedStock.type;
 
