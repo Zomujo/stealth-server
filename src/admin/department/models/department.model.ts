@@ -1,6 +1,7 @@
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import {
+  AfterFind,
   BelongsTo,
   Column,
   DataType,
@@ -57,11 +58,41 @@ export class Department extends BaseModel {
     },
   })
   @Column({ field: 'created_by', allowNull: true, type: DataType.JSON })
-  createdBy: User;
+  createdBy: Pick<User, 'id' | 'fullName'>;
 
   @ApiResponseProperty({
     example: null,
   })
   @Column({ field: 'updated_by', allowNull: true, type: DataType.JSON })
-  updatedBy: User;
+  updatedBy: Pick<User, 'id' | 'fullName'>;
+
+  @AfterFind
+  static async addCreatedByUser(batches: Department | Department[]) {
+    const records = Array.isArray(batches) ? batches : [batches];
+
+    if (!records.length) return;
+
+    const createdByNotExist = records.every((record) => !record.createdBy.id);
+    if (createdByNotExist) return;
+
+    const userIds = records.map((record) => record.createdBy.id);
+
+    const users = await User.findAll({
+      where: {
+        id: userIds,
+      },
+      attributes: ['id', 'fullName', 'email'],
+    });
+
+    const userMap = new Map(users.map((user) => [user.id, user]));
+
+    for (const record of records) {
+      const user = userMap.get(record.createdBy.id) || null;
+
+      record.createdBy = {
+        id: user.id,
+        fullName: user.fullName,
+      };
+    }
+  }
 }
