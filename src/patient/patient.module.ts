@@ -9,5 +9,6 @@ import { PatientExistsRule } from '../shared/validators';
   imports: [SequelizeModule.forFeature([Patient])],
   providers: [PatientService, PatientExistsRule],
   controllers: [PatientController],
+  exports: [PatientService],
 })
 export class PatientModule {}

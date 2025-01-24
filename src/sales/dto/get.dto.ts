@@ -41,6 +41,7 @@ export class GetSalesDto extends IntersectionType(
     'saleItems',
     'patientId',
     'paymentType',
+    'patientCardId',
   ]),
   OmitType(GenericResponseDto, ['updatedAt']),
 ) {

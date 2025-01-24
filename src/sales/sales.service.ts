@@ -15,6 +15,7 @@ import { BatchService } from '../inventory/items/batches/batch.service';
 import { Patient } from '../patient/models/patient.model';
 import { Batch, Item } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';
+import { PatientService } from '../patient/patient.service';
 
 @Injectable()
 export class SalesService {
@@ -25,6 +26,7 @@ export class SalesService {
 
     private itemService: ItemService,
     private batchService: BatchService,
+    private patientService: PatientService,
   ) {}
 
   async fetchItems(query: FindItemDto, user: IUserPayload) {
@@ -82,6 +84,12 @@ export class SalesService {
     dto.saleNumber = `S-${new Date().getTime()}`;
     dto.subTotal = parseFloat(subTotal.toFixed(2));
     dto.total = parseFloat(subTotal.toFixed(2));
+
+    const patient = await this.patientService.findByCardId(
+      dto.patientCardId,
+      false,
+    );
+    dto.patientId = patient.id;
 
     const sale = await this.saleRepository.create({
       ...dto,

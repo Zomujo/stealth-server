@@ -6,14 +6,7 @@ import {
   OmitType,
   PartialType,
 } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsUUID,
-  Min,
-} from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, Min } from 'class-validator';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { PaymentStatus, SalePaymentType } from '../models/sales.models';
 import { BatchExists, PatientExists } from '../../shared/validators';
@@ -38,13 +31,12 @@ export class CreateSaleItemsDto {
 
 export class CreateSaleDto {
   @ApiPropertyOptional({
-    example: 'f7b1a1a9-7f0e-4f0e-9f0e-7f0e7f0e7f0e',
-    description: 'The Id of the selected item',
+    example: 'gh-56387082875',
+    description: 'The card identification number of the selected patient',
   })
   @IsOptional()
-  @IsUUID(4)
   @PatientExists()
-  patientId: string;
+  patientCardId: string;
 
   @ApiProperty({
     example: 'CASH',
@@ -71,6 +63,11 @@ export class CreateSaleDto {
   notes: string;
 
   @ApiResponseProperty({
+    example: '0723e7a1-ec12-4cdb-b4d5-6169dba540c6',
+  })
+  patientId: string;
+
+  @ApiResponseProperty({
     example: 'S-1234',
   })
   saleNumber: string;
@@ -94,7 +91,7 @@ export class CreateSaleDto {
 
 export class CreateSaleResponseDto extends IntersectionType(
   GenericResponseDto,
-  CreateSaleDto,
+  OmitType(CreateSaleDto, ['patientCardId']),
 ) {
   @ApiResponseProperty({
     example: '34a7159b-94bc-40c3-a710-3aba911e9289',
@@ -118,5 +115,5 @@ export class CreateSaleResponseDto extends IntersectionType(
 }
 
 export class UpdateSalesDto extends PartialType(
-  OmitType(CreateSaleDto, ['patientId']),
+  OmitType(CreateSaleDto, ['patientCardId']),
 ) {}

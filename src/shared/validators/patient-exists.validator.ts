@@ -14,7 +14,7 @@ export class PatientExistsRule implements ValidatorConstraintInterface {
   constructor(private patientService: PatientService) {}
   async validate(value: string) {
     try {
-      await this.patientService.findOne(value, false);
+      await this.patientService.findByCardId(value, false);
     } catch (_e) {
       return false;
     }

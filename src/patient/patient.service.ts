@@ -36,6 +36,21 @@ export class PatientService {
     return patient;
   }
 
+  async findByCardId(id: string, populate: boolean) {
+    let includeOption: any = {};
+    if (populate) {
+      includeOption = { include: [Sale] };
+    }
+    const patient = await this.patientRepository.findOne({
+      where: { cardIdentificationNumber: id },
+      ...includeOption,
+    });
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+    return patient;
+  }
+
   async update(id: string, dto: UpdatePatientDto) {
     const updatedPatient = await this.patientRepository.update(dto, {
       where: { id },
