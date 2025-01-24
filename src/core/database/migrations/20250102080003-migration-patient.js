@@ -27,10 +27,10 @@ module.exports = {
         field: 'date_of_birth',
       },
 
-      createdBy: {
+      createdById: {
         type: Sequelize.STRING,
         allowNull: false,
-        field: 'created_by',
+        field: 'created_by_id',
       },
 
       deletedAt: {

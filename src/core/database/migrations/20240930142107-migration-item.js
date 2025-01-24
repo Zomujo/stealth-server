@@ -64,10 +64,10 @@ module.exports = {
         type: Sequelize.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'),
         allowNull: false,
       },
-      created_by: {
+      created_by_id: {
         type: Sequelize.STRING,
         allowNull: false,
-        field: 'created_by',
+        field: 'created_by_id',
       },
       updatedBy: {
         type: Sequelize.STRING,
@@ -132,10 +132,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      created_by: {
+      created_by_id: {
         type: Sequelize.STRING,
         allowNull: false,
-        field: 'created_by',
+        field: 'created_by_id',
       },
       deletedAt: {
         type: Sequelize.DATE,

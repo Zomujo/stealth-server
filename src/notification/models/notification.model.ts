@@ -1,8 +1,15 @@
-import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
+import {
+  AllowNull,
+  Column,
+  Default,
+  ForeignKey,
+  Table,
+} from 'sequelize-typescript';
 import { BaseModel } from '../../shared/models/base.model';
 import { Facility } from '../../admin/facility/models/facility.model';
 import { Department } from '../../admin/department/models/department.model';
 import { Features } from '../../shared/enums/permissions.enum';
+import { NotificationStatus } from '../enum';
 
 @Table({
   tableName: 'notifications',
@@ -22,6 +29,10 @@ export class NotificationModel extends BaseModel {
 
   @Column
   feature: Features;
+
+  @Default(NotificationStatus.UNREAD)
+  @Column
+  status: NotificationStatus;
 
   @ForeignKey(() => Facility)
   @Column

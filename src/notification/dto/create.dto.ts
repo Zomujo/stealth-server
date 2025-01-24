@@ -1,5 +1,6 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { NotificationStatus } from '../enum';
 
 export class CreateNotificationDto {
   @ApiResponseProperty({
@@ -27,6 +28,14 @@ export class CreateNotificationDto {
   @IsOptional()
   @IsString()
   linkRoute: string;
+
+  @ApiResponseProperty({
+    example: 'UNREAD',
+    enum: NotificationStatus,
+  })
+  @IsNotEmpty()
+  @IsEnum(NotificationStatus)
+  status: NotificationStatus;
 
   @ApiResponseProperty({
     example: new Date(),

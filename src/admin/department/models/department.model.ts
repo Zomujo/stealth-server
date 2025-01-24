@@ -67,8 +67,9 @@ export class Department extends BaseModel {
   updatedBy: Pick<User, 'id' | 'fullName'>;
 
   @AfterFind
-  static async addCreatedByUser(batches: Department | Department[]) {
-    const records = Array.isArray(batches) ? batches : [batches];
+  static async addCreatedByUser(departments: Department | Department[]) {
+    if (!departments) return;
+    const records = Array.isArray(departments) ? departments : [departments];
 
     if (!records.length) return;
 

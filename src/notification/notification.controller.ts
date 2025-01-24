@@ -6,6 +6,7 @@ import {
   Logger,
   Param,
   ParseUUIDPipe,
+  Put,
   Query,
   Sse,
 } from '@nestjs/common';
@@ -69,6 +70,23 @@ export class NotificationController {
         response,
         HttpStatus.OK,
         'Notifications retrieved successfully',
+      );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize'], {
+    message: 'Notification marked as read successfully',
+  })
+  @Put(':id')
+  async markNotificationAsRead(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      const _response = await this.notificationService.markAsRead(id);
+
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'Notification marked as read successfully',
       );
     } catch (error) {
       throwError(this.logger, error);

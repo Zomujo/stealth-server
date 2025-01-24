@@ -26,6 +26,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      status: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'UNREAD',
+      },
       facilityId: {
         type: Sequelize.UUID,
         allowNull: false,

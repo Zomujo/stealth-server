@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { NotificationModel } from './models/notification.model';
 import { CreateNotificationDto } from './dto';
 import { IUserPayload } from '../auth/interface/payload.interface';
+import { NotificationStatus } from './enum';
 
 @Injectable()
 export class NotificationService {
@@ -52,11 +53,29 @@ export class NotificationService {
       where: {
         ...whereOptions,
       },
-      attributes: ['id', 'message', 'linkName', 'linkRoute', 'createdAt'],
+      attributes: [
+        'id',
+        'message',
+        'linkName',
+        'linkRoute',
+        'createdAt',
+        'status',
+      ],
       order: [['createdAt', 'DESC']],
     });
 
     return notifications;
+  }
+
+  async markAsRead(id: string) {
+    const updatedNotification = await this.notifcationRepo.update(
+      { status: NotificationStatus.READ },
+      { where: { id } },
+    );
+    if (updatedNotification[0] == 0) {
+      throw new NotFoundException('Notification not found');
+    }
+    return;
   }
 
   async remove(id: string) {

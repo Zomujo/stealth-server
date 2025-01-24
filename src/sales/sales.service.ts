@@ -85,11 +85,13 @@ export class SalesService {
     dto.subTotal = parseFloat(subTotal.toFixed(2));
     dto.total = parseFloat(subTotal.toFixed(2));
 
-    const patient = await this.patientService.findByCardId(
-      dto.patientCardId,
-      false,
-    );
-    dto.patientId = patient.id;
+    if (dto.patientCardId) {
+      const patient = await this.patientService.findByCardId(
+        dto.patientCardId,
+        false,
+      );
+      dto.patientId = patient.id;
+    }
 
     const sale = await this.saleRepository.create({
       ...dto,

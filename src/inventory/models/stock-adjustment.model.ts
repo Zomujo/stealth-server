@@ -106,10 +106,13 @@ export class StockAdjustment extends BaseModel {
   @Column
   status: StockAdjustmentStatus;
 
+  @Column
+  createdById: string;
+
   @ApiResponseProperty({
     example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
   })
-  @Column
+  @Column(DataType.VIRTUAL)
   createdBy: string;
 
   @ApiResponseProperty({
@@ -142,16 +145,17 @@ export class StockAdjustment extends BaseModel {
   static async addCreatedByUser(
     stockAdjustments: StockAdjustment | StockAdjustment[],
   ) {
+    if (!stockAdjustments) return;
     const records = Array.isArray(stockAdjustments)
       ? stockAdjustments
       : [stockAdjustments];
 
     if (!records.length) return;
 
-    const createdByNotExist = records.every((record) => !record.createdBy);
+    const createdByNotExist = records.every((record) => !record.createdById);
     if (createdByNotExist) return;
 
-    const userIds = records.map((record) => record.createdBy);
+    const userIds = records.map((record) => record.createdById);
 
     const users = await User.findAll({
       where: {
@@ -163,7 +167,7 @@ export class StockAdjustment extends BaseModel {
     const userMap = new Map(users.map((user) => [user.id, user]));
 
     for (const record of records) {
-      const user = userMap.get(record.createdBy) || null;
+      const user = userMap.get(record.createdById) || null;
 
       record.createdBy = `${user.fullName},${user.id}`;
     }

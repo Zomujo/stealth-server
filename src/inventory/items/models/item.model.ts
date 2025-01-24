@@ -68,7 +68,10 @@ export class Item extends BaseModel {
   })
   status: string;
 
-  @Column({ field: 'created_by', allowNull: true })
+  @Column({ field: 'created_by_id', allowNull: true })
+  createdById: string;
+
+  @Column(DataType.VIRTUAL)
   createdBy: string;
 
   // relationships
@@ -114,14 +117,15 @@ export class Item extends BaseModel {
 
   @AfterFind
   static async addCreatedByUser(items: Item | Item[]) {
+    if (!items) return;
     const records = Array.isArray(items) ? items : [items];
 
     if (!records.length) return;
 
-    const createdByNotExist = records.every((record) => !record.createdBy);
+    const createdByNotExist = records.every((record) => !record.createdById);
     if (createdByNotExist) return;
 
-    const userIds = records.map((record) => record.createdBy);
+    const userIds = records.map((record) => record.createdById);
 
     const users = await User.findAll({
       where: {
@@ -133,7 +137,7 @@ export class Item extends BaseModel {
     const userMap = new Map(users.map((user) => [user.id, user]));
 
     for (const record of records) {
-      const user = userMap.get(record.createdBy) || null;
+      const user = userMap.get(record.createdById) || null;
 
       record.createdBy = `${user.fullName},${user.id}`;
     }

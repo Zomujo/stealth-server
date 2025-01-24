@@ -34,8 +34,8 @@ export class Batch extends BaseModel {
   @Column({ type: DataType.INTEGER, allowNull: false })
   quantity: number;
 
-  @Column({ field: 'created_by', allowNull: true })
-  createdBy: string;
+  @Column({ field: 'created_by_id', allowNull: true })
+  createdById: string;
 
   @ForeignKey(() => Supplier)
   @Column
@@ -44,16 +44,20 @@ export class Batch extends BaseModel {
   @BelongsTo(() => Supplier)
   supplier: Supplier;
 
+  @Column(DataType.VIRTUAL)
+  createdBy: string;
+
   @AfterFind
-  static async addCreatedByUser(batches: Item | Item[]) {
+  static async addCreatedByUser(batches: Batch | Batch[]) {
+    if (!batches) return;
     const records = Array.isArray(batches) ? batches : [batches];
 
     if (!records.length) return;
 
-    const createdByNotExist = records.every((record) => !record.createdBy);
+    const createdByNotExist = records.every((record) => !record.createdById);
     if (createdByNotExist) return;
 
-    const userIds = records.map((record) => record.createdBy);
+    const userIds = records.map((record) => record.createdById);
 
     const users = await User.findAll({
       where: {
@@ -65,7 +69,7 @@ export class Batch extends BaseModel {
     const userMap = new Map(users.map((user) => [user.id, user]));
 
     for (const record of records) {
-      const user = userMap.get(record.createdBy) || null;
+      const user = userMap.get(record.createdById) || null;
 
       record.createdBy = `${user.fullName},${user.id}`;
     }

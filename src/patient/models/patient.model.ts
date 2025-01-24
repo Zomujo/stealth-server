@@ -28,6 +28,9 @@ export class Patient extends BaseModel {
   dateOfBirth: Date;
 
   @Column
+  createdById: string;
+
+  @Column(DataType.VIRTUAL)
   createdBy: string;
 
   @DeletedAt
@@ -43,14 +46,15 @@ export class Patient extends BaseModel {
 
   @AfterFind
   static async addCreatedByUser(patients: Patient | Patient[]) {
+    if (!patients) return;
     const records = Array.isArray(patients) ? patients : [patients];
 
     if (!records.length) return;
 
-    const createdByNotExist = records.every((record) => !record.createdBy);
+    const createdByNotExist = records.every((record) => !record.createdById);
     if (createdByNotExist) return;
 
-    const userIds = records.map((record) => record.createdBy);
+    const userIds = records.map((record) => record.createdById);
 
     const users = await User.findAll({
       where: {
@@ -62,7 +66,7 @@ export class Patient extends BaseModel {
     const userMap = new Map(users.map((user) => [user.id, user]));
 
     for (const record of records) {
-      const user = userMap.get(record.createdBy) || null;
+      const user = userMap.get(record.createdById) || null;
 
       record.createdBy = `${user.fullName},${user.id}`;
     }
