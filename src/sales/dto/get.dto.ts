@@ -49,6 +49,7 @@ export class GetSalesDto extends IntersectionType(
     example: {
       id: '4f2dd5bb-ae60-41ca-9227-0fb3dacebcbe',
       cardIdentificationNumber: 'gh-56387082875',
+      name: 'Paul Billings',
     },
   })
   patient: object;
@@ -87,6 +88,7 @@ export class GetSaleDto extends OmitType(CreateSaleResponseDto, [
     example: {
       id: '4f2dd5bb-ae60-41ca-9227-0fb3dacebcbe',
       cardIdentificationNumber: 'gh-56387082875',
+      name: 'Paul Billings',
     },
   })
   patient: object;
