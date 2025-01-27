@@ -16,6 +16,7 @@ import { Patient } from '../patient/models/patient.model';
 import { Batch, Item } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { PatientService } from '../patient/patient.service';
+import { endOfDay, startOfDay } from 'date-fns';
 
 @Injectable()
 export class SalesService {
@@ -107,6 +108,18 @@ export class SalesService {
   async fetchAll(query: GetSalesPaginationDto, user: IUserPayload) {
     const whereConditions: Record<string, Record<any, any>> = {};
     whereConditions.facilityId = { [Op.eq]: user.facility };
+    const currentDate = new Date();
+    const dayStart = startOfDay(currentDate);
+    const dayEnd = endOfDay(currentDate);
+
+    const todaySales = query.todaySales === 'true';
+
+    if (todaySales) {
+      whereConditions.createdAt = {
+        [Op.gt]: dayStart,
+        [Op.lte]: dayEnd,
+      };
+    }
 
     if (user.department) {
       whereConditions.departmentId = { [Op.eq]: user.department };

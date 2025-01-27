@@ -32,6 +32,7 @@ import { Op } from 'sequelize';
 import { AdminSignUpDto } from '../user/dto/signup.dto';
 import { FacilityService } from '../admin/facility/facility.service';
 import { Facility } from '../admin/facility/models/facility.model';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +50,7 @@ export class AuthService {
     private readonly mailService: MailService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly facilityService: FacilityService,
+    private readonly httpService: HttpService,
   ) {
     this.logger = new Logger(AuthService.name);
   }
@@ -409,8 +411,12 @@ export class AuthService {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
 
     try {
-      const request = await fetch(url);
-      const response = await request.json();
+      const request = await this.httpService.get(url);
+      // const request = await fetch(url);
+      let response;
+      request.subscribe((resp) => {
+        response = resp.data;
+      });
       if (response.address) {
         const address = `${response.address.town}, ${response.address.city}, ${response.address.country_code.toUpperCase()}`;
         return address;

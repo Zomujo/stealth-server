@@ -7,7 +7,7 @@ import {
   IntersectionType,
   ApiResponseProperty,
 } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsBooleanString, IsEnum, IsOptional } from 'class-validator';
 import { PaymentStatus } from '../models/sales.models';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
 
@@ -111,6 +111,14 @@ export class GetSaleDto extends OmitType(CreateSaleResponseDto, [
 }
 
 export class GetSalesPaginationDto extends PaginationRequestDto {
+  @ApiPropertyOptional({
+    example: true,
+    description: "The filter for viewing only today's sales",
+  })
+  @IsOptional()
+  @IsBooleanString()
+  todaySales: string;
+
   @ApiPropertyOptional({
     enum: PaymentStatus,
     description: 'The various payment statuses',

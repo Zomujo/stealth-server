@@ -53,7 +53,9 @@ export class FacilityService {
         (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {},
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy && [[query.orderBy, 'ASC']],
+      order: query.orderBy
+        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
+        : [['updatedAt', 'DESC']],
       distinct: true,
     };
     const facilities = await this.facilityRepo.findAndCountAll(filter);

@@ -1,0 +1,21 @@
+extends baseEmail
+
+block content
+    h1 New Complaint Received
+    p Hello Customer Care Team,
+    p A new complaint has been lodged by a user. Here are the details:
+    ul
+        li
+            strong User Name: 
+            | #{fullName}
+        li
+            strong Email: 
+            | #{email}
+        li
+            strong Complaint: 
+            p(style="margin-left: 20px; font-style: italic;") #{complaint}
+    p Please address this issue at the earliest convenience.
+    p Thank you.
+    hr
+    footer
+    p This is an automated message. Please do not reply to this email.

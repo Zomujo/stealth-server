@@ -14,6 +14,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { LoginSession } from './models/login-session.model';
 import { PermissionGuard } from './guards/permissions.guard';
 import { FacilityModule } from '../admin/facility/facility.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { FacilityModule } from '../admin/facility/facility.module';
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     FacilityModule,
+    HttpModule,
   ],
   controllers: [AuthController],
   providers: [

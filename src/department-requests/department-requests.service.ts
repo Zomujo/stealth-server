@@ -89,7 +89,14 @@ export class DepartmentRequestsService {
         attributes,
         limit: query.pageSize || 10,
         offset: query.pageSize * (query.page - 1) || 0,
-        order: query.orderBy && [[query.orderBy, 'ASC']],
+        order: query.orderBy
+          ? [
+              [
+                query.orderBy,
+                query.orderDirection ? query.orderDirection : 'ASC',
+              ],
+            ]
+          : [['updatedAt', 'DESC']],
         distinct: true,
         include: [
           { model: Item, attributes: [] },
