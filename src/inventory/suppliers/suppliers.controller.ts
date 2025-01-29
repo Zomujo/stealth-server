@@ -16,12 +16,12 @@ import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
 import {
   CreateSupplierDto,
+  GetSupplierDto,
   GetSupplierResponse,
   GetSuppliersResponse,
   SupplierResponse,
   UpdateSupplierDto,
 } from './dto';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
@@ -76,7 +76,7 @@ export class SuppliersController {
   @Get()
   async findAll(
     @GetUser('facility', ParseUUIDPipe) facilityId: string,
-    @Query() query: PaginationRequestDto,
+    @Query() query: GetSupplierDto,
   ) {
     try {
       const suppliers = await this.suppliersService.findAll(facilityId, query);

@@ -17,6 +17,7 @@ import { Batch, Item } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { PatientService } from '../patient/patient.service';
 import { endOfDay, startOfDay } from 'date-fns';
+import { generateFilter } from '../shared/factory';
 
 @Injectable()
 export class SalesService {
@@ -107,7 +108,12 @@ export class SalesService {
 
   async fetchAll(query: GetSalesPaginationDto, user: IUserPayload) {
     const whereConditions: Record<string, Record<any, any>> = {};
-    whereConditions.facilityId = { [Op.eq]: user.facility };
+    const queryFilter = generateFilter(query);
+
+    whereConditions.facilityId = {
+      [Op.eq]: user.facility,
+      ...queryFilter.searchFilter,
+    };
     const currentDate = new Date();
     const dayStart = startOfDay(currentDate);
     const dayEnd = endOfDay(currentDate);
@@ -136,11 +142,7 @@ export class SalesService {
 
     const filter: FindAndCountOptions<Sale> = {
       where: whereConditions,
-      limit: query.pageSize || 10,
-      offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy
-        ? [[query.orderBy, query.orderDirection ?? 'ASC']]
-        : [['updatedAt', 'DESC']],
+      ...queryFilter.pageFilter,
       attributes: [
         'id',
         'saleItems',

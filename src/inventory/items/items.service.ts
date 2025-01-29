@@ -9,7 +9,6 @@ import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
-import { Supplier } from '../suppliers/models/supplier.model';
 import { BatchService } from './batches/batch.service';
 import {
   ChangeQuantityEvent,
@@ -91,24 +90,25 @@ export class ItemService {
     const filter = this.applyFilter(query);
     const items = await this.itemRepo.findAndCountAll(filter);
 
-    const itemList = items.rows.map((item) => {
-      const modItem: Item = item.get({ plain: true });
-
-      const totalStock = modItem.batches.reduce(
-        (total, batch) => total + batch.quantity,
-        0,
-      );
-      const suppliers = modItem.batches.map((batch) => batch.supplier);
-      delete modItem.batches;
-      return {
-        ...modItem,
-        supplier: suppliers[0],
-        ...(suppliers.length > 1 && {
-          supplierRemainder: suppliers.length - 1,
-        }),
-        totalStock,
-      };
-    });
+    const itemList = await Promise.all(
+      items.rows.map(async (item) => {
+        const modItem: Item = item.get({ plain: true });
+        const batches = await this.batchService.findAll(modItem.id);
+        const totalStock = batches.reduce(
+          (total, batch) => total + batch.quantity,
+          0,
+        );
+        // const suppliers = modItem.batches.map((batch) => batch.supplier);
+        // supplier: suppliers[0],
+        //   ...(suppliers.length > 1 && {
+        //     supplierRemainder: suppliers.length - 1,
+        //   }),
+        return {
+          ...modItem,
+          totalStock,
+        };
+      }),
+    );
 
     this.logger.log(`Retrieved ${items.count} items`);
 
@@ -334,25 +334,25 @@ export class ItemService {
         'createdAt',
         'updatedAt',
       ],
-      include: [
-        {
-          model: Batch,
-          include: [
-            {
-              model: Supplier,
-              attributes: ['id', 'name'],
-              where: {
-                ...(query.supplierId && {
-                  id: query.supplierId,
-                }),
-              },
-            },
-          ],
-        },
-        { model: ItemCategory, attributes: ['id', 'name'] },
-      ],
+      include: [{ model: ItemCategory, attributes: ['id', 'name'] }],
       distinct: true,
     };
+    //  {
+    //       model: Batch,
+    //       attributes: ['quantity', 'supplierId'],
+    //       limit: 3,
+    //       include: [
+    //         {
+    //           model: Supplier,
+    //           attributes: ['id', 'name'],
+    //           where: {
+    //             ...(query.supplierId && {
+    //               id: query.supplierId,
+    //             }),
+    //           },
+    //         },
+    //       ],
+    //     },
   }
 
   @OnEvent('quantity.changed')

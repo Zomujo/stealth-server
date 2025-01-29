@@ -12,6 +12,7 @@ export enum DateRange {
   THIS_WEEK = 'this_week',
   THIS_MONTH = 'this_month',
   LAST_MONTH = 'last_month',
+  LAST_THREE_MONTHS = 'last_three_months',
   THIS_YEAR = 'this_year',
 }
 

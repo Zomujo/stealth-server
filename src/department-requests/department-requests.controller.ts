@@ -20,11 +20,11 @@ import {
 } from 'src/utils/responses/success.response';
 import { throwError } from 'src/utils/responses/error.response';
 import {
+  FindRequestPaginationDto,
   GetDepartmentRequestDto,
   GetDepartmentRequestResponseDto,
   GetSpecificRequestResponseDto,
 } from './dto/';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { GetUser } from 'src/auth/decorator';
 import { IUserPayload } from '../auth/interface/payload.interface';
 
@@ -43,14 +43,13 @@ export class DepartmentRequestsController {
   })
   @Get()
   async getRequests(
-    @Query() query: PaginationRequestDto,
+    @Query() query: FindRequestPaginationDto,
     @GetUser() user: IUserPayload,
   ) {
     try {
       const response = await this.departmentRequestsService.fetchAll(
         query,
         user,
-        true,
       );
 
       return new ApiSuccessResponseDto(

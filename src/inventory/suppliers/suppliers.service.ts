@@ -1,10 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { StatusType, Supplier } from './models/supplier.model';
-import { CreateSupplierDto, UpdateSupplierDto } from './dto';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { CreateSupplierDto, GetSupplierDto, UpdateSupplierDto } from './dto';
 import { FindAndCountOptions, literal, Op } from 'sequelize';
 import { Batch } from '../items/models';
+import { generateFilter } from '../../shared/factory';
 
 @Injectable()
 export class SuppliersService {
@@ -41,20 +41,25 @@ export class SuppliersService {
 
   async findAll(
     facilityId: string,
-    query?: PaginationRequestDto,
+    query?: GetSupplierDto,
   ): Promise<[Supplier[], number]> {
     // todo: refactor filter
+    const queryFilter = generateFilter(query);
     const paginateObject = query
       ? {
           where: {
-            facilityId,
-            ...((query.search && {
-              name: { [Op.iLike]: `%${query.search}%` },
-            }) ||
-              {}),
+            [Op.and]: [
+              { facilityId },
+              query.search && {
+                name: { [Op.iLike]: `%${query.search}%` },
+              },
+              query.status && {
+                status: query.status,
+              },
+              queryFilter.searchFilter,
+            ],
           },
-          limit: query.pageSize || 10,
-          offset: query.pageSize * (query.page - 1) || 0,
+          ...queryFilter.pageFilter,
         }
       : {};
 

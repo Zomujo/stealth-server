@@ -63,8 +63,12 @@ export class BatchService {
     return;
   }
 
-  async findAll(): Promise<Batch[]> {
-    return this.batchRepo.findAll({ include: [Supplier] });
+  async findAll(itemId?: string): Promise<Batch[]> {
+    const whereOptions = itemId ? { itemId } : {};
+    return this.batchRepo.findAll({
+      where: whereOptions,
+      include: [{ model: Supplier, attributes: ['id', 'name'] }],
+    });
   }
 
   async fetchAllPaginate(itemId: string, query: PaginationRequestDto) {

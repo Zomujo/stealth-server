@@ -5,7 +5,14 @@ import {
   OmitType,
   PickType,
 } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsUUID, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import {
   DepartmentRequestStatus,
@@ -13,6 +20,34 @@ import {
 } from '../models/department-requests.model';
 import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
 import { ItemExists } from '../../shared/validators';
+
+export class FindRequestPaginationDto extends PaginationRequestDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  departmentId: string;
+
+  @ApiPropertyOptional({ enum: DepartmentRequestStatus })
+  @IsOptional()
+  @IsEnum(DepartmentRequestStatus)
+  status: DepartmentRequestStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  itemId: string;
+}
+export class FindItemRequestPaginationDto extends PaginationRequestDto {
+  @ApiPropertyOptional({ enum: DepartmentRequestStatus })
+  @IsOptional()
+  @IsEnum(DepartmentRequestStatus)
+  status: DepartmentRequestStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  itemId: string;
+}
 
 export class GetDepartmentRequestDto extends GenericResponseDto {
   @ApiProperty({

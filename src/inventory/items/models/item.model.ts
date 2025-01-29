@@ -1,5 +1,4 @@
 import {
-  BeforeCreate,
   BelongsTo,
   Column,
   DataType,
@@ -13,7 +12,6 @@ import { Facility } from 'src/admin/facility/models/facility.model';
 import { DepartmentRequest } from 'src/department-requests/models/department-requests.model';
 import { ItemCategory } from 'src/inventory/items-category/models/items-category.model';
 import { BaseModel } from 'src/shared/models/base.model';
-import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Batch } from '.';
 import { StockAdjustment } from '../../models/stock-adjustment.model';
 import { User } from '../../../auth/models/user.model';
@@ -140,35 +138,6 @@ export class Item extends BaseModel {
       const user = userMap.get(record.createdById) || null;
 
       record.createdBy = `${user.fullName},${user.id}`;
-    }
-  }
-
-  @BeforeCreate
-  static async validate(item: Item) {
-    const facility = await Facility.findByPk(item.dataValues.facilityId);
-    if (!facility) throw new NotFoundException('Facility not found');
-    const department =
-      item.dataValues.departmentId != undefined
-        ? await Department.findByPk(item.dataValues.departmentId)
-        : true;
-    if (!department) throw new NotFoundException('Department not found');
-    const category = await ItemCategory.findByPk(item.dataValues.categoryId);
-    if (!category)
-      throw new NotFoundException(
-        `Category with Id ${item.dataValues.categoryId} Not found`,
-      );
-    const exists = await Item.findOne({ where: { name: item.name } });
-    if (
-      exists &&
-      (exists.facilityId == facility.id ||
-        (department && exists.departmentId == (department as Department).id))
-    ) {
-      throw new ConflictException(
-        JSON.stringify({
-          message: 'Item already exists in facility or department',
-          id: exists.id,
-        }),
-      );
     }
   }
 }

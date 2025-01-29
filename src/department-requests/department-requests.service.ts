@@ -8,14 +8,18 @@ import { InjectModel } from '@nestjs/sequelize';
 import { DepartmentRequest } from './models/department-requests.model';
 import { ItemService } from 'src/inventory/items/items.service';
 import { DepartmentService } from 'src/admin/department/department.service';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
-import { GetDepartmentRequestDto } from './dto/';
+import {
+  FindItemRequestPaginationDto,
+  FindRequestPaginationDto,
+  GetDepartmentRequestDto,
+} from './dto';
 import { Item } from '../inventory/items/models';
 import { Department } from '../admin/department/models/department.model';
 import { col, FindAttributeOptions, Op, WhereOptions } from 'sequelize';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { FacilityService } from '../admin/facility/facility.service';
+import { generateFilter } from '../shared/factory';
 
 @Injectable()
 export class DepartmentRequestsService {
@@ -45,39 +49,28 @@ export class DepartmentRequestsService {
     return result;
   }
 
-  async fetchAll(
-    query: PaginationRequestDto,
-    user: IUserPayload,
-    isItem: boolean = false,
-  ) {
-    let attributes: FindAttributeOptions;
-    let whereOptions: WhereOptions<DepartmentRequest>;
-    if (isItem) {
-      attributes = [
-        'id',
-        [col('department.name'), 'departmentName'],
-        'requestNumber',
-        [col('item.name'), 'itemName'],
-        'quantity',
-        ['created_at', 'dateRequested'],
-        'status',
-      ];
-      whereOptions = {
-        facilityId: user.facility,
-      };
-    } else {
-      attributes = [
-        'id',
-        'requestNumber',
-        [col('item.name'), 'itemName'],
-        'quantity',
-        ['created_at', 'dateRequested'],
-        'status',
-      ];
-      whereOptions = {
-        departmentId: user.department,
-      };
-    }
+  async fetchAll(query: FindRequestPaginationDto, user: IUserPayload) {
+    const queryFilter = generateFilter(query);
+
+    const attributes: FindAttributeOptions = [
+      'id',
+      [col('department.name'), 'departmentName'],
+      'requestNumber',
+      'itemId',
+      [col('item.name'), 'itemName'],
+      'quantity',
+      ['created_at', 'dateRequested'],
+      'status',
+    ];
+    const whereOptions: WhereOptions<DepartmentRequest> = {
+      [Op.and]: [
+        { facilityId: user.facility },
+        query.departmentId && { departmentId: query.departmentId },
+        query.status && { status: query.status },
+        query.itemId && { itemId: query.itemId },
+      ],
+    };
+
     const searchByName =
       (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {};
     const itemRequests = await this.departmentRequestRepository.findAndCountAll(
@@ -85,18 +78,62 @@ export class DepartmentRequestsService {
         where: {
           ...whereOptions,
           ...searchByName,
+          ...queryFilter.searchFilter,
         },
         attributes,
-        limit: query.pageSize || 10,
-        offset: query.pageSize * (query.page - 1) || 0,
-        order: query.orderBy
-          ? [
-              [
-                query.orderBy,
-                query.orderDirection ? query.orderDirection : 'ASC',
-              ],
-            ]
-          : [['updatedAt', 'DESC']],
+        ...queryFilter.pageFilter,
+        distinct: true,
+        include: [
+          { model: Item, attributes: [] },
+          { model: Department, attributes: [] },
+        ],
+      },
+    );
+    const response = new PaginatedDataResponseDto<GetDepartmentRequestDto[]>(
+      itemRequests.rows,
+      query.page || 1,
+      query.pageSize,
+      itemRequests.count,
+    );
+
+    return response;
+  }
+
+  async fetchAllItemRequests(
+    query: FindItemRequestPaginationDto,
+    user: IUserPayload,
+  ) {
+    const queryFilter = generateFilter(query);
+
+    const attributes: FindAttributeOptions = [
+      'id',
+      'requestNumber',
+      'itemId',
+      [col('item.name'), 'itemName'],
+      'quantity',
+      ['created_at', 'dateRequested'],
+      'status',
+    ];
+
+    const whereOptions: WhereOptions<DepartmentRequest> = {
+      [Op.and]: [
+        { departmentId: user.department },
+        query.status && { status: query.status },
+        query.itemId && { itemId: query.itemId },
+      ],
+    };
+
+    const searchByName =
+      (query.search && { name: { [Op.iLike]: `%${query.search}%` } }) || {};
+    const itemRequests = await this.departmentRequestRepository.findAndCountAll(
+      {
+        where: {
+          ...whereOptions,
+          ...searchByName,
+          ...queryFilter.searchFilter,
+        },
+        attributes,
+        ...queryFilter.pageFilter,
         distinct: true,
         include: [
           { model: Item, attributes: [] },

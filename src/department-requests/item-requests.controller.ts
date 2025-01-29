@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { DepartmentRequestsService } from './department-requests.service';
 import {
   CreateDepartmentRequestDto,
+  FindItemRequestPaginationDto,
   GetDepartmentRequestDto,
   GetItemRequestsResponseDto,
   GetSpecificRequestResponseDto,
@@ -27,7 +28,6 @@ import {
   ApiSuccessResponseNoData,
 } from '../utils/responses/success.response';
 import { throwError } from '../utils/responses/error.response';
-import { PaginationRequestDto } from '../shared/docs/dto/pagination.dto';
 import { IUserPayload } from '../auth/interface/payload.interface';
 
 @ApiTags('Department Item Requests')
@@ -71,14 +71,12 @@ export class ItemRequestsController {
   })
   @Get()
   async getRequests(
-    @Query() query: PaginationRequestDto,
+    @Query() query: FindItemRequestPaginationDto,
     @GetUser() user: IUserPayload,
   ) {
     try {
-      const response = await this.departmentRequestsService.fetchAll(
-        query,
-        user,
-      );
+      const response =
+        await this.departmentRequestsService.fetchAllItemRequests(query, user);
 
       return new ApiSuccessResponseDto(
         response,

@@ -43,6 +43,16 @@ export const getDateRangeFilter = (
           [Op.between]: [startOfMonth(lastMonth), endOfMonth(lastMonth)],
         },
       };
+    case DateRange.LAST_THREE_MONTHS:
+      const lastThreeMonths = subMonths(now, 3);
+      return {
+        createdAt: {
+          [Op.between]: [
+            startOfMonth(lastThreeMonths),
+            endOfMonth(lastThreeMonths),
+          ],
+        },
+      };
     case DateRange.THIS_YEAR:
       return {
         createdAt: {
