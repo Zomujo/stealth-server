@@ -220,7 +220,11 @@ export class StockAdjustmentsService {
     if (query.orderBy == 'itemName') {
       itemOrderOptions = {
         order: [
-          [Item, 'name', query.orderDirection ? query.orderDirection : 'ASC'],
+          [
+            { model: Item, as: 'item' },
+            'name',
+            query.orderDirection ? query.orderDirection : 'ASC',
+          ],
         ],
       };
       delete queryFilter.pageFilter.order;
