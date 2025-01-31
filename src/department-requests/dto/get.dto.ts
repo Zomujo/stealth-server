@@ -97,6 +97,11 @@ export class GetItemRequestsResponseDto extends PickType(
   ['id', 'requestNumber', 'quantity', 'status'],
 ) {
   @ApiResponseProperty({
+    example: '8304e5ff-6324-4863-ac51-8fcbc6812b13',
+  })
+  itemId: string;
+
+  @ApiResponseProperty({
     example: 'Some Name',
   })
   itemName: string;
