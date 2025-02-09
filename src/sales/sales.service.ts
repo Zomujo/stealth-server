@@ -110,7 +110,6 @@ export class SalesService {
 
     whereConditions.facilityId = {
       [Op.eq]: user.facility,
-      ...queryFilter.searchFilter,
     };
     const currentDate = new Date();
     const dayStart = startOfDay(currentDate);
@@ -139,7 +138,7 @@ export class SalesService {
     }
 
     const filter: FindAndCountOptions<Sale> = {
-      where: whereConditions,
+      where: { ...whereConditions, ...queryFilter.searchFilter },
       ...queryFilter.pageFilter,
       attributes: [
         'id',
