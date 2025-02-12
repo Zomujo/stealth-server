@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Logger,
   ParseUUIDPipe,
@@ -11,8 +12,11 @@ import { CustomApiResponse } from '../shared/docs/decorators';
 import { UserService } from './user.service';
 import { throwError } from '../utils/responses/error.response';
 import { GetUser } from '../auth/decorator';
-import { ApiSuccessResponseNoData } from '../utils/responses/success.response';
-import { CreateSettingsDto } from './dto';
+import {
+  ApiSuccessResponseDto,
+  ApiSuccessResponseNoData,
+} from '../utils/responses/success.response';
+import { CreateSettingsDto, GetSettingsDto } from './dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -23,16 +27,34 @@ export class UserController {
   @CustomApiResponse(['successNull', 'notfound', 'authorize'], {
     message: 'Settings added successfully',
   })
-  @Patch('setting')
+  @Patch('settings')
   async addSettings(
     @Body() dto: CreateSettingsDto,
     @GetUser('sub', ParseUUIDPipe) userId: string,
   ) {
     try {
-      const _response = await this.userService.addService(dto, userId);
+      const _response = await this.userService.addSettings(dto, userId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Settings added successfully',
+      );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['success', 'notfound', 'authorize'], {
+    type: GetSettingsDto,
+    message: 'Settings fetched successfully',
+  })
+  @Get('settings')
+  async findSettings(@GetUser('sub', ParseUUIDPipe) userId: string) {
+    try {
+      const response = await this.userService.findSettings(userId);
+      return new ApiSuccessResponseDto(
+        response,
+        HttpStatus.OK,
+        'Settings fetched successfully',
       );
     } catch (error) {
       throwError(this.logger, error);

@@ -91,12 +91,15 @@ export class CreateUserDto extends IntersectionType(GenericResponseDto) {
 }
 
 export class CreateSettingsDto {
-  @ApiProperty({ example: true })
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
   emailDepartmentRequests: boolean;
 
-  @ApiProperty({ example: true })
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
   emailItemLowStocks: boolean;
 
-  @ApiProperty({ example: true })
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
   emailItemOutOfStock: boolean;
 }

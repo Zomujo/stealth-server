@@ -35,13 +35,37 @@ export class UserService {
     return user;
   }
 
-  async addService(dto: CreateSettingsDto, userId: string) {
+  async addSettings(dto: CreateSettingsDto, userId: string) {
     const user = await this.findOne(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    try {
+      const settings = await this.findSettings(userId);
+      await settings.update({ ...dto });
+    } catch {
+      await this.settingsRepository.create({
+        ...dto,
+        userId,
+      });
+    }
 
-    const _settings = await this.settingsRepository.create({ ...dto, userId });
     return;
+  }
+
+  async findSettings(userId: string) {
+    const settings = await this.settingsRepository.findOne({
+      where: { userId },
+      attributes: [
+        'id',
+        'emailDepartmentRequests',
+        'emailItemLowStocks',
+        'emailItemOutOfStock',
+      ],
+    });
+    if (!settings) {
+      throw new NotFoundException('Settings not found');
+    }
+    return settings;
   }
 }

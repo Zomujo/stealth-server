@@ -1,6 +1,12 @@
-import { ApiResponseProperty, OmitType } from '@nestjs/swagger';
-import { CreateUserDto } from './create.dto';
+import {
+  ApiResponseProperty,
+  IntersectionType,
+  OmitType,
+  PickType,
+} from '@nestjs/swagger';
+import { CreateSettingsDto, CreateUserDto } from './create.dto';
 import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
+import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
 
 export class GetUserDto extends OmitType(CreateUserDto, [
   'deactivatedBy',
@@ -13,3 +19,8 @@ export class GetUserDto extends OmitType(CreateUserDto, [
   })
   facility: GetNoPaginateDto;
 }
+
+export class GetSettingsDto extends IntersectionType(
+  PickType(GenericResponseDto, ['id']),
+  CreateSettingsDto,
+) {}
