@@ -12,7 +12,7 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { AccountState, User } from './models/user.model';
 import { UpdateUserDto } from '../user/dto';
-import { LoginDto, LoginTokenDto, TokenDto } from './dto';
+import { LoginDto, LoginTokenDto, RefreshTokenDto, TokenDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from './interface/jwt.config';
@@ -163,23 +163,28 @@ export class AuthService {
     return { message: 'user deleted' };
   }
 
-  async refreshToken(userId: string, sessionId: string) {
-    const user = await this.userRepository.findByPk(userId);
+  async refreshToken(token: string) {
+    const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
+      secret: this.jwtConfiguration.secret,
+    });
+    const user = await this.userRepository.findByPk(payload.sub);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    if (sessionId) {
-      const loginSession = await this.loginSessionRepository.findOne({
-        where: {
-          id: sessionId,
-        },
-      });
+    if (payload.session) {
+      const loginSession = await this.loginSessionRepository.findByPk(
+        payload.session,
+      );
       loginSession.status = StatusType.ACTIVE;
       await loginSession.save();
 
-      return this.generateTokens(user, sessionId);
+      return new RefreshTokenDto(
+        (await this.generateTokens(user, payload.session)).accessToken,
+      );
     } else {
-      return this.generateTokens(user, null);
+      return new RefreshTokenDto(
+        (await this.generateTokens(user, null)).accessToken,
+      );
     }
   }
 

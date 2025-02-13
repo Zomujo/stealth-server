@@ -13,6 +13,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -30,6 +31,7 @@ import {
   ImageUploadDto,
   LoginDto,
   LoginTokenDto,
+  RefreshTokenDto,
   ResetPasswordDto,
   SendForgotPasswordEmailDto,
   TokenDto,
@@ -257,19 +259,14 @@ export class AuthController {
     type: ApiErrorResponse,
     description: 'An unexpected error occured',
   })
-  @ApiBearerAuth('access-token')
-  @Authorize()
   @Get('refresh')
-  async refreshTokens(
-    @GetUser('sub', ParseUUIDPipe) id: string,
-    @GetUser('session') sessionId: string,
-  ) {
+  async refreshTokens(@Query('token') token: string) {
     try {
-      const response = await this.authService.refreshToken(id, sessionId);
-      return new ApiSuccessResponseDto<TokenDto>(
+      const response = await this.authService.refreshToken(token);
+      return new ApiSuccessResponseDto<RefreshTokenDto>(
         response,
         HttpStatus.OK,
-        'tokens refreshed successfully',
+        'Tokens refreshed successfully',
       );
     } catch (error) {
       if (error instanceof HttpException) {
