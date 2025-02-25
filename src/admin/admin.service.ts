@@ -15,6 +15,9 @@ import { CreateUserDto } from '../user/dto';
 import * as roles from './data/roles.json';
 import * as bcrypt from 'bcrypt';
 import { FacilityService } from './facility/facility.service';
+import { PaginationRequestDto } from '../shared/docs/dto/pagination.dto';
+import { IUserPayload } from '../auth/interface/payload.interface';
+import { generateFilter } from '../shared/factory';
 
 @Injectable()
 export class AdminService {
@@ -56,21 +59,25 @@ export class AdminService {
     return roles.roles;
   }
 
-  async findFaciltyPersonnel(
-    facilityId: string,
-    departmentId: string,
-    userId: string,
-  ) {
+  async findFaciltyPersonnel(user: IUserPayload, query: PaginationRequestDto) {
     this.logger.log(`Retrieving facilities personnel`);
-    const departmentIdObj = departmentId ? { departmentId } : {};
+    const queryFilter = generateFilter(query);
+    const userId = user.sub;
+    const departmentIdObj = user.department
+      ? { departmentId: user.department }
+      : {};
     const users = await this.userRepository.findAndCountAll({
       where: {
-        facilityId,
+        facilityId: user.facility,
         ...departmentIdObj,
+        ...queryFilter.searchFilter,
       },
-      order: [
-        [
-          literal(`
+      ...queryFilter.pageFilter,
+      order: query.orderBy
+        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
+        : [
+            [
+              literal(`
         CASE 
           WHEN status = 'Pending' THEN 1
           WHEN status = 'Accepted' THEN 2
@@ -79,9 +86,9 @@ export class AdminService {
           WHEN status = 'Inactive' THEN 5
         END
       `),
-          'ASC',
-        ],
-      ],
+              'ASC',
+            ],
+          ],
       include: [{ model: Department, attributes: ['id', 'name'] }],
       attributes: ['id', 'fullName', 'role', 'status'],
       distinct: true,

@@ -68,11 +68,9 @@ export class AdminController {
     @Query() query: PaginationRequestDto,
     @GetUser() user: IUserPayload,
   ) {
-    const { sub, facility, department } = user;
     const { rows, count } = await this.adminService.findFaciltyPersonnel(
-      facility,
-      department,
-      sub,
+      user,
+      query,
     );
     return new ApiSuccessResponseDto(
       new PaginatedDataResponseDto<User[]>(

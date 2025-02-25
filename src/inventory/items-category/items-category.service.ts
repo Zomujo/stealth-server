@@ -13,6 +13,7 @@ import { ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { Item } from '../items/models/item.model';
+import { generateFilter } from '../../shared/factory';
 
 @Injectable()
 export class ItemCategoryService {
@@ -55,6 +56,7 @@ export class ItemCategoryService {
     facilityId: string,
     query?: PaginationRequestDto,
   ): Promise<[ItemCategory[], number]> {
+    const queryFilter = generateFilter(query);
     const paginateObject = query
       ? {
           where: {
@@ -63,16 +65,13 @@ export class ItemCategoryService {
               name: { [Op.iLike]: `%${query.search}%` },
             }) ||
               {}),
+            ...queryFilter.searchFilter,
           },
-          limit: query.pageSize || 10,
-          offset: query.pageSize * (query.page - 1) || 0,
         }
       : {};
     const filter: FindAndCountOptions<ItemCategory> = {
       ...paginateObject,
-      order: query
-        ? query.orderBy && [[query.orderBy, 'ASC']]
-        : [['updatedAt', 'DESC']],
+      ...queryFilter.pageFilter,
       include: [Item],
       attributes: { exclude: ['facilityId'] },
       distinct: true,
