@@ -1,100 +1,229 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Stealth Server Backend
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A robust NestJS-based backend server for the Stealth application, providing authentication, user management, and various business functionalities.
 
-## Description
+## Table of Contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [API Documentation](#api-documentation)
+- [Architecture](#architecture)
+- [Security](#security)
+
+## Overview
+
+Stealth Server is a comprehensive backend solution built with NestJS, providing a secure and scalable API for managing users, facilities, and various business operations. The application implements robust authentication and authorization mechanisms, along with features for user management, facility management, and more.
+
+## Features
+
+### Authentication & Authorization
+
+- JWT-based authentication
+- Role-based access control (RBAC)
+- Permission-based authorization
+- Session management
+- Password reset functionality
+- Email verification
+- Multi-device login support
+
+### User Management
+
+- User registration and login
+- Profile management
+- Password management
+- Email change functionality
+- Profile picture upload (via Cloudinary)
+
+### Security Features
+
+- Password hashing with bcrypt
+- JWT token management
+- Session tracking
+- Rate limiting
+- Input validation
+- CORS protection
+
+### Additional Features
+
+- Email notifications
+- File upload capabilities
+- Location tracking for login sessions
+- Facility management
+- Department management
+- Inventory management
+- Sales tracking
+- Patient management
+- Complaint handling
+
+## Tech Stack
+
+- **Framework**: NestJS
+- **Database**: PostgreSQL with Sequelize ORM
+- **Authentication**: JWT
+- **File Storage**: Cloudinary
+- **Email Service**: Nodemailer with Pug templates
+- **API Documentation**: Swagger/OpenAPI
+- **Validation**: class-validator
+- **Scheduling**: @nestjs/schedule
+- **Event Handling**: @nestjs/event-emitter
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- PostgreSQL
+- Cloudinary account
+- SMTP server for email notifications
 
 ## Installation
 
-```bash
-yarn install
+1. Clone the repository:
+
+   ```bash
+   git clone <repository-url>
+   cd stealth-server
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Configure your environment variables in `.env`
+
+## Configuration
+
+The application uses environment variables for configuration. Key variables include:
+
+```env
+# Database
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+# JWT
+JWT_SECRET=
+JWT_TOKEN_AUDIENCE=
+JWT_TOKEN_ISSUER=
+JWT_ACCESS_TOKEN_TTL=
+JWT_REFRESH_TOKEN_TTL=
+
+# Email
+EMAIL_HOST=
+EMAIL_USERNAME=
+EMAIL_PASSWORD=
+EMAIL_FROM=
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Server
+PORT=
+NODE_ENV=
 ```
 
-## Running the app
+## API Documentation
 
-```bash
-# development
-$ yarn run start
+The API documentation is available at `/docs` when running the server. It provides detailed information about all available endpoints, request/response formats, and authentication requirements.
 
-# watch mode
-$ yarn run start:dev
+## Architecture
 
-# production mode
-$ yarn run start:prod
-```
+### Core Modules
 
-## Database CLI
+- **AuthModule**: Handles authentication and authorization
+- **UserModule**: Manages user-related operations
+- **AdminModule**: Administrative functionalities
+- **FacilityModule**: Facility management
+- **NotificationModule**: Email and notification services
+- **CloudinaryModule**: File upload and management
 
-# To generate a migration script
+### Security Architecture
 
-```bash
-yarn sequelize-cli migration:generate --name migration-NameOfModel
+- JWT-based authentication with access and refresh tokens
+- Role-based access control (RBAC)
+- Permission-based authorization
+- Session management with device tracking
+- Secure password hashing
+- Input validation and sanitization
 
-# To run a migration
+### Database Architecture
 
-yarn migrate:up
+- PostgreSQL database with Sequelize ORM
+- Modular model structure
+- Relationship management between entities
+- Transaction support
 
-# To undo a migration
+## Security
 
-yarn migrate:undo
+The application implements several security measures:
 
-# To undo all migrations
+1. **Authentication**
 
-yarn migrate:undo:all
+   - JWT-based authentication
+   - Token refresh mechanism
+   - Session management
+   - Multi-device support
 
-# To create a seed script
+2. **Authorization**
 
-npx sequelize-cli seed:generate --name demo-NameOfModel
+   - Role-based access control
+   - Permission-based authorization
+   - Route protection
+   - Resource-level access control
 
-# To run a seed script
+3. **Data Security**
 
-yarn seed:all
+   - Password hashing with bcrypt
+   - Input validation
+   - SQL injection prevention
+   - XSS protection
 
-# To undo a specific seed script
+4. **API Security**
 
-yarn sequelize-cli db:seed:undo --seed nameOfSeedScript
+   - Rate limiting
+   - CORS protection
+   - Request validation
+   - Error handling
 
-# To undo all seed scripts
+## Running the Application
 
-yarn seed:undo:all
-```
+1. Development mode:
 
-## Test
+   ```bash
+   yarn start:dev
+   ```
 
-```bash
-# unit tests
-$ yarn run test
+2. Production mode:
 
-# e2e tests
-$ yarn run test:e2e
+   ```bash
+   yarn build
+   yarn start:prod
+   ```
 
-# test coverage
-$ yarn run test:cov
-```
+The server will be available at `http://localhost:${PORT}` and the API documentation at `http://localhost:${PORT}/docs`.
 
-## Support
+## Contributing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License - see the LICENSE file for details.
