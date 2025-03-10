@@ -33,6 +33,7 @@ export class LoginTokenDto {
     this.facilityId = user.facilityId;
     this.departmentId = user.departmentId;
     this.permissions = user.permissions;
+    this.status = user.status;
     this.role = user.role as Role;
     this.tokens = tokens;
     this.expiresAt = addSeconds(new Date(), expiresAt);

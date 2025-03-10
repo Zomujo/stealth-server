@@ -67,7 +67,7 @@ export class User extends BaseModel {
   accountActivated: boolean;
 
   @Column({ defaultValue: AccountState.PENDING })
-  status: string; //Pending | Accepted | Declined
+  status: AccountState;
 
   @Column({ allowNull: true })
   deactivatedBy: string;
