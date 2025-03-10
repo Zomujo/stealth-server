@@ -6,6 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { IsArray, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
+import { AccountState } from '../../auth/models/user.model';
 
 export class CreateUserDto extends IntersectionType(GenericResponseDto) {
   @ApiProperty({
@@ -71,8 +72,9 @@ export class CreateUserDto extends IntersectionType(GenericResponseDto) {
 
   @ApiResponseProperty({
     example: 'Active',
+    enum: AccountState,
   })
-  status: string;
+  status: AccountState;
 
   @ApiResponseProperty({
     example: null,

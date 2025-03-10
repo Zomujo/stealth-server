@@ -33,7 +33,7 @@ export class AdminService {
   }
 
   async createPersonnel(dto: CreateUserDto, facilityId: string) {
-    dto.status = 'Pending';
+    dto.status = AccountState.PENDING;
     const facility = await this.facilityService.findOne(facilityId);
     const hashPassword = await bcrypt.hash(
       facility.password,

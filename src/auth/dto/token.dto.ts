@@ -1,6 +1,6 @@
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { User } from '../models/user.model';
+import { AccountState, User } from '../models/user.model';
 import { Role } from '../interface/roles.enum';
 import { addSeconds } from 'date-fns';
 
@@ -66,6 +66,12 @@ export class LoginTokenDto {
     example: 'b683e942-d167-48c3-8a67-b6ebde4676a2',
   })
   departmentId: string;
+
+  @ApiResponseProperty({
+    example: 'Active',
+    enum: AccountState,
+  })
+  status: AccountState;
 
   @ApiResponseProperty({
     example: 'Central Admin',
