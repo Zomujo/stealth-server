@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { TelemetryInterceptor } from './shared/interceptors';
-import { StealthCustomLogger } from './shared/factory/custom-logger.factory';
+import { StealthCustomLogger } from './shared/factory';
 
 async function bootstrap() {
   const PORT = parseInt(process.env.PORT);
