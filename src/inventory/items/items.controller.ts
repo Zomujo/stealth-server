@@ -15,12 +15,12 @@ import { ApiTags } from '@nestjs/swagger';
 import { GetUser, Permission } from 'src/auth/decorator';
 import { IUserPayload } from 'src/auth/interface/payload.interface';
 import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { throwError } from 'src/utils/responses/error.response';
+import { throwError } from 'src/shared/responses/error.response';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/utils/responses/success.response';
+} from 'src/shared/responses/success.response';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import {
   AdjustPriceDto,

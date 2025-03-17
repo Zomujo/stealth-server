@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
+import { ApiSuccessResponseNoData } from 'src/shared/responses/success.response';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { BatchService } from 'src/inventory/items/batches/batch.service';
 import { IUserPayload } from '../auth/interface/payload.interface';

@@ -9,7 +9,7 @@ import {
   ItemCategoryResponse,
   UpdateItemCategoryDto,
 } from './dto';
-import { ApiSuccessResponseNoData } from 'src/utils/responses/success.response';
+import { ApiSuccessResponseNoData } from 'src/shared/responses/success.response';
 import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { Item } from '../items/models/item.model';

@@ -18,8 +18,8 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from '../utils/responses/success.response';
-import { throwError } from '../utils/responses/error.response';
+} from '../shared/responses/success.response';
+import { throwError } from '../shared/responses/error.response';
 import { User } from '../auth/models/user.model';
 import { ChangeRoleDto, GetAdminUserDto } from './dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';

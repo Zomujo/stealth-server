@@ -7,7 +7,7 @@ import {
 } from './dto/';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sale } from './models/sales.models';
-import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
 import { FindAndCountOptions } from 'sequelize';
 import { Op } from 'sequelize';
 import { BatchService } from '../inventory/items/batches/batch.service';

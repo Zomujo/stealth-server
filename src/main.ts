@@ -3,13 +3,22 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
+import { TelemetryInterceptor } from './shared/interceptors';
+import { StealthCustomLogger } from './shared/factory/custom-logger.factory';
 
 async function bootstrap() {
   const PORT = parseInt(process.env.PORT);
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(
+    AppModule,
+    process.env.LOGTAIL_SOURCE_TOKEN && {
+      logger: new StealthCustomLogger(),
+    },
+  );
+
   app.enableCors();
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  app.useGlobalInterceptors(new TelemetryInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

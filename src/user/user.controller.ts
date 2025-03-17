@@ -10,12 +10,12 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from '../shared/docs/decorators';
 import { UserService } from './user.service';
-import { throwError } from '../utils/responses/error.response';
+import { throwError } from '../shared/responses/error.response';
 import { GetUser } from '../auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../utils/responses/success.response';
+} from '../shared/responses/success.response';
 import { CreateSettingsDto, GetSettingsDto } from './dto';
 
 @ApiTags('User')

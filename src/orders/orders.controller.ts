@@ -16,7 +16,7 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from '../utils/responses/success.response';
+} from '../shared/responses/success.response';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import {
   UpdateItemOrderDto,
@@ -30,7 +30,7 @@ import { ItemOrdersService } from './orders.service';
 import { ItemOrder } from './models/itemOrder.model';
 import { Permission } from 'src/auth/decorator';
 import { CustomApiResponse } from 'src/shared/docs/decorators';
-import { throwError } from '../utils/responses/error.response';
+import { throwError } from '../shared/responses/error.response';
 import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
 
 @ApiTags('Item Orders')

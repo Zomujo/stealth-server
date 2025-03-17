@@ -49,11 +49,11 @@ import { Authorize, GetUser } from './decorator';
 import {
   ApiErrorResponse,
   throwError,
-} from '../utils/responses/error.response';
+} from '../shared/responses/error.response';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../utils/responses/success.response';
+} from '../shared/responses/success.response';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateLoginSessionDto } from './dto/login-session.dto';

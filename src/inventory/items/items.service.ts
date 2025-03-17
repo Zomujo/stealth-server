@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
-import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { BatchService } from './batches/batch.service';

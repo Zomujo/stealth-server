@@ -8,7 +8,7 @@ import {
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../../../utils/responses/success.response';
+} from '../../responses/success.response';
 
 export const ApiSuccessResponse = ({
   type,

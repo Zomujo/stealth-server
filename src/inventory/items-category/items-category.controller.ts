@@ -25,8 +25,8 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/utils/responses/success.response';
-import { throwError } from 'src/utils/responses/error.response';
+} from 'src/shared/responses/success.response';
+import { throwError } from 'src/shared/responses/error.response';
 import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
 import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
 

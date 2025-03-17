@@ -19,9 +19,9 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from '../../utils/responses/success.response';
+} from '../../shared/responses/success.response';
 import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
-import { throwError } from '../../utils/responses/error.response';
+import { throwError } from '../../shared/responses/error.response';
 import { CustomApiResponse } from '../../shared/docs/decorators';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser, Public, Roles } from '../../auth/decorator';

@@ -17,8 +17,8 @@ import { CustomApiResponse } from 'src/shared/docs/decorators';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from 'src/utils/responses/success.response';
-import { throwError } from 'src/utils/responses/error.response';
+} from 'src/shared/responses/success.response';
+import { throwError } from 'src/shared/responses/error.response';
 import {
   FindRequestPaginationDto,
   GetDepartmentRequestDto,

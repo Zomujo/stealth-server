@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
 import { ApiTags } from '@nestjs/swagger';
-import { throwError } from '../utils/responses/error.response';
+import { throwError } from '../shared/responses/error.response';
 import { CustomApiResponse } from '../shared/docs/decorators';
 import { GetNotificationDto } from './dto/get.dto';
 import { GetUser } from '../auth/decorator';
@@ -22,7 +22,7 @@ import { IUserPayload } from '../auth/interface/payload.interface';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../utils/responses/success.response';
+} from '../shared/responses/success.response';
 
 @ApiTags('Notifications')
 @Controller('notifications')

@@ -23,11 +23,11 @@ import {
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../utils/responses/success.response';
+} from '../shared/responses/success.response';
 import { CustomApiResponse } from '../shared/docs/decorators';
 import { GetUser, Permission } from '../auth/decorator';
 import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
-import { throwError } from '../utils/responses/error.response';
+import { throwError } from '../shared/responses/error.response';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Patients')

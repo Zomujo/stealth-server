@@ -9,7 +9,7 @@ import {
 import { ItemOrder } from './models/itemOrder.model';
 import { FindAndCountOptions, literal } from 'sequelize'; // Sequelize operators for filtering
 import { generateOrderNumber } from 'src/orders/utils/orders.utils';
-import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
 import { Supplier } from '../inventory/suppliers/models/supplier.model';
 import { Item } from '../inventory/items/models';
 import { generateFilter } from '../shared/factory';

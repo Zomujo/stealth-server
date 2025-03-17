@@ -18,8 +18,8 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/utils/responses/success.response';
-import { throwError } from 'src/utils/responses/error.response';
+} from 'src/shared/responses/success.response';
+import { throwError } from 'src/shared/responses/error.response';
 import { GetUser, Permission } from '../auth/decorator';
 import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
 import {

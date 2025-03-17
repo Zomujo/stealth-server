@@ -26,8 +26,8 @@ import { GetUser } from '../auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../utils/responses/success.response';
-import { throwError } from '../utils/responses/error.response';
+} from '../shared/responses/success.response';
+import { throwError } from '../shared/responses/error.response';
 import { IUserPayload } from '../auth/interface/payload.interface';
 
 @ApiTags('Department Item Requests')

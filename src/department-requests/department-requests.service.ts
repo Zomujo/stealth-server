@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { DepartmentRequest } from './models/department-requests.model';
 import { ItemService } from 'src/inventory/items/items.service';
 import { DepartmentService } from 'src/admin/department/department.service';
-import { PaginatedDataResponseDto } from 'src/utils/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
 import {
   FindItemRequestPaginationDto,
   FindRequestPaginationDto,

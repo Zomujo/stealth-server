@@ -40,9 +40,3 @@ export const configuration = {
     },
   },
 };
-
-// export const nodemailerConfiguration: MailerOptions = {
-//   defaults: {
-//     from: '"No Reply" <noreply@stealth.com>',
-//   },
-// };
