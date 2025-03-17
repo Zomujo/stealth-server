@@ -27,7 +27,7 @@ export class HealthService {
 
       () => this.db.pingCheck('database'),
       () =>
-        this.disk.checkStorage('storage', { path: '/', thresholdPercent: 0.5 }),
+        this.disk.checkStorage('storage', { path: '/', thresholdPercent: 0.7 }),
       () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
     ]);
   }
