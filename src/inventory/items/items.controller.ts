@@ -66,8 +66,8 @@ export class ItemController {
   @Post()
   async create(@Body() dto: CreateItemDto, @GetUser() user: IUserPayload) {
     try {
-      !dto.facilityId && (dto.facilityId = user.facility);
-      !dto.departmentId && (dto.departmentId = user.department);
+      dto.facilityId = dto.facilityId || user.facility;
+      dto.departmentId = dto.departmentId || user.department;
       dto.createdById = user.sub;
       const createdItem = await this.itemsService.create(dto);
       return new ApiSuccessResponseDto(
@@ -76,7 +76,7 @@ export class ItemController {
         'Item created successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -96,7 +96,7 @@ export class ItemController {
         'Batch created successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -118,7 +118,7 @@ export class ItemController {
         'Batches retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -147,7 +147,7 @@ export class ItemController {
         'Batches retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -166,7 +166,7 @@ export class ItemController {
         'Batches retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -186,7 +186,7 @@ export class ItemController {
         'Batch updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -202,8 +202,8 @@ export class ItemController {
     @GetUser() user: IUserPayload,
   ) {
     try {
-      !query.facilityId && (query.facilityId = user.facility);
-      !query.departmentId && (query.departmentId = user.department);
+      query.facilityId = query.facilityId || user.facility;
+      query.departmentId = query.departmentId || user.department;
       const items = await this.itemsService.findAll(query);
       return new ApiSuccessResponseDto(
         items,
@@ -211,7 +211,7 @@ export class ItemController {
         'Items retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -244,7 +244,7 @@ export class ItemController {
         'Items retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -273,7 +273,7 @@ export class ItemController {
         'item counts retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
   @CustomApiResponse(['success', 'authorize', 'notfound'], {
@@ -291,7 +291,7 @@ export class ItemController {
         'Item retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -311,7 +311,7 @@ export class ItemController {
         'Item updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -331,7 +331,7 @@ export class ItemController {
         'Item prices adjusted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -348,7 +348,7 @@ export class ItemController {
         'Item deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 }

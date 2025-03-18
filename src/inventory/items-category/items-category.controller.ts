@@ -62,7 +62,7 @@ export class ItemCategoryController {
         'Item category created successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -92,7 +92,7 @@ export class ItemCategoryController {
         'Item categories retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -115,7 +115,7 @@ export class ItemCategoryController {
         'Item categories retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -134,7 +134,7 @@ export class ItemCategoryController {
         'Item category retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -154,7 +154,7 @@ export class ItemCategoryController {
         'Item updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -171,7 +171,7 @@ export class ItemCategoryController {
         'Item category status updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -188,7 +188,7 @@ export class ItemCategoryController {
         'Item deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 }

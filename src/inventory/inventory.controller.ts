@@ -65,7 +65,7 @@ export class StockAdjustmentsController {
         'Stock adjustment created successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -80,8 +80,8 @@ export class StockAdjustmentsController {
     @GetUser() user: IUserPayload,
   ) {
     try {
-      !dto.facilityId && (dto.facilityId = user.facility);
-      !dto.departmentId && (dto.departmentId = user.department);
+      dto.facilityId = dto.facilityId || user.facility;
+      dto.departmentId = dto.departmentId || user.department;
       const adjustments = await this.stockAdjustmentsService.findAll(dto);
       return new ApiSuccessResponseDto(
         new PaginatedDataResponseDto(
@@ -94,7 +94,7 @@ export class StockAdjustmentsController {
         'Stock adjustments retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -113,7 +113,7 @@ export class StockAdjustmentsController {
         'Stock adjustment retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -154,7 +154,7 @@ export class StockAdjustmentsController {
   //       'Stock adjustment updated successfully',
   //     );
   //   } catch (error) {
-  //     throw throwError(this.logger, error);
+  //     throwError(this.logger, error);
   //   }
   // }
 
@@ -174,7 +174,7 @@ export class StockAdjustmentsController {
   //       'Stock adjustment updated successfully',
   //     );
   //   } catch (error) {
-  //     throw throwError(this.logger, error);
+  //     throwError(this.logger, error);
   //   }
   // }
   @CustomApiResponse(['successNull', 'authorize'], {
@@ -190,7 +190,7 @@ export class StockAdjustmentsController {
         'Stock adjustment deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 }

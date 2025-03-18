@@ -26,7 +26,7 @@ export class NotificationsGateway
     const bearerToken = client.handshake?.headers?.authorization;
     let role = 'all';
     if (bearerToken) {
-      const [_type, token] = bearerToken ? bearerToken?.split(' ') : [];
+      const [_type, token] = bearerToken ? bearerToken.split(' ') : [];
       const user = await this.decodeToken(token);
       role = user.role ?? 'null';
       client.join(role);

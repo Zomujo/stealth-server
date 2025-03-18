@@ -75,10 +75,11 @@ export class ReportsService {
     }
 
     switch (type) {
-      case ReportCategories.PERIODIC_SALES_REPORT:
+      case ReportCategories.PERIODIC_SALES_REPORT: {
         const { rows, count } =
           await this.salesService.fetchData(whereConditions);
         return { count, rows };
+      }
       default:
         return { count: 0, rows: [] };
     }

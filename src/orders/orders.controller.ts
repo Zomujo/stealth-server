@@ -60,7 +60,7 @@ export class ItemOrdersController {
         'Item order created successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -82,7 +82,7 @@ export class ItemOrdersController {
         'Item orders retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -105,7 +105,7 @@ export class ItemOrdersController {
         'Item order retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -127,7 +127,7 @@ export class ItemOrdersController {
         'Item order updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -149,7 +149,7 @@ export class ItemOrdersController {
         'Item order state changed successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -168,7 +168,7 @@ export class ItemOrdersController {
         'Item order deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 }

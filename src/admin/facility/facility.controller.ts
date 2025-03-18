@@ -51,7 +51,7 @@ export class FacilityController {
         'Facility created successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -74,7 +74,7 @@ export class FacilityController {
         'Facilities retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -92,7 +92,7 @@ export class FacilityController {
         'Facility retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -113,7 +113,7 @@ export class FacilityController {
         'Facility updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -130,7 +130,7 @@ export class FacilityController {
         'Facility deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 }

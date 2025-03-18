@@ -66,7 +66,7 @@ export class SuppliersController {
         `Supplier created successfully`,
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -94,7 +94,7 @@ export class SuppliersController {
         'Suppliers retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -117,7 +117,7 @@ export class SuppliersController {
         'Suppliers retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -136,7 +136,7 @@ export class SuppliersController {
         'supplier retrieved successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -156,7 +156,7 @@ export class SuppliersController {
         'supplier updated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -173,7 +173,7 @@ export class SuppliersController {
         'Supplier deactivated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -190,7 +190,7 @@ export class SuppliersController {
         'Supplier activated successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -207,7 +207,7 @@ export class SuppliersController {
         'Supplier deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 
@@ -224,7 +224,7 @@ export class SuppliersController {
         'Suppliers deleted successfully',
       );
     } catch (error) {
-      throw throwError(this.logger, error);
+      throwError(this.logger, error);
     }
   }
 }
