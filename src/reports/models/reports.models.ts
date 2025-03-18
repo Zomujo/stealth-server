@@ -6,7 +6,7 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../shared/models/base.model';
+import { BaseModel } from '../../core/shared/models/base.model';
 import { Facility } from '../../admin/facility/models/facility.model';
 import { Department } from '../../admin/department/models/department.model';
 

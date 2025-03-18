@@ -22,14 +22,17 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from '../../shared/responses/success.response';
+} from '../../core/shared/responses/success.response';
 import { GetUser, Permission } from '../../auth/decorator';
 import { ApiTags } from '@nestjs/swagger';
-import { CustomApiResponse } from '../../shared/docs/decorators';
+import { CustomApiResponse } from '../../core/shared/docs/decorators';
 import { Department } from './models/department.model';
-import { throwError } from '../../shared/responses/error.response';
-import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
-import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
+import { throwError } from '../../core/shared/responses/error.response';
+import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
+import {
+  Features,
+  PermissionLevel,
+} from '../../core/shared/enums/permissions.enum';
 
 @ApiTags('Department')
 @Controller('departments')

@@ -13,7 +13,7 @@ import {
   UpdateReportDto,
 } from './dto';
 import { IUserPayload } from '../auth/interface/payload.interface';
-import { generateFilter } from '../shared/factory';
+import { generateFilter } from '../core/shared/factory';
 import { endOfDay, startOfDay } from 'date-fns';
 
 @Injectable()

@@ -13,15 +13,18 @@ import {
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
-import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
+import { CustomApiResponse } from 'src/core/shared/docs/decorators/default.response.decorators';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/shared/responses/success.response';
-import { throwError } from 'src/shared/responses/error.response';
+} from 'src/core/shared/responses/success.response';
+import { throwError } from 'src/core/shared/responses/error.response';
 import { GetUser, Permission } from '../auth/decorator';
-import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
+import {
+  Features,
+  PermissionLevel,
+} from '../core/shared/enums/permissions.enum';
 import {
   CreateReportDto,
   FindReportDataDto,

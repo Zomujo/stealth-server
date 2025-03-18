@@ -1,7 +1,7 @@
 import {
   Features,
   PermissionLevel,
-} from './../../shared/enums/permissions.enum';
+} from '../../core/shared/enums/permissions.enum';
 import {
   CanActivate,
   ExecutionContext,

@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
-import { TelemetryInterceptor } from './shared/interceptors';
-import { StealthCustomLogger } from './shared/factory';
+import { TelemetryInterceptor } from './core/shared/interceptors';
+import { StealthCustomLogger } from './core/shared/factory';
 
 async function bootstrap() {
   const PORT = parseInt(process.env.PORT);

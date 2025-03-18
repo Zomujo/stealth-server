@@ -9,11 +9,11 @@ import {
   ItemCategoryResponse,
   UpdateItemCategoryDto,
 } from './dto';
-import { ApiSuccessResponseNoData } from 'src/shared/responses/success.response';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { ApiSuccessResponseNoData } from 'src/core/shared/responses/success.response';
+import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { Item } from '../items/models/item.model';
-import { generateFilter } from '../../shared/factory';
+import { generateFilter } from '../../core/shared/factory';
 
 @Injectable()
 export class ItemCategoryService {

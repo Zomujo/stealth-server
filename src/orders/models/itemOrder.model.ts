@@ -1,4 +1,4 @@
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import {
   Table,
   Column,
@@ -6,7 +6,7 @@ import {
   BelongsTo,
   AllowNull,
 } from 'sequelize-typescript';
-import { OrderStatus } from 'src/shared/enums/itemOrder.enum';
+import { OrderStatus } from 'src/core/shared/enums/itemOrder.enum';
 import { Item } from '../../inventory/items/models';
 import { Supplier } from '../../inventory/suppliers/models/supplier.model';
 @Table({

@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateItemOrderDto } from './createOrder.dto';
-import { OrderStatus } from '../../shared/enums/itemOrder.enum';
+import { OrderStatus } from '../../core/shared/enums/itemOrder.enum';
 
 import { IsEnum } from 'class-validator';
 

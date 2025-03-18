@@ -13,13 +13,13 @@ import {
   IsUUID,
   Min,
 } from 'class-validator';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
 import {
   DepartmentRequestStatus,
   DepartmentRequestStatusType,
 } from '../models/department-requests.model';
-import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
-import { ItemExists } from '../../shared/validators';
+import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
+import { ItemExists } from '../../core/shared/validators';
 
 export class FindRequestPaginationDto extends PaginationRequestDto {
   @ApiPropertyOptional()

@@ -12,16 +12,19 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
+import { CustomApiResponse } from 'src/core/shared/docs/decorators/default.response.decorators';
 import { GetUser, Permission } from 'src/auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/shared/responses/success.response';
-import { throwError } from 'src/shared/responses/error.response';
+} from 'src/core/shared/responses/success.response';
+import { throwError } from 'src/core/shared/responses/error.response';
 import { IUserPayload } from 'src/auth/interface/payload.interface';
-import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
+import {
+  Features,
+  PermissionLevel,
+} from '../core/shared/enums/permissions.enum';
 import { StockAdjustmentsService } from './inventory.service';
 import {
   CreatedAdjustmentResponseDto,

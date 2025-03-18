@@ -5,7 +5,7 @@ import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { Item } from '../items/models/item.model';
 import { Supplier } from './models/supplier.model';
-import { configuration } from 'src/shared/config/config';
+import { configuration } from 'src/core/shared/config/config';
 
 describe('SuppliersController', () => {
   let controller: SuppliersController;

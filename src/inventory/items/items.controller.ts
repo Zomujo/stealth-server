@@ -14,14 +14,17 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser, Permission } from 'src/auth/decorator';
 import { IUserPayload } from 'src/auth/interface/payload.interface';
-import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
-import { throwError } from 'src/shared/responses/error.response';
+import { CustomApiResponse } from 'src/core/shared/docs/decorators/default.response.decorators';
+import { throwError } from 'src/core/shared/responses/error.response';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/shared/responses/success.response';
-import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
+} from 'src/core/shared/responses/success.response';
+import {
+  Features,
+  PermissionLevel,
+} from '../../core/shared/enums/permissions.enum';
 import {
   AdjustPriceDto,
   CreateItemDto,
@@ -34,7 +37,7 @@ import {
 import { ItemService } from './items.service';
 
 import { BatchService } from './batches/batch.service';
-import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
+import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
 import {
   BatchesNoPaginate,
   CreateBatchDto,
@@ -42,7 +45,7 @@ import {
   BatchResponseDto,
   UpdateBatchDto,
 } from './batches/dto';
-import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
 
 @ApiTags('Items')
 @Controller('items')

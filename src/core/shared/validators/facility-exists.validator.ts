@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FacilityService } from '../../admin/facility/facility.service';
+import { FacilityService } from '../../../admin/facility/facility.service';
 import {
   registerDecorator,
   ValidationArguments,

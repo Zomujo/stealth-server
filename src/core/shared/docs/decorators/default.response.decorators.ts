@@ -7,7 +7,7 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiErrorResponse } from 'src/shared/responses/error.response';
+import { ApiErrorResponse } from 'src/core/shared/responses/error.response';
 import {
   ApiCreatedSuccessResponse,
   ApiSuccessResponse,

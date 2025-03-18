@@ -1,6 +1,9 @@
 import { SetMetadata } from '@nestjs/common';
 import { Role } from '../interface/roles.enum';
-import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
+import {
+  Features,
+  PermissionLevel,
+} from '../../core/shared/enums/permissions.enum';
 
 export const ROLES_KEY = 'roles';
 export const PERMISSION_KEY = 'permission';

@@ -14,7 +14,6 @@ export class StealthCustomLogger extends ConsoleLogger {
 
   log(message: any, ...optionalParams: any[]) {
     super.log(message, ...optionalParams);
-    this.logtail.info(message, { optionalParams }).catch(console.error);
   }
 
   error(message: any, trace?: string, ...optionalParams: any[]) {

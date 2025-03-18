@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BatchExistsRule } from '../../../shared/validators';
+import { BatchExistsRule } from '../../../core/shared/validators';
 import { BatchService } from './batch.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Batch } from '../models';

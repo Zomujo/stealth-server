@@ -6,7 +6,7 @@ import {
   ForeignKey,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../shared/models/base.model';
+import { BaseModel } from '../../core/shared/models/base.model';
 import { User } from './user.model';
 import { formatDistance } from 'date-fns';
 

@@ -21,13 +21,13 @@ import {
   GetSpecificRequestResponseDto,
   UpdateDepartmentRequestDto,
 } from './dto';
-import { CustomApiResponse } from '../shared/docs/decorators';
+import { CustomApiResponse } from '../core/shared/docs/decorators';
 import { GetUser } from '../auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../shared/responses/success.response';
-import { throwError } from '../shared/responses/error.response';
+} from '../core/shared/responses/success.response';
+import { throwError } from '../core/shared/responses/error.response';
 import { IUserPayload } from '../auth/interface/payload.interface';
 
 @ApiTags('Department Item Requests')

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { ApiSuccessResponseNoData } from 'src/shared/responses/success.response';
+import { ApiSuccessResponseNoData } from 'src/core/shared/responses/success.response';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { BatchService } from 'src/inventory/items/batches/batch.service';
 import { IUserPayload } from '../auth/interface/payload.interface';
@@ -21,7 +21,7 @@ import {
   UpdateStockAdjustmentDto,
 } from './dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { generateFilter } from '../shared/factory';
+import { generateFilter } from '../core/shared/factory';
 
 @Injectable()
 export class StockAdjustmentsService {

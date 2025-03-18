@@ -5,7 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Batch, Item } from './models';
 import { Supplier } from '../suppliers/models/supplier.model';
 import { User } from '../../auth/models/user.model';
-import { ItemExistsRule } from '../../shared/validators';
+import { ItemExistsRule } from '../../core/shared/validators';
 import { BatchesModule } from './batches/batches.module';
 import { BatchService } from './batches/batch.service';
 import { SuppliersModule } from '../suppliers/suppliers.module';

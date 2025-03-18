@@ -5,8 +5,8 @@ import {
   IntersectionType,
   OmitType,
 } from '@nestjs/swagger';
-import { GenericResponseDto } from 'src/shared/docs/dto/base.dto';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
+import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
+import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
 import { CreateReportDto, ReportCategories } from './create.dto';
 import { Type } from 'class-transformer';
 import { addDays } from 'date-fns';

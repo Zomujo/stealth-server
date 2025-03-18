@@ -4,8 +4,8 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsUUID } from 'class-validator';
-import { PaginationRequestDto } from 'src/shared/docs/dto/pagination.dto';
-import { OrderStatus } from 'src/shared/enums/itemOrder.enum';
+import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
+import { OrderStatus } from 'src/core/shared/enums/itemOrder.enum';
 import { CreateItemOrderDto } from './createOrder.dto';
 
 export class GetOrdersDto extends PaginationRequestDto {

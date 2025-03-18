@@ -3,7 +3,7 @@ import {
   ApiResponseProperty,
   IntersectionType,
 } from '@nestjs/swagger';
-import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
 import { IsNotEmpty, MaxDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { format } from 'date-fns';

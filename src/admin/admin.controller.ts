@@ -11,19 +11,22 @@ import {
   Query,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { CustomApiResponse } from '../shared/docs/decorators';
-import { PaginationRequestDto } from '../shared/docs/dto/pagination.dto';
+import { CustomApiResponse } from '../core/shared/docs/decorators';
+import { PaginationRequestDto } from '../core/shared/docs/dto/pagination.dto';
 import { GetUser, Permission } from '../auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from '../shared/responses/success.response';
-import { throwError } from '../shared/responses/error.response';
+} from '../core/shared/responses/success.response';
+import { throwError } from '../core/shared/responses/error.response';
 import { User } from '../auth/models/user.model';
 import { ChangeRoleDto, GetAdminUserDto } from './dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Features, PermissionLevel } from '../shared/enums/permissions.enum';
+import {
+  Features,
+  PermissionLevel,
+} from '../core/shared/enums/permissions.enum';
 import { CreateUserDto, GetUserDto } from '../user/dto';
 import { IUserPayload } from '../auth/interface/payload.interface';
 

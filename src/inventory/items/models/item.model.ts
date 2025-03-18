@@ -11,7 +11,7 @@ import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from 'src/admin/facility/models/facility.model';
 import { DepartmentRequest } from 'src/department-requests/models/department-requests.model';
 import { ItemCategory } from 'src/inventory/items-category/models/items-category.model';
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import { Batch } from '.';
 import { StockAdjustment } from '../../models/stock-adjustment.model';
 import { User } from '../../../auth/models/user.model';

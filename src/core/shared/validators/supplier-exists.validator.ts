@@ -6,7 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { SuppliersService } from '../../inventory/suppliers/suppliers.service';
+import { SuppliersService } from '../../../inventory/suppliers/suppliers.service';
 
 @ValidatorConstraint({ name: 'SupplierExists', async: true })
 @Injectable()

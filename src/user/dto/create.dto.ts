@@ -5,7 +5,7 @@ import {
   IntersectionType,
 } from '@nestjs/swagger';
 import { IsArray, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
-import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
 import { AccountState } from '../../auth/models/user.model';
 
 export class CreateUserDto extends IntersectionType(GenericResponseDto) {

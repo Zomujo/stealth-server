@@ -9,9 +9,9 @@ import {
 import { ComplaintsService } from './complaints.service';
 import { CreateComplaintDto } from './dto/create.dto';
 import { GetUser } from '../auth/decorator';
-import { ApiSuccessResponseNoData } from '../shared/responses/success.response';
-import { CustomApiResponse } from '../shared/docs/decorators';
-import { throwError } from '../shared/responses/error.response';
+import { ApiSuccessResponseNoData } from '../core/shared/responses/success.response';
+import { CustomApiResponse } from '../core/shared/docs/decorators';
+import { throwError } from '../core/shared/responses/error.response';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Complaints')

@@ -15,9 +15,9 @@ import { CreateUserDto } from '../user/dto';
 import * as roles from './data/roles.json';
 import * as bcrypt from 'bcrypt';
 import { FacilityService } from './facility/facility.service';
-import { PaginationRequestDto } from '../shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../core/shared/docs/dto/pagination.dto';
 import { IUserPayload } from '../auth/interface/payload.interface';
-import { generateFilter } from '../shared/factory';
+import { generateFilter } from '../core/shared/factory';
 
 @Injectable()
 export class AdminService {

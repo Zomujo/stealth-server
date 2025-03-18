@@ -19,10 +19,10 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from '../../shared/responses/success.response';
-import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
-import { throwError } from '../../shared/responses/error.response';
-import { CustomApiResponse } from '../../shared/docs/decorators';
+} from '../../core/shared/responses/success.response';
+import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
+import { throwError } from '../../core/shared/responses/error.response';
+import { CustomApiResponse } from '../../core/shared/docs/decorators';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser, Public, Roles } from '../../auth/decorator';
 import { Role } from '../../auth/interface/roles.enum';

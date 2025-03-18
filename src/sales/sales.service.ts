@@ -7,7 +7,7 @@ import {
 } from './dto/';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sale } from './models/sales.models';
-import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import { FindAndCountOptions } from 'sequelize';
 import { Op } from 'sequelize';
 import { BatchService } from '../inventory/items/batches/batch.service';
@@ -16,7 +16,7 @@ import { Batch, Item } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { PatientService } from '../patient/patient.service';
 import { endOfDay, startOfDay } from 'date-fns';
-import { generateFilter } from '../shared/factory';
+import { generateFilter } from '../core/shared/factory';
 
 @Injectable()
 export class SalesService {

@@ -4,7 +4,7 @@ import { DepartmentController } from './department.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Department } from './models/department.model';
 import { User } from '../../auth/models/user.model';
-import { DepartmentExistsRule } from '../../shared/validators';
+import { DepartmentExistsRule } from '../../core/shared/validators';
 
 @Module({
   imports: [SequelizeModule.forFeature([Department, User])],

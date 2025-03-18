@@ -3,7 +3,7 @@ import {
   ApiPropertyOptional,
   ApiResponseProperty,
 } from '@nestjs/swagger';
-import { OrderStatus } from '../../shared/enums/itemOrder.enum';
+import { OrderStatus } from '../../core/shared/enums/itemOrder.enum';
 import {
   IsEnum,
   IsNotEmpty,
@@ -14,8 +14,8 @@ import {
   MinDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
-import { ItemExists, SupplierExists } from '../../shared/validators';
+import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
+import { ItemExists, SupplierExists } from '../../core/shared/validators';
 
 export class CreateItemOrderDto extends GenericResponseDto {
   @ApiProperty({

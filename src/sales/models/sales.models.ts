@@ -9,7 +9,7 @@ import {
   Table,
   Unique,
 } from 'sequelize-typescript';
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import { Patient } from '../../patient/models/patient.model';
 import { Department } from '../../admin/department/models/department.model';
 import { Facility } from '../../admin/facility/models/facility.model';

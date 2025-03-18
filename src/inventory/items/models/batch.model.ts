@@ -7,7 +7,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import { Item } from '.';
 import { User } from '../../../auth/models/user.model';
 

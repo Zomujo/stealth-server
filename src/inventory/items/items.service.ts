@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
-import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { BatchService } from './batches/batch.service';
@@ -26,9 +26,9 @@ import { IUserPayload } from '../../auth/interface/payload.interface';
 import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationService } from '../../notification/notification.service';
 import { CreateNotificationDto } from '../../notification/dto';
-import { Features } from '../../shared/enums/permissions.enum';
+import { Features } from '../../core/shared/enums/permissions.enum';
 import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
-import { generateFilter } from '../../shared/factory';
+import { generateFilter } from '../../core/shared/factory';
 
 @Injectable()
 export class ItemService {

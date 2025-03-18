@@ -1,5 +1,5 @@
 import { AllowNull, Column, HasMany, Table } from 'sequelize-typescript';
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import { User } from 'src/auth/models/user.model';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Matches } from 'class-validator';

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { IndexModels } from './shared/models/index.models';
-import { IndexModules } from './shared/modules/index.modules';
+import { IndexModels } from './core/shared/models/index.models';
+import { IndexModules } from './core/shared/modules/index.modules';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { HealthModule } from './health/health.module';
     ScheduleModule.forRoot(),
     HealthModule,
     ...IndexModules,
+    DashboardModule,
   ],
 })
 export class AppModule {}

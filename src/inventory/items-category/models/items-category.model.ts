@@ -10,7 +10,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Item } from 'src/inventory/items/models/item.model';
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import { Facility } from '../../../admin/facility/models/facility.model';
 
 export enum ItemCategoryStatus {

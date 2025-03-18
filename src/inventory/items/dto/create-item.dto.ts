@@ -6,7 +6,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
-import { ItemCategoryExists } from '../../../shared/validators/item-category-exists.validator';
+import { ItemCategoryExists } from '../../../core/shared/validators/item-category-exists.validator';
 
 export enum DosageForm {
   SOLIDS = 'SOLIDS',

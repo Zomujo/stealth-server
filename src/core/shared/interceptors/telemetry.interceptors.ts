@@ -14,12 +14,15 @@ export class TelemetryInterceptor implements NestInterceptor {
   ): Observable<any> | Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const { method, route, url, headers, body } = request;
-    this.logger.debug(`Request: ${route.path}`, {
-      method,
-      url,
-      headers,
-      body,
-    });
+    const isDevelopment = process.env.NODE_ENV == 'development';
+    if (!isDevelopment) {
+      this.logger.debug(`Request: ${route.path}`, {
+        method,
+        url,
+        headers,
+        body,
+      });
+    }
     const now = Date.now();
 
     return next.handle().pipe(

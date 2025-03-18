@@ -11,8 +11,8 @@ import { SuppliersService } from '../../suppliers/suppliers.service';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateBatchDto, UpdateBatchDto } from './dto';
-import { PaginationRequestDto } from '../../../shared/docs/dto/pagination.dto';
-import { generateFilter } from '../../../shared/factory';
+import { PaginationRequestDto } from '../../../core/shared/docs/dto/pagination.dto';
+import { generateFilter } from '../../../core/shared/factory';
 
 @Injectable()
 export class BatchService {

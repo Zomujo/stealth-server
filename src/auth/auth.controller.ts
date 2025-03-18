@@ -24,7 +24,7 @@ import {
   ApiCreatedSuccessResponse,
   ApiSuccessResponse,
   ApiSuccessResponseNullData,
-} from '../shared/docs/decorators/response.decorators';
+} from '../core/shared/docs/decorators/response.decorators';
 import {
   ChangePasswordDto,
   CheckCodeDto,
@@ -49,15 +49,15 @@ import { Authorize, GetUser } from './decorator';
 import {
   ApiErrorResponse,
   throwError,
-} from '../shared/responses/error.response';
+} from '../core/shared/responses/error.response';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../shared/responses/success.response';
+} from '../core/shared/responses/success.response';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateLoginSessionDto } from './dto/login-session.dto';
-import { CustomApiResponse } from '../shared/docs/decorators';
+import { CustomApiResponse } from '../core/shared/docs/decorators';
 import { AdminSignUpDto } from '../user/dto/signup.dto';
 
 @ApiTags('Authentication')

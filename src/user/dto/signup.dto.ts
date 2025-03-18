@@ -4,7 +4,7 @@ import {
   IntersectionType,
 } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, Matches } from 'class-validator';
-import { GenericResponseDto } from '../../shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
 import { CreateFacilityDto } from '../../admin/facility/dto';
 
 // enum FacilityType {

@@ -6,7 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { BatchService } from '../../inventory/items/batches/batch.service';
+import { BatchService } from '../../../inventory/items/batches/batch.service';
 
 @ValidatorConstraint({ name: 'BatchExists', async: true })
 @Injectable()

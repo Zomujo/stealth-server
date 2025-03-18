@@ -6,7 +6,7 @@ import {
   ValidatorConstraintInterface,
   ValidatorOptions,
 } from 'class-validator';
-import { ItemCategoryService } from '../../inventory/items-category/items-category.service';
+import { ItemCategoryService } from '../../../inventory/items-category/items-category.service';
 
 @ValidatorConstraint({ name: 'ItemCategoryExists', async: true })
 @Injectable()

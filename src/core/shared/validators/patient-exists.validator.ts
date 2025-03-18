@@ -6,7 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { PatientService } from '../../patient/patient.service';
+import { PatientService } from '../../../patient/patient.service';
 
 @ValidatorConstraint({ name: 'PatientExists', async: true })
 @Injectable()

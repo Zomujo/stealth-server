@@ -6,7 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { DepartmentService } from '../../admin/department/department.service';
+import { DepartmentService } from '../../../admin/department/department.service';
 
 @ValidatorConstraint({ name: 'DepartmentExists', async: true })
 @Injectable()

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CustomApiResponse } from 'src/shared/docs/decorators/default.response.decorators';
+import { CustomApiResponse } from 'src/core/shared/docs/decorators/default.response.decorators';
 import {
   CreateSupplierDto,
   GetSupplierDto,
@@ -26,13 +26,16 @@ import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
-} from 'src/shared/responses/success.response';
-import { throwError } from 'src/shared/responses/error.response';
+} from 'src/core/shared/responses/success.response';
+import { throwError } from 'src/core/shared/responses/error.response';
 import { StatusType } from './models/supplier.model';
 import { GetUser, Permission } from '../../auth/decorator';
-import { DeleteItemsDto } from '../../shared/docs/dto/delete.dto';
-import { Features, PermissionLevel } from '../../shared/enums/permissions.enum';
-import { GetNoPaginateDto } from '../../shared/docs/dto/get-no_paginate.dto';
+import { DeleteItemsDto } from '../../core/shared/docs/dto/delete.dto';
+import {
+  Features,
+  PermissionLevel,
+} from '../../core/shared/enums/permissions.enum';
+import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
 
 @ApiTags('Suppliers')
 @Controller('suppliers')

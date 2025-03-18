@@ -8,14 +8,14 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CustomApiResponse } from '../shared/docs/decorators';
+import { CustomApiResponse } from '../core/shared/docs/decorators';
 import { UserService } from './user.service';
-import { throwError } from '../shared/responses/error.response';
+import { throwError } from '../core/shared/responses/error.response';
 import { GetUser } from '../auth/decorator';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from '../shared/responses/success.response';
+} from '../core/shared/responses/success.response';
 import { CreateSettingsDto, GetSettingsDto } from './dto';
 
 @ApiTags('User')

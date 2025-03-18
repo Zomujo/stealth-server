@@ -3,10 +3,10 @@ import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { Department } from './models/department.model';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto';
-import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
 import { NotificationService } from '../../notification/notification.service';
 import { User } from '../../auth/models/user.model';
-import { generateFilter } from '../../shared/factory';
+import { generateFilter } from '../../core/shared/factory';
 
 @Injectable()
 export class DepartmentService {

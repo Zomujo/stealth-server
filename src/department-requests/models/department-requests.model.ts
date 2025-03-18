@@ -6,7 +6,7 @@ import {
   BelongsTo,
   DeletedAt,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../shared/models/base.model';
+import { BaseModel } from '../../core/shared/models/base.model';
 import { Item } from 'src/inventory/items/models/item.model';
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from '../../admin/facility/models/facility.model';

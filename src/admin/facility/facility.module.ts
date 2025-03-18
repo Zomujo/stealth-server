@@ -3,7 +3,7 @@ import { FacilityService } from './facility.service';
 import { FacilityController } from './facility.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Facility } from './models/facility.model';
-import { FacilityExistsRule } from '../../shared/validators';
+import { FacilityExistsRule } from '../../core/shared/validators';
 
 @Module({
   imports: [SequelizeModule.forFeature([Facility])],

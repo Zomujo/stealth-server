@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationsGateway } from './gateway/notification.gateway';
 import { Role } from '../auth/interface/roles.enum';
 import { Observable, Subject } from 'rxjs';
-import { Features } from '../shared/enums/permissions.enum';
+import { Features } from '../core/shared/enums/permissions.enum';
 import { InjectModel } from '@nestjs/sequelize';
 import { NotificationModel } from './models/notification.model';
 import { CreateNotificationDto } from './dto';

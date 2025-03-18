@@ -1,5 +1,5 @@
 import { IntersectionType, PickType } from '@nestjs/swagger';
-import { PaginationRequestDto } from '../../shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
 import { CreatePatientResponseDto } from './create.dto';
 
 export class RetrievePatientsDto extends IntersectionType(

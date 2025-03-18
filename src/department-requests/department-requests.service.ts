@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { DepartmentRequest } from './models/department-requests.model';
 import { ItemService } from 'src/inventory/items/items.service';
 import { DepartmentService } from 'src/admin/department/department.service';
-import { PaginatedDataResponseDto } from 'src/shared/responses/success.response';
+import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import {
   FindItemRequestPaginationDto,
   FindRequestPaginationDto,
@@ -19,7 +19,7 @@ import { Department } from '../admin/department/models/department.model';
 import { col, FindAttributeOptions, Op, WhereOptions } from 'sequelize';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { FacilityService } from '../admin/facility/facility.service';
-import { generateFilter } from '../shared/factory';
+import { generateFilter } from '../core/shared/factory';
 
 @Injectable()
 export class DepartmentRequestsService {

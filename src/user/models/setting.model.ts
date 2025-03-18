@@ -5,7 +5,7 @@ import {
   ForeignKey,
   Table,
 } from 'sequelize-typescript';
-import { BaseModel } from '../../shared/models/base.model';
+import { BaseModel } from '../../core/shared/models/base.model';
 import { User } from '../../auth/models/user.model';
 
 @Table({

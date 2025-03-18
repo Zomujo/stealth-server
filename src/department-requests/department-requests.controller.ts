@@ -13,12 +13,12 @@ import {
 import { DepartmentRequestsService } from './department-requests.service';
 import { UpdateRequestStatusDto } from './dto/create.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { CustomApiResponse } from 'src/shared/docs/decorators';
+import { CustomApiResponse } from 'src/core/shared/docs/decorators';
 import {
   ApiSuccessResponseDto,
   ApiSuccessResponseNoData,
-} from 'src/shared/responses/success.response';
-import { throwError } from 'src/shared/responses/error.response';
+} from 'src/core/shared/responses/success.response';
+import { throwError } from 'src/core/shared/responses/error.response';
 import {
   FindRequestPaginationDto,
   GetDepartmentRequestDto,

@@ -10,7 +10,7 @@ import {
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from 'src/admin/facility/models/facility.model';
 import { Batch, Item } from 'src/inventory/items/models';
-import { BaseModel } from 'src/shared/models/base.model';
+import { BaseModel } from 'src/core/shared/models/base.model';
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { User } from '../../auth/models/user.model';
 

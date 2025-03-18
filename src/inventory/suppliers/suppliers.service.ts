@@ -4,7 +4,7 @@ import { StatusType, Supplier } from './models/supplier.model';
 import { CreateSupplierDto, GetSupplierDto, UpdateSupplierDto } from './dto';
 import { FindAndCountOptions, literal, Op } from 'sequelize';
 import { Batch } from '../items/models';
-import { generateFilter } from '../../shared/factory';
+import { generateFilter } from '../../core/shared/factory';
 
 @Injectable()
 export class SuppliersService {

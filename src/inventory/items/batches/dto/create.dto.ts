@@ -7,7 +7,7 @@ import {
   Min,
   MinDate,
 } from 'class-validator';
-import { ItemExists, SupplierExists } from '../../../../shared/validators';
+import { ItemExists, SupplierExists } from '../../../../core/shared/validators';
 import { CreateItemDto } from '../../dto';
 import { format } from 'date-fns';
 import { Type } from 'class-transformer';
