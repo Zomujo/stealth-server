@@ -33,6 +33,7 @@ import {
   Features,
   PermissionLevel,
 } from '../../core/shared/enums/permissions.enum';
+import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
 
 @ApiTags('Department')
 @Controller('departments')
@@ -63,6 +64,29 @@ export class DepartmentController {
         response,
         HttpStatus.CREATED,
         'Department created successfully',
+      );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['success', 'authorize'], {
+    type: GetNoPaginateDto,
+    isArray: true,
+    message: 'Departments retrieved successfully',
+  })
+  @Permission(Features.DEPARTMENTS, PermissionLevel.READ)
+  @Get('no-paginate')
+  async getDepartmentsNoPaginate(
+    @GetUser('facility', ParseUUIDPipe) facilityId: string,
+  ) {
+    try {
+      const response =
+        await this.departmentService.findAllNoPaginate(facilityId);
+      return new ApiSuccessResponseDto(
+        response,
+        HttpStatus.OK,
+        'Departments retrieved successfully',
       );
     } catch (error) {
       throwError(this.logger, error);

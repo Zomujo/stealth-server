@@ -1,7 +1,6 @@
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { AccountState, User } from '../models/user.model';
-import { Role } from '../interface/roles.enum';
 import { addSeconds } from 'date-fns';
 
 export class TokenDto {
@@ -27,14 +26,8 @@ export class TokenDto {
 export class LoginTokenDto {
   constructor(user: User, tokens: TokenDto, expiresAt: number) {
     this.id = user.id;
-    this.fullName = user.fullName;
     this.email = user.email;
-    this.phoneNumber = user.phoneNumber;
-    this.facilityId = user.facilityId;
-    this.departmentId = user.departmentId;
-    this.permissions = user.permissions;
     this.status = user.status;
-    this.role = user.role as Role;
     this.tokens = tokens;
     this.expiresAt = addSeconds(new Date(), expiresAt);
   }
@@ -44,51 +37,15 @@ export class LoginTokenDto {
   id: string;
 
   @ApiResponseProperty({
-    example: 'John Doe',
-  })
-  fullName: string;
-
-  @ApiResponseProperty({
     example: 'example@email.com',
   })
   email: string;
-
-  @ApiResponseProperty({
-    example: '0244335567',
-  })
-  phoneNumber: string;
-
-  @ApiResponseProperty({
-    example: '9dcf380d-a58b-4f35-8870-9948af717cb8',
-  })
-  facilityId: string;
-
-  @ApiResponseProperty({
-    example: 'b683e942-d167-48c3-8a67-b6ebde4676a2',
-  })
-  departmentId: string;
 
   @ApiResponseProperty({
     example: 'Active',
     enum: AccountState,
   })
   status: AccountState;
-
-  @ApiResponseProperty({
-    example: 'Central Admin',
-    enum: Role,
-  })
-  role: Role;
-
-  @ApiResponseProperty({
-    example: [
-      'items:READ',
-      'item_categories:READ_WRITE',
-      'stock_adjustment:READ_WRITE_DELETE',
-      'item_orders:READ_WRITE_DELETE',
-    ],
-  })
-  permissions: string[];
 
   @ApiResponseProperty({
     type: TokenDto,

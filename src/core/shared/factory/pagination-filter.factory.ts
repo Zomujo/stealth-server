@@ -12,9 +12,7 @@ export function generateFilter<T extends Partial<PaginationRequestDto>>(
     pageFilter: {
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
-      order: query.orderBy
-        ? [[query.orderBy, query.orderDirection ? query.orderDirection : 'ASC']]
-        : [['updatedAt', 'DESC']],
+      order: [[query.orderBy || 'updatedAt', query.orderDirection || 'DESC']],
     },
     searchFilter: {
       ...(query.search && searchOption),

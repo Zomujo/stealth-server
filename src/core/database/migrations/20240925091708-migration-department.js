@@ -18,16 +18,28 @@ module.exports = {
         onUpdate: 'CASCADE',
       },
 
-      createdBy: {
-        type: Sequelize.JSON,
+      createdById: {
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        type: Sequelize.UUID,
         allowNull: true,
-        field: 'created_by',
+        field: 'created_by_id',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
       },
 
-      updatedBy: {
-        type: Sequelize.JSON,
+      updatedById: {
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        type: Sequelize.UUID,
         allowNull: true,
-        field: 'updated_by',
+        field: 'updated_by_id',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
       },
     });
 
@@ -44,6 +56,14 @@ module.exports = {
   async down(queryInterface, _Sequelize) {
     await queryInterface.removeConstraint('users', 'users_department_id_fkey');
     await queryInterface.removeColumn('users', 'department_id');
+    await queryInterface.removeConstraint(
+      'departments',
+      'departments_created_by_id_fkey',
+    );
+    await queryInterface.removeConstraint(
+      'departments',
+      'departments_updated_by_id_fkey',
+    );
     await queryInterface.dropTable('departments');
   },
 };

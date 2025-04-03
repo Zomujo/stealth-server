@@ -57,6 +57,25 @@ export class DepartmentService {
    * @returns A promise that resolves to an array of DepartmentResponse objects.
    * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
    */
+  async findAllNoPaginate(facilityId: string) {
+    const filter: FindAndCountOptions<Department> = {
+      where: {
+        facilityId,
+      },
+      attributes: ['id', 'name'],
+    };
+    const departments = await this.departmentRepo.findAll(filter);
+
+    return departments;
+  }
+
+  /**
+   * Retrieves all departments.
+   *
+   * @param limit - The maximum number of categories to retrieve.
+   * @returns A promise that resolves to an array of DepartmentResponse objects.
+   * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
+   */
   async findAll(query: PaginationRequestDto, facilityId: string) {
     const searchByName = { name: { [Op.iLike]: `%${query.search}%` } };
 
@@ -68,6 +87,11 @@ export class DepartmentService {
         ...queryFilter.searchFilter,
       },
       ...queryFilter.pageFilter,
+      attributes: { exclude: ['createdById', 'updatedById'] },
+      include: [
+        { model: User, as: 'createdBy', attributes: ['id', 'fullName'] },
+        { model: User, as: 'updatedBy', attributes: ['id', 'fullName'] },
+      ],
       distinct: true,
     };
     const { rows, count } = await this.departmentRepo.findAndCountAll(filter);
