@@ -56,4 +56,18 @@ export class ResetPasswordDto {
 
 export class ChangePasswordDto extends PickType(ResetPasswordDto, [
   'newPassword',
-]) {}
+]) {
+  @ApiProperty({
+    example: 'XT(v2EiTqQZ',
+    description: 'The old password',
+  })
+  @IsNotEmpty()
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,!@#$^&*()_-])[a-zA-Z\d.,!@#$^&*()_-]{8,32}$/gm,
+    {
+      message:
+        'Password must be between 8 and 32 characters long with at least 1 special character and an uppercase character',
+    },
+  )
+  oldPassword: string;
+}

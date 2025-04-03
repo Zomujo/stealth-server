@@ -63,6 +63,7 @@ export class DepartmentService {
         facilityId,
       },
       attributes: ['id', 'name'],
+      order: [['updatedAt', 'DESC']],
     };
     const departments = await this.departmentRepo.findAll(filter);
 

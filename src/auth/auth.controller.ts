@@ -143,6 +143,37 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('access-token')
+  @Authorize()
+  @Delete('profile-picture')
+  @ApiSuccessResponseNullData({
+    description: 'Picture deleted successfully',
+  })
+  @ApiNotFoundResponse({
+    type: ApiErrorResponse,
+    description: 'User not found',
+  })
+  @ApiNotFoundResponse({
+    type: ApiErrorResponse,
+    description: 'Image not found',
+  })
+  @ApiInternalServerErrorResponse({
+    type: ApiErrorResponse,
+    description: 'An unexpected error occured',
+  })
+  @HttpCode(HttpStatus.OK)
+  async deleteProfilePicture(@GetUser('sub', ParseUUIDPipe) userId: string) {
+    try {
+      await this.authService.deletePicture(userId);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'Image has been deleted successfully',
+      );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
+
   @ApiSuccessResponse({
     type: LoginTokenDto,
     description: 'User logged in successfully',
@@ -367,7 +398,7 @@ export class AuthController {
     }
   }
 
-  @Patch('')
+  @Patch()
   @ApiBearerAuth('access-token')
   @Authorize()
   @ApiSuccessResponseNullData({

@@ -331,15 +331,40 @@ export class AuthService {
     return;
   }
 
+  async deletePicture(userId: string) {
+    const user = await this.userRepository.findByPk(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.imageId || !user.imageUrl) {
+      throw new NotFoundException('No image present');
+    }
+
+    await this.cloudinaryService.deleteFile(user.imageId);
+    user.imageId = null;
+    user.imageUrl = null;
+
+    await user.save();
+
+    return;
+  }
+
   async changePassword(dto: ChangePasswordDto, userId: string) {
-    const { newPassword } = dto;
+    const { oldPassword, newPassword } = dto;
     const user = await this.userRepository.findByPk(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     const passwordMatch = await bcrypt.compare(newPassword, user.password);
+    const oldPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!oldPasswordMatch) {
+      throw new BadRequestException('Old password is invalid');
+    }
+
     if (passwordMatch) {
-      throw new BadRequestException('Invalid. Password already exists.');
+      throw new BadRequestException('Invalid. Password already exists');
     }
 
     const newHashedPassword = await bcrypt.hash(
