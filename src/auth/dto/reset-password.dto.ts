@@ -1,5 +1,12 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, Matches, Max, Min } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class SendForgotPasswordEmailDto {
   @ApiProperty({
@@ -61,7 +68,8 @@ export class ChangePasswordDto extends PickType(ResetPasswordDto, [
     example: 'XT(v2EiTqQZ',
     description: 'The old password',
   })
-  @IsNotEmpty()
+  @IsOptional()
+  // @IsNotEmpty()
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,!@#$^&*()_-])[a-zA-Z\d.,!@#$^&*()_-]{8,32}$/gm,
     {

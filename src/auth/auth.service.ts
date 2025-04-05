@@ -357,10 +357,13 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
     const passwordMatch = await bcrypt.compare(newPassword, user.password);
-    const oldPasswordMatch = await bcrypt.compare(oldPassword, user.password);
 
-    if (!oldPasswordMatch) {
-      throw new BadRequestException('Old password is invalid');
+    if (oldPassword) {
+      const oldPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+      if (!oldPasswordMatch) {
+        throw new BadRequestException('Old password is invalid');
+      }
     }
 
     if (passwordMatch) {
