@@ -217,7 +217,6 @@ export class ItemController {
 
   // @CustomApiResponse(['success', 'authorize'], {
   //   type: GetNoPaginateDto,
-  //   isArray: true,
   //   message: 'Item status updated successfully',
   // })
   // @Put()
