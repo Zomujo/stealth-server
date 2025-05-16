@@ -158,22 +158,22 @@ export class ItemCategoryController {
     }
   }
 
-  @CustomApiResponse(['successNull', 'authorize'], {
-    message: 'Item category status updated successfully',
-  })
-  @Permission(Features.ITEMS_CATEGORIES, PermissionLevel.READ_WRITE)
-  @Patch(':id')
-  async toggleStatus(@Param('id', ParseUUIDPipe) id: string) {
-    try {
-      await this.itemCategoryService.toggleStatus(id);
-      return new ApiSuccessResponseNoData(
-        HttpStatus.OK,
-        'Item category status updated successfully',
-      );
-    } catch (error) {
-      throwError(this.logger, error);
-    }
-  }
+  // @CustomApiResponse(['successNull', 'authorize'], {
+  //   message: 'Item category status updated successfully',
+  // })
+  // @Permission(Features.ITEMS_CATEGORIES, PermissionLevel.READ_WRITE)
+  // @Patch(':id/status')
+  // async toggleStatus(@Param('id', ParseUUIDPipe) id: string) {
+  //   try {
+  //     await this.itemCategoryService.toggleStatus(id);
+  //     return new ApiSuccessResponseNoData(
+  //       HttpStatus.OK,
+  //       'Item category status updated successfully',
+  //     );
+  //   } catch (error) {
+  //     throwError(this.logger, error);
+  //   }
+  // }
 
   @CustomApiResponse(['successNull', 'authorize'], {
     message: 'Item category deleted successfully',
