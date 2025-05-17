@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import {
   AfterFind,
   BelongsTo,
@@ -41,6 +41,7 @@ export class ItemCategory extends BaseModel {
     description: 'item category status',
     enum: ItemCategoryStatus,
   })
+  @IsOptional()
   status: ItemCategoryStatus;
 
   @ForeignKey(() => Facility)
