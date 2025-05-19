@@ -33,7 +33,6 @@ export class FindUserQueryDto extends PaginationRequestDto {
 
   @ApiPropertyOptional({
     example: 'Pharmacist',
-    enum: ['Pharmacist', 'Central Admin', 'Department Admin'],
     description: 'Search for a user based on their role',
   })
   @IsOptional()
