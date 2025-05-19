@@ -16,7 +16,7 @@ export class TelemetryInterceptor implements NestInterceptor {
     const { method, route, url, headers, body } = request;
     const isDevelopment = process.env.NODE_ENV == 'development';
     if (!isDevelopment) {
-      this.logger.debug(`Request: ${route.path}`, {
+      this.logger.debug(`Request: ${method} ${route.path}`, {
         method,
         url,
         headers,

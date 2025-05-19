@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { ApiSuccessResponseNoData } from 'src/core/shared/responses/success.response';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { BatchService } from 'src/inventory/items/batches/batch.service';
 import { IUserPayload } from '../auth/interface/payload.interface';
@@ -46,13 +45,17 @@ export class StockAdjustmentsService {
     dto: CreateStockAdjustmentDto,
     user: IUserPayload,
   ): Promise<StockAdjustment> {
-    if (dto.type === StockAdjustmentType.REDUCTION) {
-      await this.batchService.removeStock(dto.batchId, dto.quantity);
-    } else if (dto.type === StockAdjustmentType.INCREMENT) {
-      await this.batchService.increaseStock(dto.batchId, dto.quantity);
-    } else {
-      throw new BadRequestException('unknown adjustment type');
+    switch (dto.type) {
+      case StockAdjustmentType.REDUCTION:
+        await this.batchService.removeStock(dto.batchId, dto.quantity);
+        break;
+      case StockAdjustmentType.INCREMENT:
+        await this.batchService.increaseStock(dto.batchId, dto.quantity);
+        break;
+      default:
+        throw new BadRequestException('unknown adjustment type');
     }
+
     dto.status = StockAdjustmentStatus.ADJUSTED;
     dto.createdById = user.sub;
     dto.facilityId = user.facility;
@@ -158,7 +161,7 @@ export class StockAdjustmentsService {
    * @throws {NotFoundException} If the stock adjustment with the given ID is not found.
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
-  async remove(id: string): Promise<ApiSuccessResponseNoData> {
+  async remove(id: string): Promise<void> {
     this.logger.log(`Removing stock adjustment with ID: ${id}`);
     const adjustedStock = await this.findOne(id);
     const _oldBatch = await this.restoreStock(
