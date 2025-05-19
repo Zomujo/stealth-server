@@ -61,7 +61,9 @@ export class AdminService {
 
   async findFaciltyPersonnel(user: IUserPayload, query: FindUserQueryDto) {
     this.logger.log(`Retrieving facilities personnel`);
-    const queryFilter = generateFilter(query);
+    const queryFilter = generateFilter(query, {
+      name: { [Op.iLike]: `%${query.search}%` },
+    });
     const whereOptions: Record<string, any> = {};
     const userId = user.sub;
     if (user.department) {
