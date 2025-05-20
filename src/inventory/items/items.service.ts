@@ -217,9 +217,9 @@ export class ItemService {
 
   async getItemCount(user: IUserPayload) {
     const whereOptions: any = { facilityId: user.facility };
-    if (user.department) {
-      whereOptions.departmentId = user.department;
-    }
+    // if (user.department) {
+    //   whereOptions.departmentId = user.department;
+    // }
 
     const totalItems = await this.itemRepo.count({
       where: { ...whereOptions },
@@ -250,9 +250,14 @@ export class ItemService {
     });
 
     const lowStocked = totalInStock - highStocked;
-
-    const totalStock =
+    let total: number =
       await this.batchService.calculateTotalStock(whereOptions);
+    if (user.department) {
+      total = await this.batchService.calculateTotalBatchStock({
+        departmentId: user.department,
+      });
+    }
+    const totalStock = total;
 
     const totalItemsObject = await this.computeTotalItems(totalItems);
     const itemAnalytics = new ItemCounts();
