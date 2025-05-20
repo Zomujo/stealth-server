@@ -21,6 +21,7 @@ export enum AccountState {
   DECLINED = 'Declined',
   ACTIVE = 'Active',
   INACTIVE = 'Inactive',
+  UNVERIFIED = 'Unverified',
 }
 @Table({
   tableName: 'users',

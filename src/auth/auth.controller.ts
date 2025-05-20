@@ -4,9 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
-  InternalServerErrorException,
   Logger,
   Param,
   ParseUUIDPipe,
@@ -14,6 +12,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -40,8 +39,10 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -59,6 +60,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateLoginSessionDto } from './dto/login-session.dto';
 import { CustomApiResponse } from '../core/shared/docs/decorators';
 import { AdminSignUpDto } from '../user/dto/signup.dto';
+import { Request } from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -82,9 +84,9 @@ export class AuthController {
     description: 'An unexpected error occured',
   })
   @Post('signup')
-  async signUp(@Body() dto: AdminSignUpDto) {
+  async signUp(@Body() dto: AdminSignUpDto, @Req() req: Request) {
     try {
-      const response = await this.authService.register(dto);
+      const response = await this.authService.register(dto, req);
       return new ApiSuccessResponseDto<LoginTokenDto>(
         response,
         HttpStatus.CREATED,
@@ -131,15 +133,7 @@ export class AuthController {
         'Image has been uploaded successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -193,15 +187,7 @@ export class AuthController {
         'User logged in successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -229,15 +215,7 @@ export class AuthController {
         'user retrieved successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -265,15 +243,7 @@ export class AuthController {
         'login sessions retrieved successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -299,15 +269,7 @@ export class AuthController {
         'Tokens refreshed successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -328,15 +290,57 @@ export class AuthController {
         'email has been sent successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
+    }
+  }
+
+  @Post('verification/send-mail')
+  @ApiSuccessResponseNullData({
+    description: 'Email sent successfully',
+  })
+  @ApiInternalServerErrorResponse({
+    type: ApiErrorResponse,
+    description: 'An unexpected error occured',
+  })
+  @HttpCode(HttpStatus.OK)
+  async sendVerificationMail(
+    @Body() dto: SendForgotPasswordEmailDto,
+    @Req() req: Request,
+  ) {
+    try {
+      await this.authService.sendVerificationEmail(dto.email, req);
+      return new ApiSuccessResponseNoData(
+        HttpStatus.OK,
+        'email has been sent successfully',
+      );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
+
+  @Get('verify')
+  @ApiOkResponse({
+    type: String,
+    description: 'Account verified successfully',
+  })
+  @ApiForbiddenResponse({
+    type: ApiErrorResponse,
+    description: 'Cannot be verified',
+  })
+  // @ApiSuccessResponseNullData({
+  //   description: 'Account verified successfully',
+  // })
+  @ApiInternalServerErrorResponse({
+    type: ApiErrorResponse,
+    description: 'An unexpected error occured',
+  })
+  @HttpCode(HttpStatus.OK)
+  async verifyAccount(@Query('token') token: string) {
+    try {
+      const response = await this.authService.verifyAccount(token);
+      return response;
+    } catch (error) {
+      throwError(this.logger, error);
     }
   }
 
@@ -357,15 +361,7 @@ export class AuthController {
         'code has been validated successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -386,15 +382,7 @@ export class AuthController {
         'password has been reset successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -428,15 +416,7 @@ export class AuthController {
         'user has been updated successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -462,15 +442,7 @@ export class AuthController {
         'email has been sent successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -496,15 +468,7 @@ export class AuthController {
         'OTP validated. User email updated successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -530,15 +494,7 @@ export class AuthController {
         'user password changed successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 
@@ -554,15 +510,7 @@ export class AuthController {
         'session deleted successfully',
       );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.error(
-          `An error occured: ${error.name} :: ${error.message}`,
-          error.stack,
-        );
-        throw new InternalServerErrorException(error.message, error);
-      }
+      throwError(this.logger, error);
     }
   }
 }

@@ -304,11 +304,11 @@ export class ItemService {
    * @returns The FindAndCountOptions object with the applied filter options.
    */
   private applyFilter(query: ItemPaginationDto): FindAndCountOptions<Item> {
+    // query.departmentId && { departmentId: query.departmentId };
     const queryFilter = generateFilter(query);
     const whereOptions: WhereOptions<Item> = {
       [Op.and]: [
         query.facilityId && { facilityId: query.facilityId },
-        query.departmentId && { departmentId: query.departmentId },
         query.search && {
           [Op.or]: [
             { name: { [Op.iLike]: `%${query.search}%` } },

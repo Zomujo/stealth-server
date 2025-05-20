@@ -34,6 +34,7 @@ import { FacilityService } from '../admin/facility/facility.service';
 import { Facility } from '../admin/facility/models/facility.model';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -56,7 +57,7 @@ export class AuthService {
     this.logger = new Logger(AuthService.name);
   }
 
-  async register(dto: AdminSignUpDto) {
+  async register(dto: AdminSignUpDto, req: Request) {
     const facility = await this.facilityService.create(dto.facility);
     const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
     const user = await this.userRepository.create({
@@ -76,17 +77,55 @@ export class AuthService {
         'users:READ_WRITE_DELETE',
       ],
       password: hashPassword,
-      status: AccountState.ACTIVE,
+      status: AccountState.UNVERIFIED,
     });
 
-    this.sendAccountCreationConfirmation(dto.email, user.fullName, user.role);
     const token = await this.generateTokens(user, null);
-
+    await this.sendVerificationEmail(user.email, req);
     const expiresAt: number = this.configService.get<number>(
       'JWT_ACCESS_TOKEN_TTL',
     );
     return new LoginTokenDto(user, token, expiresAt);
     // return createdUser;
+  }
+
+  async sendVerificationEmail(email: string, req: Request) {
+    const user = await this.fetchUserByEmail(email);
+    if (user.status !== AccountState.UNVERIFIED) {
+      throw new ForbiddenException('Account cannot be verified');
+    }
+    const verificationToken = await this.signToken(user.id, 3600, {});
+    const fullUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/verify?token=${verificationToken}`;
+    this.sendAccountVerficationMail(email, user.fullName, user.role, fullUrl);
+    return;
+  }
+
+  private async fetchUserByEmail(email: string) {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      attributes: ['id', 'fullName', 'email', 'role', 'status'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async verifyAccount(token: string) {
+    const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
+      secret: this.jwtConfiguration.secret,
+    });
+
+    const user = await this.retrieveUser(payload.sub);
+
+    if (user.status !== AccountState.UNVERIFIED) {
+      throw new ForbiddenException('Account cannot be verified');
+    }
+    user.status = AccountState.ACTIVE;
+    await user.save();
+    this.sendAccountCreationConfirmation(user.email, user.fullName, user.role);
+    return '<p>Account Verified successfully <a href="https://ims-v2-frontend.vercel.app/auth/login">Proceed to login</a></p>';
   }
 
   async login(dto: LoginDto) {
@@ -106,9 +145,13 @@ export class AuthService {
       user.status === AccountState.PENDING ||
       user.status === AccountState.ACTIVE;
 
+    if (user.status === AccountState.UNVERIFIED) {
+      throw new UnauthorizedException('Account is not yet verified');
+    }
     if (!authorized) {
       throw new UnauthorizedException('Account is not authorized');
     }
+
     let token: TokenDto;
     if (dto.loginSessionMeta) {
       const sessionData = await this.getSessionDetails(dto, user.id);
@@ -522,6 +565,27 @@ export class AuthService {
     return new TokenDto(accessToken, refreshToken);
   }
 
+  private sendAccountVerficationMail(
+    mail: string,
+    fullName: string,
+    role: string,
+    verificationUrl: string,
+  ) {
+    const email = {
+      from: this.configService.get<string>('EMAIL_FROM'),
+      to: mail,
+      subject: 'Account Verification - Stealth',
+      template: './signUpVerification',
+      context: {
+        email: mail,
+        fullName,
+        role,
+        verificationUrl,
+      },
+    };
+
+    this.mailService.send(email);
+  }
   private sendAccountCreationConfirmation(
     mail: string,
     fullName: string,
@@ -530,8 +594,7 @@ export class AuthService {
     const email = {
       from: this.configService.get<string>('EMAIL_FROM'),
       to: mail,
-      subject:
-        'Account Creation Successful - Awaiting Admin Approval - Stealth',
+      subject: 'Account Creation Successful - Stealth',
       template: './signupConfirmation',
       context: {
         email: mail,
