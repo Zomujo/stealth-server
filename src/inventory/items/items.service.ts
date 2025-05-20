@@ -225,31 +225,50 @@ export class ItemService {
       where: { ...whereOptions },
     });
 
-    const totalInStock = await this.itemRepo.count({
+    // const totalInStock = await this.itemRepo.count({
+    //   include: [
+    //     {
+    //       model: Batch,
+    //       as: 'batches',
+    //       required: false,
+    //       where: {
+    //         ...(user.department && { departmentId: user.department }),
+    //       },
+    //     },
+    //   ],
+    //   where: {
+    //     '$batches.id$': {
+    //       [Op.ne]: null,
+    //     },
+    //     ...whereOptions,
+    //     ...(user.department && { departmentId: user.department }),
+    //   },
+    //   distinct: true,
+    // });
+
+    const itemsOutOfStock = await this.itemRepo.count({
       include: [
         {
           model: Batch,
           as: 'batches',
           required: false,
+          where: {
+            ...(user.department && { departmentId: user.department }),
+          },
         },
       ],
       where: {
         '$batches.id$': {
-          [Op.ne]: null,
+          [Op.is]: null,
         },
         ...whereOptions,
       },
       distinct: true,
     });
-    const outOfStock = totalItems - totalInStock;
-    const highStocked = await this.itemRepo.count({
-      where: {
-        ...whereOptions,
-        status: ItemStatus.STOCKED,
-      },
-    });
+    const itemsHighStocked = totalItems - itemsOutOfStock;
 
-    const lowStocked = totalInStock - highStocked;
+    const itemsLowStocked = totalItems - (itemsOutOfStock + itemsHighStocked);
+
     let total: number =
       await this.batchService.calculateTotalStock(whereOptions);
     if (user.department) {
@@ -263,9 +282,9 @@ export class ItemService {
     const itemAnalytics = new ItemCounts();
     itemAnalytics.totalItems = totalItemsObject;
     itemAnalytics.totalStock = totalStock;
-    itemAnalytics.outOfStock = outOfStock;
-    itemAnalytics.highStocked = highStocked;
-    itemAnalytics.lowStocked = lowStocked;
+    itemAnalytics.outOfStock = itemsOutOfStock;
+    itemAnalytics.highStocked = itemsHighStocked;
+    itemAnalytics.lowStocked = itemsLowStocked;
 
     return itemAnalytics;
   }
