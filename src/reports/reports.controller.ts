@@ -109,9 +109,10 @@ export class ReportsController {
   async getReportData(
     @Param('type') type: ReportCategories,
     @Query() query: FindReportDataDto,
+    @GetUser() user: IUserPayload,
   ) {
     try {
-      const response = await this.reportsService.fetchData(type, query);
+      const response = await this.reportsService.fetchData(type, query, user);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,

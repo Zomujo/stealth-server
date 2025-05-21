@@ -57,8 +57,16 @@ export class ReportsService {
     return { rows, count };
   }
 
-  async fetchData(type: ReportCategories, query: FindReportDataDto) {
-    const whereConditions: Record<string, Record<any, any>> = {};
+  async fetchData(
+    type: ReportCategories,
+    query: FindReportDataDto,
+    user: IUserPayload,
+  ) {
+    const { facility, department } = user;
+    const whereConditions: Record<string, any> = {
+      facilityId: facility,
+      ...(department && { departmentId: department }),
+    };
 
     if (query.startDate && query.endDate) {
       whereConditions.createdAt = {
