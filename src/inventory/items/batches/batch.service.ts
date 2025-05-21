@@ -105,16 +105,10 @@ export class BatchService {
     const paginationFilter = generateFilter(query, {
       batchNumber: { [Op.iLike]: `%${query.search}%` },
     });
-    const whereOptions: Record<string, any> = {};
-    if (!departmentId) {
-      whereOptions.departmentId = { [Op.is]: departmentId };
-    } else {
-      whereOptions.departmentId = departmentId;
-    }
 
     const { rows, count } = await this.batchRepo.findAndCountAll({
       ...paginationFilter.pageFilter,
-      where: { itemId, ...whereOptions, ...paginationFilter.searchFilter },
+      where: { itemId, departmentId, ...paginationFilter.searchFilter },
       attributes: ['id', 'createdAt', 'validity', 'batchNumber', 'quantity'],
       include: [
         { model: Supplier, attributes: ['id', 'name'] },
