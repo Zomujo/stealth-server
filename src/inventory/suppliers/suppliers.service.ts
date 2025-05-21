@@ -29,7 +29,7 @@ export class SuppliersService {
 
   async findAllNoPaginate(facilityId: string): Promise<Supplier[]> {
     const filter: FindAndCountOptions<Supplier> = {
-      where: { facilityId },
+      where: { facilityId, status: StatusType.ACTIVE },
       attributes: ['id', 'name'],
       distinct: true,
     };
