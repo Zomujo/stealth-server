@@ -161,24 +161,22 @@ export class SalesService {
     };
 
     const { rows, count } = await this.saleRepository.findAndCountAll(filter);
-    let modRows: object[];
+    let modRows: object[] = [];
 
-    if (rows.length == 0) {
-      modRows = [];
+    if (rows.length != 0) {
+      modRows = rows.map((sale) => {
+        const modSale: Sale = sale.get({ plain: true });
+        const saleItem: any = modSale.saleItems[0];
+        const remainderItems = modSale.saleItems.length - 1;
+        const totalQuantity = modSale.saleItems.reduce(
+          (total, saleItem: any) => total + saleItem.quantity,
+          0,
+        );
+        delete modSale.saleItems;
+        delete saleItem.quantity;
+        return { ...modSale, saleItem, remainderItems, totalQuantity };
+      });
     }
-
-    modRows = rows.map((sale) => {
-      const modSale: Sale = sale.get({ plain: true });
-      const saleItem: any = modSale.saleItems[0];
-      const remainderItems = modSale.saleItems.length - 1;
-      const totalQuantity = modSale.saleItems.reduce(
-        (total, saleItem: any) => total + saleItem.quantity,
-        0,
-      );
-      delete modSale.saleItems;
-      delete saleItem.quantity;
-      return { ...modSale, saleItem, remainderItems, totalQuantity };
-    });
 
     const response = new PaginatedDataResponseDto<object[]>(
       modRows,
