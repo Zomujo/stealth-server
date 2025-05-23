@@ -12,8 +12,23 @@ block content
             strong Email: 
             | #{email}
         li
+            strong Facility Id: 
+            | #{facility}
+        li
+            strong Department Id: 
+            | #{department}
+        li
+            strong Feature Under Complaint: 
+            p(style="margin-left: 20px; font-style: italic;") #{feature}
+        li
             strong Complaint: 
             p(style="margin-left: 20px; font-style: italic;") #{complaint}
+        li
+            strong Date and Time Issue Occured: 
+            p(style="margin-left: 20px; font-style: italic;") #{dateTimeIssueOccured}
+        li
+            strong Error Message: 
+            p(style="margin-left: 20px; font-style: italic;") #{errorMessage}
     p Please address this issue at the earliest convenience.
     p Thank you.
     hr

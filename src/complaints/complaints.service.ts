@@ -18,6 +18,9 @@ export class ComplaintsService {
   }
 
   private async sendComplaintMail(dto: CreateComplaintDto, user: User) {
+    const dateTimeIssueOccured = new Date(
+      dto.dateTimeIssueOccured,
+    ).toUTCString();
     const email = {
       from: this.configService.get<string>('EMAIL_FROM'),
       to: this.configService.get<string>('CUSTOMER_SERVICE_MAIL'),
@@ -26,7 +29,12 @@ export class ComplaintsService {
       context: {
         email: user.email,
         fullName: user.fullName,
+        facility: user.facility.id,
+        department: user.departmentId || 'none',
+        feature: dto.feature,
         complaint: dto.complaint,
+        errorMessage: dto.errorMessage || 'not provided',
+        dateTimeIssueOccured,
       },
     };
 
