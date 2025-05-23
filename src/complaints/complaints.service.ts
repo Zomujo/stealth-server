@@ -4,6 +4,8 @@ import { MailService } from '../notification/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../auth/models/user.model';
 import { UserService } from '../user/user.service';
+import { InjectModel } from '@nestjs/sequelize';
+import { CustomerCareAgent } from './models/agent.entity';
 
 @Injectable()
 export class ComplaintsService {
@@ -11,19 +13,32 @@ export class ComplaintsService {
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    @InjectModel(CustomerCareAgent)
+    private customerAgentRepository: typeof CustomerCareAgent,
   ) {}
   async create(dto: CreateComplaintDto, userId: string) {
     const user = await this.userService.findOne(userId);
-    return this.sendComplaintMail(dto, user);
+    const customerAgents = await this.customerAgentRepository.findAll({
+      attributes: ['id', 'email'],
+    });
+    const customerAgentsEmails: string = customerAgents
+      .map((agent) => agent.email)
+      .join(', ');
+    return this.sendComplaintMail(dto, user, customerAgentsEmails);
   }
 
-  private async sendComplaintMail(dto: CreateComplaintDto, user: User) {
+  private async sendComplaintMail(
+    dto: CreateComplaintDto,
+    user: User,
+    customerAgentsEmails: string,
+  ) {
     const dateTimeIssueOccured = new Date(
       dto.dateTimeIssueOccured,
     ).toUTCString();
+    // to: this.configService.get<string>('CUSTOMER_SERVICE_MAIL'),
     const email = {
       from: this.configService.get<string>('EMAIL_FROM'),
-      to: this.configService.get<string>('CUSTOMER_SERVICE_MAIL'),
+      to: customerAgentsEmails,
       subject: 'New Complaint Lodged',
       template: './complaint',
       context: {
