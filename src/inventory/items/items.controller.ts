@@ -110,7 +110,7 @@ export class ItemController {
   @Get('batches/:itemId/no-paginate')
   async retrieveBatchesNoPaginate(
     @Param('itemId', ParseUUIDPipe) itemId: string,
-    @GetUser('department', ParseUUIDPipe) departmentId: string,
+    @GetUser('department') departmentId: string,
   ) {
     try {
       const batches = await this.batchService.findAllNoPaginate(

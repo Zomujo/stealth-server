@@ -122,6 +122,7 @@ export class BatchService {
     return this.batchRepo.findAll({
       where: { itemId, departmentId },
       attributes: ['id', 'batchNumber', 'quantity'],
+      order: [['updatedAt', 'DESC']],
     });
   }
 

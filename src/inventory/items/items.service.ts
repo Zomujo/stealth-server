@@ -72,6 +72,7 @@ export class ItemService {
         facilityId,
       },
       attributes: ['id', 'name'],
+      order: [['updatedAt', 'DESC']],
     });
 
     this.logger.log(`Retrieved ${items.count} items`);
