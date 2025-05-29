@@ -38,9 +38,23 @@ export class BatchService {
     }
 
     this.logger.log(`Creating batch for itemId: ${createBatchDto.itemId}...`);
-    const batch = await this.batchRepo.create({ ...createBatchDto });
-    this.logger.log(`Batch created successfully. ID: ${batch.id}`);
 
+    let batch: Batch;
+    batch = await this.batchRepo.findOne<Batch>({
+      where: {
+        batchNumber: createBatchDto.batchNumber,
+        deletedAt: { [Op.not]: null },
+      },
+      paranoid: false,
+    });
+    if (batch) {
+      await batch.restore();
+      await batch.update({ ...createBatchDto, createdAt: new Date() });
+      this.logger.log(`Batch reinstated successfully. ID: ${batch.id}`);
+    } else {
+      batch = await this.batchRepo.create({ ...createBatchDto });
+      this.logger.log(`Batch created successfully. ID: ${batch.id}`);
+    }
     this.eventEmitter.emit('quantity.changed', {
       itemId: createBatchDto.itemId,
     });

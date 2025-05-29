@@ -127,6 +127,7 @@ module.exports = {
       batchNumber: {
         type: Sequelize.STRING,
         field: 'batch_number',
+        unique: true,
       },
       quantity: {
         type: Sequelize.INTEGER,

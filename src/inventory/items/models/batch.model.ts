@@ -6,6 +6,7 @@ import {
   DeletedAt,
   ForeignKey,
   Table,
+  Unique,
 } from 'sequelize-typescript';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { BaseModel } from 'src/core/shared/models/base.model';
@@ -30,6 +31,7 @@ export class Batch extends BaseModel {
   @Column({ type: DataType.DATE, allowNull: false })
   validity: Date;
 
+  @Unique
   @Column
   batchNumber: string;
 
