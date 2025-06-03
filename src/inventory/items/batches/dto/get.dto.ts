@@ -4,8 +4,8 @@ import {
   IntersectionType,
   PickType,
 } from '@nestjs/swagger';
-import { GenericResponseDto } from '../../../../core/shared/docs/dto/base.dto';
-import { GetNoPaginateDto } from '../../../../core/shared/docs/dto/get-no_paginate.dto';
+import { GenericResponseDto } from '../../../../core/shared/dto/base.dto';
+import { GetNoPaginateDto } from '../../../../core/shared/dto/get-no_paginate.dto';
 
 export class OneBatch extends IntersectionType(
   CreateBatchDto,

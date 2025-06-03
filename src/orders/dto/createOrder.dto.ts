@@ -14,7 +14,7 @@ import {
   MinDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/dto/base.dto';
 import { ItemExists, SupplierExists } from '../../core/shared/validators';
 
 export class CreateItemOrderDto extends GenericResponseDto {

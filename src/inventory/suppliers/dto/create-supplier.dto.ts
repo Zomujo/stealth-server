@@ -10,7 +10,7 @@ import {
   IsEnum,
   IsEmail,
 } from 'class-validator';
-import { GenericResponseDto } from '../../../core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../../core/shared/dto/base.dto';
 enum PaymentType {
   BANK = 'Bank',
   MOBILE_MONEY = 'Mobile Money',

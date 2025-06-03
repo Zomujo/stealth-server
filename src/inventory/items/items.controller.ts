@@ -37,7 +37,7 @@ import {
 import { ItemService } from './items.service';
 
 import { BatchService } from './batches/batch.service';
-import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
+import { GetNoPaginateDto } from '../../core/shared/dto/get-no_paginate.dto';
 import {
   BatchesNoPaginate,
   CreateBatchDto,
@@ -45,7 +45,7 @@ import {
   BatchResponseDto,
   UpdateBatchDto,
 } from './batches/dto';
-import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
 
 @ApiTags('Items')
 @Controller('items')
@@ -90,6 +90,7 @@ export class ItemController {
     try {
       dto.createdById = user.sub;
       dto.departmentId = user.department;
+      dto.facilityId = user.facility;
       const createdItem = await this.batchService.create(dto);
       return new ApiSuccessResponseDto(
         createdItem,

@@ -116,7 +116,7 @@ export class ReportsController {
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
-        'Report data successfully',
+        'Report data successfully retrieved',
       );
     } catch (error) {
       throwError(this.logger, error);

@@ -20,7 +20,7 @@ import {
   ApiSuccessResponseNoData,
   PaginatedDataResponseDto,
 } from '../../core/shared/responses/success.response';
-import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
 import { throwError } from '../../core/shared/responses/error.response';
 import { CustomApiResponse } from '../../core/shared/docs/decorators';
 import { ApiTags } from '@nestjs/swagger';

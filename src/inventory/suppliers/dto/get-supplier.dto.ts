@@ -4,8 +4,8 @@ import {
   OmitType,
   PickType,
 } from '@nestjs/swagger';
-import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
-import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
+import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
+import { PaginationRequestDto } from 'src/core/shared/dto/pagination.dto';
 import { CreateSupplierDto } from './create-supplier.dto';
 import { IsEnum, IsOptional } from 'class-validator';
 import { StatusType } from '../models/supplier.model';

@@ -1,6 +1,6 @@
 import { Department } from './../models/department.model';
 import { IntersectionType } from '@nestjs/swagger';
-import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
 
 export class DepartmentResponse extends IntersectionType(
   Department,

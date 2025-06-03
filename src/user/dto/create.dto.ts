@@ -11,7 +11,7 @@ import {
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
-import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/dto/base.dto';
 import { AccountState } from '../../auth/models/user.model';
 import { PermissionsTypes } from '../../admin/dto';
 

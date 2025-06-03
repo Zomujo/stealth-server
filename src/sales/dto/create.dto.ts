@@ -14,7 +14,7 @@ import {
   IsOptional,
   Min,
 } from 'class-validator';
-import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
 import { PaymentStatus, SalePaymentType } from '../models/sales.models';
 import { BatchExists, PatientExists } from '../../core/shared/validators';
 

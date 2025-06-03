@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
-import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from 'src/core/shared/dto/pagination.dto';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { CreateFacilityDto, FacilityResponse, UpdateFacilityDto } from './dto';
 import { Facility } from './models/facility.model';

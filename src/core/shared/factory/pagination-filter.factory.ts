@@ -1,4 +1,4 @@
-import { PaginationRequestDto } from '../docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../dto/pagination.dto';
 import { getDateRangeFilter } from './date-filter.factory';
 
 export function generateFilter<T extends Partial<PaginationRequestDto>>(

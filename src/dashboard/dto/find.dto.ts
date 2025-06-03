@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { subDays } from 'date-fns';
-import { DateRange } from '../../core/shared/docs/dto/pagination.dto';
+import { DateRange } from '../../core/shared/dto/pagination.dto';
 
 export class FindGeneralAnalyticsQueryDto {
   @ApiProperty({

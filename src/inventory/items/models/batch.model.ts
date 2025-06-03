@@ -13,6 +13,7 @@ import { BaseModel } from 'src/core/shared/models/base.model';
 import { Item } from '.';
 import { User } from '../../../auth/models/user.model';
 import { Department } from '../../../admin/department/models/department.model';
+import { Facility } from '../../../admin/facility/models/facility.model';
 
 @Table({
   tableName: 'batches',
@@ -59,6 +60,13 @@ export class Batch extends BaseModel {
 
   @BelongsTo(() => Department)
   department: Department;
+
+  @ForeignKey(() => Facility)
+  @Column
+  facilityId: string;
+
+  @BelongsTo(() => Facility)
+  facility: Facility;
 
   @DeletedAt
   @Column({ type: DataType.DATE, field: 'deleted_at' })

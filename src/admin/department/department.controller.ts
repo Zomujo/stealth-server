@@ -28,12 +28,12 @@ import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from '../../core/shared/docs/decorators';
 import { Department } from './models/department.model';
 import { throwError } from '../../core/shared/responses/error.response';
-import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
 import {
   Features,
   PermissionLevel,
 } from '../../core/shared/enums/permissions.enum';
-import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
+import { GetNoPaginateDto } from '../../core/shared/dto/get-no_paginate.dto';
 
 @ApiTags('Department')
 @Controller('departments')

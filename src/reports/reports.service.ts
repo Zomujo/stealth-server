@@ -15,6 +15,7 @@ import {
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { generateFilter } from '../core/shared/factory';
 import { endOfDay, startOfDay } from 'date-fns';
+import { BatchService } from '../inventory/items/batches/batch.service';
 
 @Injectable()
 export class ReportsService {
@@ -23,6 +24,7 @@ export class ReportsService {
     private reportRepository: typeof Report,
     private itemService: ItemService,
     private stockAdjustmentService: StockAdjustmentsService,
+    private batchService: BatchService,
     private salesService: SalesService,
   ) {}
 
@@ -86,6 +88,15 @@ export class ReportsService {
       case ReportCategories.PERIODIC_SALES_REPORT: {
         const { rows, count } =
           await this.salesService.fetchData(whereConditions);
+        return { count, rows };
+      }
+      case ReportCategories.STOCK_LEVEL_REPORT: {
+        const { rows, count } = await this.batchService.findAndCount({
+          query: whereConditions,
+          fields: ['id', 'batchNumber', 'createdAt', 'validity'],
+          populate: ['item', 'department', 'facility'],
+          sort: '-createdAt',
+        });
         return { count, rows };
       }
       default:

@@ -10,7 +10,7 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
-import { DateRange } from '../docs/dto/pagination.dto';
+import { DateRange } from '../dto/pagination.dto';
 
 export const getDateRangeFilter = (
   dateRange: DateRange,

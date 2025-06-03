@@ -4,10 +4,10 @@ import {
   IntersectionType,
   PickType,
 } from '@nestjs/swagger';
-import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
 import { CreateStockAdjustmentDto } from '.';
 import { IsEnum, IsOptional, IsUUID } from 'class-validator';
-import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from 'src/core/shared/dto/pagination.dto';
 import {
   StockAdjustmentStatus,
   StockAdjustmentType,

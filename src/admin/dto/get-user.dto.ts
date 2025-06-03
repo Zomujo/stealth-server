@@ -5,7 +5,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateUserDto } from '../../user/dto';
 import { Department } from '../department/models/department.model';
-import { PaginationRequestDto } from '../../core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { AccountState } from '../../auth/models/user.model';
 

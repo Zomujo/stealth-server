@@ -1,4 +1,4 @@
-import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from 'src/core/shared/dto/pagination.dto';
 import { CreateSaleDto, CreateSaleResponseDto } from './create.dto';
 import {
   ApiPropertyOptional,
@@ -9,7 +9,7 @@ import {
 } from '@nestjs/swagger';
 import { IsBooleanString, IsEnum, IsOptional } from 'class-validator';
 import { PaymentStatus } from '../models/sales.models';
-import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/dto/base.dto';
 
 export class ItemDto {
   @ApiResponseProperty({ example: 'Some Item' })

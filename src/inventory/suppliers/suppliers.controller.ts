@@ -30,12 +30,12 @@ import {
 import { throwError } from 'src/core/shared/responses/error.response';
 import { StatusType } from './models/supplier.model';
 import { GetUser, Permission } from '../../auth/decorator';
-import { DeleteItemsDto } from '../../core/shared/docs/dto/delete.dto';
+import { DeleteItemsDto } from '../../core/shared/dto/delete.dto';
 import {
   Features,
   PermissionLevel,
 } from '../../core/shared/enums/permissions.enum';
-import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
+import { GetNoPaginateDto } from '../../core/shared/dto/get-no_paginate.dto';
 
 @ApiTags('Suppliers')
 @Controller('suppliers')

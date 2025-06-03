@@ -5,8 +5,8 @@ import {
   ApiResponseProperty,
 } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { GenericResponseDto } from 'src/core/shared/docs/dto/base.dto';
-import { PaginationRequestDto } from 'src/core/shared/docs/dto/pagination.dto';
+import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
+import { PaginationRequestDto } from 'src/core/shared/dto/pagination.dto';
 import { CreateItemDto, ItemStatus } from './create-item.dto';
 import { OneBatch } from '../batches/dto';
 

@@ -168,6 +168,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
+      facilityId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'facilities',
+          key: 'id',
+        },
+        field: 'facility_id',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
     });
   },
 

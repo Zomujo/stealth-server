@@ -31,7 +31,7 @@ import {
   Features,
   PermissionLevel,
 } from '../../core/shared/enums/permissions.enum';
-import { GetNoPaginateDto } from '../../core/shared/docs/dto/get-no_paginate.dto';
+import { GetNoPaginateDto } from '../../core/shared/dto/get-no_paginate.dto';
 
 @ApiTags('Item Category')
 @Controller('item-categories')

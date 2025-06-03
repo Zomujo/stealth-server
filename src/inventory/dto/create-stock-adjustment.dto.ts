@@ -1,5 +1,5 @@
 import { IntersectionType, PickType } from '@nestjs/swagger';
-import { GenericResponseDto } from '../../core/shared/docs/dto/base.dto';
+import { GenericResponseDto } from '../../core/shared/dto/base.dto';
 import { StockAdjustment } from '../models/stock-adjustment.model';
 
 export class CreateStockAdjustmentDto extends PickType(StockAdjustment, [

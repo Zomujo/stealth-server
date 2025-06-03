@@ -8,12 +8,16 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Batch, Item } from '../models';
 import { Supplier } from 'src/inventory/suppliers/models/supplier.model';
 import { SuppliersService } from '../../suppliers/suppliers.service';
-import { FindAndCountOptions, Op, QueryTypes } from 'sequelize';
+import { FindAndCountOptions, IncludeOptions, Op, QueryTypes } from 'sequelize';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateBatchDto, UpdateBatchDto } from './dto';
-import { PaginationRequestDto } from '../../../core/shared/docs/dto/pagination.dto';
+import { PaginationRequestDto } from '../../../core/shared/dto/pagination.dto';
 import { generateFilter } from '../../../core/shared/factory';
 import { User } from '../../../auth/models/user.model';
+import { QueryOptionsDto } from '../../../core/shared/dto/query-options.dto';
+import { Department } from '../../../admin/department/models/department.model';
+import { Facility } from '../../../admin/facility/models/facility.model';
+import { buildQuery } from '../../../core/shared/factory/query-builder.factory';
 
 @Injectable()
 export class BatchService {
@@ -26,6 +30,18 @@ export class BatchService {
   ) {
     this.logger = new Logger(BatchService.name);
   }
+
+  private populates: Record<string, IncludeOptions> = {
+    supplier: { model: Supplier, attributes: ['id', 'name'] },
+
+    createdBy: { model: User, attributes: ['id', 'fullName', 'email'] },
+
+    item: { model: Item, attributes: ['id', 'name'] },
+
+    department: { model: Department, attributes: ['id', 'name'] },
+
+    facility: { model: Facility, attributes: ['id', 'name'] },
+  };
 
   async create(createBatchDto: CreateBatchDto): Promise<Batch> {
     const supplier = await this.supplierService.exists(
@@ -43,6 +59,7 @@ export class BatchService {
     batch = await this.batchRepo.findOne<Batch>({
       where: {
         batchNumber: createBatchDto.batchNumber,
+        itemId: createBatchDto.itemId,
         deletedAt: { [Op.not]: null },
       },
       paranoid: false,
@@ -79,14 +96,20 @@ export class BatchService {
   }
 
   async findAll(itemId?: string): Promise<Batch[]> {
-    const whereOptions = itemId ? { itemId } : {};
-    return this.batchRepo.findAll({
-      where: whereOptions,
-      include: [
-        { model: Supplier, attributes: ['id', 'name'] },
-        { model: User, attributes: ['id', 'fullName', 'email'] },
-      ],
+    return await this.find({
+      query: [{ itemId }],
+      populate: ['supplier', 'createdBy'],
     });
+  }
+
+  async find(options?: QueryOptionsDto<Batch>) {
+    const queryOptions = buildQuery<Batch>(options, this.populates);
+    return this.batchRepo.findAll(queryOptions);
+  }
+
+  async findAndCount(options?: QueryOptionsDto<Batch>) {
+    const queryOptions = buildQuery<Batch>(options, this.populates);
+    return this.batchRepo.findAndCountAll(queryOptions);
   }
 
   async getAggregatedBatches(from: Date, to: Date) {

@@ -57,4 +57,9 @@ export class CreateBatchDto extends PickType(CreateItemDto, ['createdById']) {
     example: '44220956-0962-4dd0-9e65-1564c585563c',
   })
   departmentId: string;
+
+  @ApiResponseProperty({
+    example: '44220956-0962-4dd0-9e65-1564c585563c',
+  })
+  facilityId: string;
 }
