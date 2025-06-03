@@ -152,10 +152,10 @@ export class ReportsService {
       [Op.between]: [nDaysFromNow(60), nDaysFromNow(90)],
     });
 
-    rows.expired = expired.rows;
-    rows.critical = critical.rows;
-    rows.highRisk = highRisk.rows;
-    rows.approaching = approaching.rows;
+    rows.expired = expired;
+    rows.critical = critical;
+    rows.highRisk = highRisk;
+    rows.approaching = approaching;
 
     const totalCount =
       (expired.count || 0) +
