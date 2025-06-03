@@ -46,8 +46,13 @@ export function buildQuery<T>(
     ];
   }
 
-  queryOptions.limit = params.pageSize || 10;
-  queryOptions.offset = queryOptions.limit * (params.page - 1) || 0;
+  if (params.pageSize) {
+    queryOptions.limit = params.pageSize;
+  }
+  if (params.page) {
+    queryOptions.offset = queryOptions.limit * (params.page - 1) || 0;
+  }
+
   queryOptions.distinct = true;
   return queryOptions;
 }
