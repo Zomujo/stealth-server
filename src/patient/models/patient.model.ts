@@ -10,7 +10,7 @@ import {
   Unique,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../core/shared/models/base.model';
-import { Sale } from '../../sales/models/sales.models';
+import { Sale } from '../../sales/models/sales.model';
 import { User } from '../../auth/models/user.model';
 
 @Table({

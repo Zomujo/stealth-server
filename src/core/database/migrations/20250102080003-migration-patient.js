@@ -51,17 +51,6 @@ module.exports = {
         field: 'deleted_by',
       },
     });
-
-    await queryInterface.addColumn('sales', 'patient_id', {
-      type: Sequelize.UUID,
-      allowNull: true,
-      references: {
-        model: 'patients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
   },
 
   async down(queryInterface, _Sequelize) {
@@ -69,8 +58,6 @@ module.exports = {
       'patients',
       'patients_created_by_id_fkey',
     );
-    await queryInterface.removeConstraint('sales', 'sales_patient_id_fkey');
-    await queryInterface.removeColumn('sales', 'patient_id');
     await queryInterface.dropTable('patients');
   },
 };

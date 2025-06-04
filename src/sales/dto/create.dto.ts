@@ -15,7 +15,7 @@ import {
   Min,
 } from 'class-validator';
 import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
-import { PaymentStatus, SalePaymentType } from '../models/sales.models';
+import { PaymentStatus, SalePaymentType } from '../models/sales.model';
 import { BatchExists, PatientExists } from '../../core/shared/validators';
 
 export class CreateSaleItemsDto {
@@ -34,6 +34,8 @@ export class CreateSaleItemsDto {
   @IsNotEmpty()
   @Min(1)
   quantity: number;
+
+  itemId: string;
 }
 
 export class CreateSaleDto {

@@ -8,7 +8,7 @@ import {
   ApiResponseProperty,
 } from '@nestjs/swagger';
 import { IsBooleanString, IsEnum, IsOptional } from 'class-validator';
-import { PaymentStatus } from '../models/sales.models';
+import { PaymentStatus } from '../models/sales.model';
 import { GenericResponseDto } from '../../core/shared/dto/base.dto';
 
 export class ItemDto {

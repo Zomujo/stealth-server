@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Patient } from './models/patient.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreatePatientDto, FindPatientDto, UpdatePatientDto } from './dto';
-import { Sale } from '../sales/models/sales.models';
+import { Sale } from '../sales/models/sales.model';
 import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { User } from '../auth/models/user.model';
 

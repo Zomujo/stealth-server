@@ -6,6 +6,7 @@ import {
   Default,
   DeletedAt,
   ForeignKey,
+  HasMany,
   Table,
   Unique,
 } from 'sequelize-typescript';
@@ -13,7 +14,7 @@ import { BaseModel } from 'src/core/shared/models/base.model';
 import { Patient } from '../../patient/models/patient.model';
 import { Department } from '../../admin/department/models/department.model';
 import { Facility } from '../../admin/facility/models/facility.model';
-import { BatchResponseDto } from '../dto';
+import { SaleItem } from './sale-items.model';
 
 export enum PaymentStatus {
   PAID = 'PAID',
@@ -37,8 +38,8 @@ export class Sale extends BaseModel {
   @Column
   paymentType: string;
 
-  @Column(DataType.ARRAY(DataType.JSONB))
-  saleItems: BatchResponseDto[];
+  @HasMany(() => SaleItem)
+  saleItems: SaleItem[];
 
   @Column
   subTotal: number;

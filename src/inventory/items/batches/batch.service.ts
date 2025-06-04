@@ -246,7 +246,10 @@ export class BatchService {
     const batch = await this.batchRepo.findByPk(id, {
       attributes: [['id', 'batchId'], 'batchNumber'],
       include: [
-        { model: Item, attributes: ['name', 'brandName', 'sellingPrice'] },
+        {
+          model: Item,
+          attributes: ['id', 'name', 'brandName', 'sellingPrice'],
+        },
       ],
     });
     if (!batch) {

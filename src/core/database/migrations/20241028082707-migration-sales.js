@@ -10,6 +10,17 @@ module.exports = {
     await queryInterface.createTable('sales', {
       ...baseModelColumns,
 
+      patientId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'patients',
+          key: 'id',
+        },
+        field: 'patient_id',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
       saleNumber: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -20,12 +31,6 @@ module.exports = {
         type: Sequelize.ENUM('CASH', 'ONLINE'),
         allowNull: false,
         field: 'payment_type',
-      },
-
-      saleItems: {
-        type: Sequelize.ARRAY(Sequelize.JSONB),
-        allowNull: false,
-        field: 'sale_items',
       },
 
       subTotal: {
@@ -91,6 +96,7 @@ module.exports = {
   },
 
   async down(queryInterface, _) {
+    await queryInterface.removeConstraint('sales', 'sales_patient_id_fkey');
     await queryInterface.removeConstraint('sales', 'sales_facility_id_fkey');
     await queryInterface.removeConstraint('sales', 'sales_department_id_fkey');
     await queryInterface.dropTable('sales');
