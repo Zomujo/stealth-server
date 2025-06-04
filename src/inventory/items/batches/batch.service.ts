@@ -78,6 +78,16 @@ export class BatchService {
   }
 
   async update(id: string, dto: UpdateBatchDto) {
+    const batch = await this.findOne(id);
+    if (dto.quantity) {
+      this.logger.log(batch);
+      if (dto.quantity > batch.quantity) {
+        this.eventEmitter.emit('quantity.increased', { itemId: batch.itemId });
+      } else if (dto.quantity < batch.quantity) {
+        this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
+      }
+    }
+
     const result = await this.batchRepo.update(
       { ...dto },
       { where: { id: id } },
@@ -86,14 +96,6 @@ export class BatchService {
       throw new NotFoundException(`batch with id ${id} not found`);
     }
 
-    if (dto.quantity) {
-      const batch = await this.findOne(id);
-      if (dto.quantity > batch.quantity) {
-        this.eventEmitter.emit('quantity.increased', { itemId: batch.itemId });
-      } else if (dto.quantity < batch.quantity) {
-        this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
-      }
-    }
     this.logger.log(`Updated item with ID: ${id}`);
     return;
   }
@@ -233,9 +235,7 @@ export class BatchService {
       };
     } else {
       options = {
-        include: [
-          { model: User, attributes: ['id', 'fullName', 'email', 'quantity'] },
-        ],
+        include: [{ model: User, attributes: ['id', 'fullName', 'email'] }],
       };
     }
     const batch = await this.batchRepo.findByPk(id, {
