@@ -71,7 +71,7 @@ export class BatchService {
       batch = await this.batchRepo.create({ ...createBatchDto });
       this.logger.log(`Batch created successfully. ID: ${batch.id}`);
     }
-    this.eventEmitter.emit('quantity.changed', {
+    this.eventEmitter.emit('quantity.increased', {
       itemId: createBatchDto.itemId,
     });
     return batch;
@@ -88,7 +88,11 @@ export class BatchService {
 
     if (dto.quantity) {
       const batch = await this.findOne(id);
-      this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
+      if (dto.quantity > batch.quantity) {
+        this.eventEmitter.emit('quantity.increased', { itemId: batch.itemId });
+      } else if (dto.quantity < batch.quantity) {
+        this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
+      }
     }
     this.logger.log(`Updated item with ID: ${id}`);
     return;
@@ -281,7 +285,7 @@ export class BatchService {
 
     batch.quantity += qty;
     await batch.save();
-    this.eventEmitter.emit('quantity.changed', { itemId: itemId });
+    this.eventEmitter.emit('quantity.increased', { itemId: itemId });
     this.logger.log(`Stock added to batch. ID: ${id}`);
   }
 

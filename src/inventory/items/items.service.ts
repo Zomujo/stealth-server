@@ -405,12 +405,30 @@ export class ItemService {
       notification.message = `${item.name} is almost out of stock. ${quantity} pieces left`;
       notification.linkName = 'Restock';
       notification.linkRoute = `/items/${item.id}/batches`;
-    } else {
-      itemStatus = ItemStatus.STOCKED;
-      notification.message = `${item.name} just got stocked`;
-      notification.linkName = 'View';
-      notification.linkRoute = `/items/${item.id}/batches`;
     }
+
+    await this.notificationService.sendNotification(
+      notification,
+      Features.ITEMS,
+      { facility: item.facilityId, department: item.departmentId },
+    );
+
+    await this.update(payload.itemId, {
+      status: itemStatus,
+    });
+  }
+
+  @OnEvent('quantity.increased')
+  async handleQuantityIncreasedEvent(payload: ChangeQuantityEvent) {
+    this.logger.log(`quantity.increased event; itemId: ${payload.itemId}`);
+    const item = await this.findOne(payload.itemId);
+    const notification = new CreateNotificationDto();
+    notification.status = NotificationStatus.UNREAD;
+
+    const itemStatus: ItemStatus = ItemStatus.STOCKED;
+    notification.message = `${item.name} just got stocked`;
+    notification.linkName = 'View';
+    notification.linkRoute = `/items/${item.id}/batches`;
 
     await this.notificationService.sendNotification(
       notification,
