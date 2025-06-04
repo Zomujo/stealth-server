@@ -11,6 +11,24 @@ import { ItemCategoryExists } from '../../../core/shared/validators/item-categor
 export enum DosageForm {
   SOLIDS = 'SOLIDS',
   LIQUIDS = 'LIQUIDS',
+  TABLET = 'TABLET',
+  INJECTION = 'INJECTION',
+  SYRUP = 'SYRUP',
+  CAPSULE = 'CAPSULE',
+  CREAM = 'CREAM',
+  OINTMENT = 'OINTMENT',
+  LOTION = 'LOTION',
+  GEL = 'GEL',
+  SUSPENSION = 'SUSPENSION',
+  DROPS = 'DROPS',
+  SPRAY = 'SPRAY',
+  POWDER = 'POWDER',
+  SUPPOSITORY = 'SUPPOSITORY',
+  INHALER = 'INHALER',
+  PATCH = 'PATCH',
+  LOZENGE = 'LOZENGE',
+  MOUTHWASH = 'MOUTHWASH',
+  SHAMPOO = 'SHAMPOO',
 }
 
 export enum ItemStatus {

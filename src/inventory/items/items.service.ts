@@ -159,22 +159,13 @@ export class ItemService {
    */
   async findOne(id: string) {
     this.logger.log(`finding item with id: ${id}`);
-    const item = await this.itemRepo.findByPk(id, { include: [Batch] });
+    const item = await this.itemRepo.findByPk(id);
     if (!item) {
       throw new NotFoundException(`item with id: ${id} not found`);
     }
 
-    let quantity = 0;
-    if (item.batches.length) {
-      quantity = item.batches.reduce(
-        (total, batch) => total + batch.quantity,
-        0,
-      );
-    }
-    const result = item.get({ plain: true });
     this.logger.log(`Found items category with ID: ${id}`);
-    result.totalStock = quantity;
-    return result;
+    return item;
   }
 
   /**

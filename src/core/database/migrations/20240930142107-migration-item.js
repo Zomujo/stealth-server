@@ -18,7 +18,7 @@ module.exports = {
         field: 'brand_name',
       },
       dosageForm: {
-        type: Sequelize.ENUM('SOLIDS', 'LIQUIDS'),
+        type: Sequelize.STRING,
         field: 'dosage_form',
       },
       costPrice: {

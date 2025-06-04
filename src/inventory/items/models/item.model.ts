@@ -15,6 +15,7 @@ import { BaseModel } from 'src/core/shared/models/base.model';
 import { Batch } from '.';
 import { StockAdjustment } from '../../models/stock-adjustment.model';
 import { User } from '../../../auth/models/user.model';
+import { DosageForm } from '../dto';
 
 @Table({
   tableName: 'items',
@@ -27,8 +28,8 @@ export class Item extends BaseModel {
   @Column({ type: DataType.STRING, field: 'brand_name' })
   brandName: string;
 
-  @Column({ type: DataType.ENUM('SOLIDS', 'LIQUIDS'), field: 'dosage_form' })
-  dosageForm: string;
+  @Column({ type: DataType.STRING, field: 'dosage_form' })
+  dosageForm: DosageForm;
 
   @Column({ type: DataType.DOUBLE, allowNull: false, field: 'cost_price' })
   costPrice: number;
