@@ -487,6 +487,7 @@
     "@eslint/core" "^0.15.0"
     levn "^0.4.1"
 
+<<<<<<< HEAD
 "@hapi/address@^4.0.1":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-4.1.0.tgz#d60c5c0d930e77456fdcde2598e77302e2955e1d"
