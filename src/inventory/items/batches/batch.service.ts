@@ -80,7 +80,6 @@ export class BatchService {
   async update(id: string, dto: UpdateBatchDto) {
     const batch = await this.findOne(id);
     if (dto.quantity) {
-      this.logger.log(batch);
       if (dto.quantity > batch.quantity) {
         this.eventEmitter.emit('quantity.increased', { itemId: batch.itemId });
       } else if (dto.quantity < batch.quantity) {
