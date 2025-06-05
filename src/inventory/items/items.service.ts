@@ -96,82 +96,6 @@ export class ItemService {
     return { rows, count };
   }
 
-  private filterBuilder(user: IUserPayload, query: FetchExpiredQueryDto) {
-    const itemWhereConditions: Record<string, any> = {};
-    const batchWhereConditions: Record<string, any> = {};
-
-    itemWhereConditions.facilityId = { [Op.eq]: user.facility };
-
-    if (query.search) {
-      itemWhereConditions.name = {
-        [Op.iLike]: `%${query.search}%`,
-      };
-    }
-
-    const today = startOfToday();
-    switch (query.status) {
-      case BatchValidityStatus.EXPIRED:
-        batchWhereConditions.validity = { [Op.lte]: today };
-        break;
-      case BatchValidityStatus.CRITICAL: {
-        const tomorrow = addDays(today, 1);
-        const thirtyDays = addDays(today, 30);
-        batchWhereConditions.validity = {
-          [Op.between]: [tomorrow, thirtyDays],
-        };
-        break;
-      }
-      case BatchValidityStatus.APPROACHING: {
-        const thirtyDays = addDays(today, 31);
-        const ninetyDays = addDays(today, 90);
-        batchWhereConditions.validity = {
-          [Op.between]: [thirtyDays, ninetyDays],
-        };
-        break;
-      }
-      case BatchValidityStatus.SAFE: {
-        const ninetyDays = addDays(today, 90);
-        batchWhereConditions.validity = { [Op.gte]: ninetyDays };
-        break;
-      }
-      default:
-        break;
-    }
-
-    if (query.startDate && !query.status) {
-      batchWhereConditions.validity = { [Op.gte]: query.startDate };
-    }
-    if (query.endDate && !query.status) {
-      batchWhereConditions.validity = { [Op.lte]: query.endDate };
-    }
-
-    const filter: FindAndCountOptions<Batch> = {
-      where: {
-        departmentId: user.department,
-        ...batchWhereConditions,
-      },
-      limit: query.pageSize || 10,
-      offset: query.pageSize * (query.page - 1) || 0,
-      order: [['validity', 'ASC']],
-      attributes: [
-        ['id', 'batchId'],
-        'batchNumber',
-        'validity',
-        'status',
-        'quantity',
-      ],
-      include: [
-        {
-          model: Item,
-          attributes: ['id', 'name'],
-          where: itemWhereConditions,
-        },
-      ],
-      distinct: true,
-    };
-    return filter;
-  }
-
   /**
    * Retrieves all items based on the provided query parameters.
    *
@@ -301,34 +225,10 @@ export class ItemService {
 
   async getItemCount(user: IUserPayload) {
     const whereOptions: any = { facilityId: user.facility };
-    // if (user.department) {
-    //   whereOptions.departmentId = user.department;
-    // }
 
     const totalItems = await this.itemRepo.count({
       where: { ...whereOptions },
     });
-
-    // const totalInStock = await this.itemRepo.count({
-    //   include: [
-    //     {
-    //       model: Batch,
-    //       as: 'batches',
-    //       required: false,
-    //       where: {
-    //         ...(user.department && { departmentId: user.department }),
-    //       },
-    //     },
-    //   ],
-    //   where: {
-    //     '$batches.id$': {
-    //       [Op.ne]: null,
-    //     },
-    //     ...whereOptions,
-    //     ...(user.department && { departmentId: user.department }),
-    //   },
-    //   distinct: true,
-    // });
 
     const itemsOutOfStock = await this.itemRepo.count({
       include: [
@@ -371,6 +271,82 @@ export class ItemService {
     itemAnalytics.lowStocked = itemsLowStocked;
 
     return itemAnalytics;
+  }
+
+  private filterBuilder(user: IUserPayload, query: FetchExpiredQueryDto) {
+    const itemWhereConditions: Record<string, any> = {};
+    const batchWhereConditions: Record<string, any> = {};
+
+    itemWhereConditions.facilityId = { [Op.eq]: user.facility };
+
+    if (query.search) {
+      itemWhereConditions.name = {
+        [Op.iLike]: `%${query.search}%`,
+      };
+    }
+
+    const today = startOfToday();
+    switch (query.status) {
+      case BatchValidityStatus.EXPIRED:
+        batchWhereConditions.validity = { [Op.lte]: today };
+        break;
+      case BatchValidityStatus.CRITICAL: {
+        const tomorrow = addDays(today, 1);
+        const thirtyDays = addDays(today, 30);
+        batchWhereConditions.validity = {
+          [Op.between]: [tomorrow, thirtyDays],
+        };
+        break;
+      }
+      case BatchValidityStatus.APPROACHING: {
+        const thirtyDays = addDays(today, 31);
+        const ninetyDays = addDays(today, 90);
+        batchWhereConditions.validity = {
+          [Op.between]: [thirtyDays, ninetyDays],
+        };
+        break;
+      }
+      case BatchValidityStatus.SAFE: {
+        const ninetyDays = addDays(today, 90);
+        batchWhereConditions.validity = { [Op.gte]: ninetyDays };
+        break;
+      }
+      default:
+        break;
+    }
+
+    if (query.startDate && !query.status) {
+      batchWhereConditions.validity = { [Op.gte]: query.startDate };
+    }
+    if (query.endDate && !query.status) {
+      batchWhereConditions.validity = { [Op.lte]: query.endDate };
+    }
+
+    const filter: FindAndCountOptions<Batch> = {
+      where: {
+        departmentId: user.department,
+        ...batchWhereConditions,
+      },
+      limit: query.pageSize || 10,
+      offset: query.pageSize * (query.page - 1) || 0,
+      order: [['validity', 'ASC']],
+      attributes: [
+        ['id', 'batchId'],
+        'batchNumber',
+        'validity',
+        'status',
+        'quantity',
+      ],
+      include: [
+        {
+          model: Item,
+          attributes: ['id', 'name'],
+          where: itemWhereConditions,
+        },
+      ],
+      distinct: true,
+    };
+    return filter;
   }
 
   private async computeTotalItems(total: number) {
