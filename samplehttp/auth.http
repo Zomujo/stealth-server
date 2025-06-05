@@ -1,12 +1,38 @@
 @baseUrl = http://localhost:5500/api/v1
+@hostUrl = https://stealth-server-production.up.railway.app/api/v1
 
-# @name login
-POST {{baseUrl}}/auth/login
+# @name signup
+POST {{baseUrl}}/auth/signup
 Content-Type: application/json
 
 {
-  "email": "example@email.com",
-  "password": "XT(v2EiTqQZ",
+  "fullName": "Kratos Gado",
+  "email": "mbeh6oce@gmail.com",
+  "facility": {
+    "name": "Hospital Gado",
+    "password": "@kRhCnlAtrqe1gr"
+  },
+  "password": "28935617Aa@"
+}
+
+# @lang
+> {%
+const data = response.body.data;
+client.global.set("baseUrl", "http://localhost:5500/api/v1");
+client.global.set("accessToken", data.tokens.accessToken);
+client.global.set("refreshToken", data.tokens.refreshToken);
+client.global.set("userId", data.id);
+client.global.set("facilityId", data.facilityId);
+%}
+###
+
+# @name login
+POST {{hostUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "mbeh6once@gmail.com",
+  "password": "28935617Aa@",
   "loginSessionMeta": {
     "browser": "Chrome - Mac OS X",
     "locationBody": {
@@ -22,15 +48,24 @@ const data = response.body.data;
 client.global.set("baseUrl", "http://localhost:5500/api/v1");
 client.global.set("accessToken", data.tokens.accessToken);
 client.global.set("refreshToken", data.tokens.refreshToken);
+%}
+
+###
+# @name verify
+GET {{baseUrl}}/auth/verify?token={{accessToken}}
+
+###
+# @name user
+GET {{hostUrl}}/auth/user
+Authorization: Bearer {{accessToken}}
+
+# @lang
+> {%
+const data = response.body.data;
 client.global.set("userId", data.id);
 client.global.set("facilityId", data.facilityId);
 %}
 
 ###
-# @name user
-GET {{baseUrl}}/auth/user
-Authorization: Bearer {{accessToken}}
-
-### 
 GET {{baseUrl}}/inventory/stat?facilityId={{facilityId}}
-Authorization: Bearer {{accessToken}} 
+Authorization: Bearer {{accessToken}}
