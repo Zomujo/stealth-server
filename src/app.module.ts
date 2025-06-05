@@ -6,7 +6,6 @@ import { IndexModules } from './core/shared/modules/index.modules';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
-import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -37,7 +36,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ScheduleModule.forRoot(),
     HealthModule,
     ...IndexModules,
-    DashboardModule,
   ],
 })
 export class AppModule {}

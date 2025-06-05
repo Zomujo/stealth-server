@@ -10,6 +10,7 @@ import { SalesModule } from 'src/sales/sales.module';
 import { OrdersModule } from '../../../orders/orders.module';
 import { PatientModule } from '../../../patient/patient.module';
 import { ComplaintsModule } from '../../../complaints/complaints.module';
+import { DashboardModule } from '../../../dashboard/dashboard.module';
 
 export const IndexModules = [
   NotificationModule,
@@ -24,4 +25,5 @@ export const IndexModules = [
   SalesModule,
   PatientModule,
   ComplaintsModule,
+  DashboardModule,
 ];
