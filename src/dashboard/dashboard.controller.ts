@@ -136,9 +136,12 @@ export class DashboardController {
     message: 'sales trend sent successfully',
   })
   @Get('sales/daily')
-  async getDailySales(@Query() query: FindAnalyticsQueryDto) {
+  async getDailySales(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response = await this.dashboardService.getDailySales(query);
+      const response = await this.dashboardService.getDailySales(query, user);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,

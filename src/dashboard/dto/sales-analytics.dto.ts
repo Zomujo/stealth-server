@@ -66,14 +66,12 @@ export class DailySalesDto {
   constructor() {
     this.sales = [
       {
-        dates: [
-          new Date('2025-03-05T00:00:00.000Z'),
-          new Date('2025-03-10T00:00:00.000Z'),
-          new Date('2025-03-15T00:00:00.000Z'),
-          new Date('2025-03-20T00:00:00.000Z'),
-          new Date('2025-03-25T00:00:00.000Z'),
-        ],
-        quantities: [54071, 161466, 81981, 67889],
+        dates: [],
+        quantities: [],
+      },
+      {
+        dates: [],
+        quantities: [],
       },
     ];
   }

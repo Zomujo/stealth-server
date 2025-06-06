@@ -13,7 +13,10 @@ import { FindOptions, Sequelize } from 'sequelize';
 import { InjectModel } from '@nestjs/sequelize';
 import { SaleItem } from 'src/sales/models/sale-items.model';
 import { Item } from 'src/inventory/items/models';
-import { getDateRangeFilter } from 'src/core/shared/factory';
+import {
+  getDateRangeFilter,
+  getDateRangeFilterCompare,
+} from 'src/core/shared/factory';
 import { IUserPayload } from 'src/auth/interface/payload.interface';
 import { Op } from 'sequelize';
 import { ItemCategory } from 'src/inventory/items-category/models/items-category.model';
@@ -71,7 +74,6 @@ export class DashboardService {
     query: FindAnalyticsQueryDto,
     user: IUserPayload,
   ) {
-    const _response = query;
     const { createdAt } = getDateRangeFilter(query.dateRange);
     const filter: FindOptions<SaleItem> = {
       where: {
@@ -93,19 +95,51 @@ export class DashboardService {
       order: [['quantity', 'desc']],
       limit: 10,
     };
-    const items = await this.saleItemRepo.findAll(filter);
+    const cats = await this.saleItemRepo.findAll(filter);
     const res = new TopSellingCategoriesDto();
 
-    items.map((i) => {
+    cats.map((i) => {
       res.topSelling.categories.push(i.dataValues.name);
       res.topSelling.quantities.push(i.dataValues.quantity);
     });
     return res;
   }
 
-  async getDailySales(query: FindAnalyticsQueryDto) {
-    const _response = query;
-    return new DailySalesDto();
+  // TODO: fix date range for grouping
+  async getDailySales(query: FindAnalyticsQueryDto, user: IUserPayload) {
+    const { createdAt, bound } = getDateRangeFilterCompare(query.dateRange);
+    const filter: FindOptions<SaleItem> = {
+      where: {
+        [Op.and]: [
+          { createdAt },
+          user.facility && { facilityId: user.facility },
+          user.department && { departmentId: user.department },
+        ],
+      },
+      attributes: ['quantity', 'createdAt'],
+      include: [
+        {
+          model: Item,
+          attributes: [],
+          include: [{ model: ItemCategory, attributes: [] }],
+        },
+      ],
+      group: ['createdAt', 'quantity'],
+      order: [['createdAt', 'asc']],
+    };
+    const sales = await this.saleItemRepo.findAll(filter);
+    const res = new DailySalesDto();
+
+    sales.map((s) => {
+      if (s.dataValues.createdAt >= bound) {
+        res.sales[1].dates.push(s.dataValues.createdAt);
+        res.sales[1].quantities.push(s.dataValues.quantity);
+      } else {
+        res.sales[0].dates.push(s.dataValues.createdAt);
+        res.sales[0].quantities.push(s.dataValues.quantity);
+      }
+    });
+    return res;
   }
 
   async getSalesPaymentMethods(query: FindAnalyticsQueryDto) {
