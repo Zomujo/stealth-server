@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
 import {
   ApiPropertyOptional,
   ApiResponseProperty,
@@ -49,6 +49,16 @@ export class FindReportDataDto {
   @IsOptional()
   @Type(() => Date)
   specificDate: Date;
+
+  @ApiPropertyOptional({
+    description: 'The limit for which data should be sent',
+    example: 10,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Type(() => Number)
+  limit: number;
 }
 
 export class GetReportDataDto {

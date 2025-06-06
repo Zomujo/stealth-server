@@ -19,6 +19,7 @@ import { endOfToday, startOfToday } from 'date-fns';
 import { generateFilter } from '../core/shared/factory';
 import { SaleItem } from './models/sale-items.model';
 import { Sequelize } from 'sequelize-typescript';
+import { ItemService } from '../inventory/items/items.service';
 
 @Injectable()
 export class SalesService {
@@ -31,6 +32,7 @@ export class SalesService {
     private sequelize: Sequelize,
     private batchService: BatchService,
     private patientService: PatientService,
+    private itemService: ItemService,
   ) {}
 
   async fetchItems(query: FindItemDto, user: IUserPayload) {
@@ -69,6 +71,46 @@ export class SalesService {
     const { rows, count } = await this.batchService.findBySpecs(filter);
 
     return { rows, count };
+  }
+
+  async fetchSellingProducts(
+    facilityId: string,
+    departmentId: string,
+    limit?: number,
+  ) {
+    const rows = await this.saleItemRepository.findAll({
+      where: {
+        facilityId,
+        departmentId,
+      },
+      attributes: [
+        'itemId',
+        [Sequelize.fn('SUM', Sequelize.col('quantity')), 'totalQuantity'],
+      ],
+      group: ['itemId'],
+      order: [['totalQuantity', 'DESC']],
+      ...(limit && { limit }),
+    });
+
+    this.logger.log(rows);
+
+    const finalData = await Promise.all(
+      rows.map(async (saleItem) => {
+        this.logger.log('totalQuantity', saleItem.totalQuantity);
+        const item = await this.itemService.findOne(saleItem.itemId, [
+          'id',
+          'name',
+          'sellingPrice',
+        ]);
+        return {
+          item: item,
+          totalQuantity: +saleItem.totalQuantity,
+          totalSales: +saleItem.totalQuantity * item.sellingPrice,
+        };
+      }),
+    );
+
+    return { rows: finalData, count: finalData.length };
   }
 
   async create(dto: CreateSaleDto, user: IUserPayload) {

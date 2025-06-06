@@ -174,9 +174,11 @@ export class ItemService {
    * @returns A promise that resolves to the found item.
    * @throws {NotFoundEception} If the item with the given ID is not found.
    */
-  async findOne(id: string) {
+  async findOne(id: string, attributes?: (keyof Item)[]) {
     this.logger.log(`finding item with id: ${id}`);
-    const item = await this.itemRepo.findByPk(id);
+    const item = await this.itemRepo.findByPk(id, {
+      ...(attributes && { attributes }),
+    });
     if (!item) {
       throw new NotFoundException(`item with id: ${id} not found`);
     }

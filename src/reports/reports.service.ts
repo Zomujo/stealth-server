@@ -106,6 +106,14 @@ export class ReportsService {
         );
         return { count, rows };
       }
+      case ReportCategories.TOP_SELLING_PRODUCTS: {
+        const { rows, count } = await this.salesService.fetchSellingProducts(
+          facility,
+          department,
+          query.limit || 10,
+        );
+        return { count, rows };
+      }
       default:
         return { count: 0, rows: [] };
     }

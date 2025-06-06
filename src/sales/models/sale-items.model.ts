@@ -37,6 +37,9 @@ export class SaleItem extends BaseModel {
   @Column
   quantity: number;
 
+  @Column({ type: DataType.VIRTUAL })
+  totalQuantity: number;
+
   @BelongsTo(() => Sale)
   sale: Sale;
 
