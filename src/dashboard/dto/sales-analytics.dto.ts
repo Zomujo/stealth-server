@@ -59,14 +59,8 @@ export class DailySalesDto {
 
   constructor() {
     this.sales = [
-      {
-        dates: [],
-        quantities: [],
-      },
-      {
-        dates: [],
-        quantities: [],
-      },
+      { dates: [], quantities: [] },
+      { dates: [], quantities: [] },
     ];
   }
 }
@@ -82,8 +76,8 @@ export class SalesPaymentMethodDto {
 
   constructor() {
     this.topSelling = {
-      categories: ['MobileMoney', 'Cash', 'Bank', 'Card'],
-      quantities: [54071, 161466, 81981, 67889],
+      categories: [],
+      quantities: [],
     };
   }
 }

@@ -20,6 +20,7 @@ import {
 import { IUserPayload } from 'src/auth/interface/payload.interface';
 import { Op } from 'sequelize';
 import { ItemCategory } from 'src/inventory/items-category/models/items-category.model';
+import { Sale } from 'src/sales/models/sales.model';
 
 @Injectable()
 export class DashboardService {
@@ -169,13 +170,40 @@ export class DashboardService {
     return res;
   }
 
-  async getSalesPaymentMethods(query: FindAnalyticsQueryDto) {
-    const _response = query;
-    return new SalesPaymentMethodDto();
-  }
+  async getSalesPaymentMethods(
+    query: FindAnalyticsQueryDto,
+    user: IUserPayload,
+  ) {
+    const { createdAt } = getDateRangeFilter(query.dateRange);
+    const filter: FindOptions<SaleItem> = {
+      where: {
+        [Op.and]: [
+          { createdAt },
+          user.facility && { facilityId: user.facility },
+          user.department && { departmentId: user.department },
+        ],
+      },
+      attributes: [
+        [fn('SUM', col('quantity')), 'quantity'],
+        [Sequelize.col('sale.payment_type'), 'name'],
+      ],
+      include: [
+        {
+          model: Sale,
+          attributes: [],
+        },
+      ],
+      group: ['name'],
+      order: [['quantity', 'desc']],
+    };
+    const cats = await this.saleItemRepo.findAll(filter);
 
-  async findOne(id: string) {
-    return `This action returns a #${id} dashboard`;
+    const res = new SalesPaymentMethodDto();
+    cats.map((i) => {
+      res.topSelling.categories.push(i.dataValues.name);
+      res.topSelling.quantities.push(Number(i.dataValues.quantity));
+    });
+    return res;
   }
 
   private computeItemStockLevel(startDate: Date, endDate: Date) {

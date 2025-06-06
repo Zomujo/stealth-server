@@ -160,10 +160,15 @@ export class DashboardController {
     message: 'sales payment methods sent successfully',
   })
   @Get('sales/payment-methods')
-  async getSalesPaymentMethods(@Query() query: FindAnalyticsQueryDto) {
+  async getSalesPaymentMethods(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response =
-        await this.dashboardService.getSalesPaymentMethods(query);
+      const response = await this.dashboardService.getSalesPaymentMethods(
+        query,
+        user,
+      );
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,

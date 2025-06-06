@@ -13,23 +13,31 @@ GET {{baseUrl}}/dashboard/usage?facilityId={{facilityId}}
 Authorization: Bearer {{accessToken}}
 
 ###
-# @name top-selling
+# @name top-selling-item
 GET {{baseUrl}}/dashboard/items/top-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
-# @name least-selling
+# @name least-selling-item
 GET {{baseUrl}}/dashboard/items/least-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
+# @name top-selling-category
 GET {{baseUrl}}/dashboard/item-categories/top-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
+# @name sales trend
 GET {{baseUrl}}/dashboard/sales/trend?dateRange=this_week
 Authorization: Bearer {{accessToken}}
 
 ###
+# @name daily sales
 GET {{baseUrl}}/dashboard/sales/daily?dateRange=this_month
+Authorization: Bearer {{accessToken}}
+
+###
+# @name sales payment-methods
+GET {{baseUrl}}/dashboard/sales/payment-methods?dateRange=today
 Authorization: Bearer {{accessToken}}
