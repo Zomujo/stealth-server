@@ -40,8 +40,8 @@ export class TopSellingCategoriesDto {
 
   constructor() {
     this.topSelling = {
-      categories: ['Syrup', 'Tablets', 'Analgesics', 'Inhalers'],
-      quantities: [54071, 161466, 81981, 67889],
+      categories: [],
+      quantities: [],
     };
   }
 }

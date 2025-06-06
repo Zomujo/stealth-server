@@ -16,6 +16,7 @@ import { Item } from 'src/inventory/items/models';
 import { getDateRangeFilter } from 'src/core/shared/factory';
 import { IUserPayload } from 'src/auth/interface/payload.interface';
 import { Op } from 'sequelize';
+import { ItemCategory } from 'src/inventory/items-category/models/items-category.model';
 
 @Injectable()
 export class DashboardService {
@@ -66,9 +67,40 @@ export class DashboardService {
     return new SalesTrendDto();
   }
 
-  async findTopSellingItemCategories(query: FindAnalyticsQueryDto) {
+  async findTopSellingItemCategories(
+    query: FindAnalyticsQueryDto,
+    user: IUserPayload,
+  ) {
     const _response = query;
-    return new TopSellingCategoriesDto();
+    const { createdAt } = getDateRangeFilter(query.dateRange);
+    const filter: FindOptions<SaleItem> = {
+      where: {
+        [Op.and]: [
+          { createdAt },
+          user.facility && { facilityId: user.facility },
+          user.department && { departmentId: user.department },
+        ],
+      },
+      attributes: ['quantity', [Sequelize.col('item.category.name'), 'name']],
+      include: [
+        {
+          model: Item,
+          attributes: [],
+          include: [{ model: ItemCategory, attributes: [] }],
+        },
+      ],
+      group: ['item.category.name', 'quantity'],
+      order: [['quantity', 'desc']],
+      limit: 10,
+    };
+    const items = await this.saleItemRepo.findAll(filter);
+    const res = new TopSellingCategoriesDto();
+
+    items.map((i) => {
+      res.topSelling.categories.push(i.dataValues.name);
+      res.topSelling.quantities.push(i.dataValues.quantity);
+    });
+    return res;
   }
 
   async getDailySales(query: FindAnalyticsQueryDto) {

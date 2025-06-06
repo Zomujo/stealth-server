@@ -23,7 +23,7 @@ GET {{baseUrl}}/dashboard/items/least-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/top-categories?facilityId={{facilityId}}
+GET {{baseUrl}}/dashboard/item-categories/top-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###

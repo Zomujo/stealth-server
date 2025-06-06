@@ -112,10 +112,15 @@ export class DashboardController {
     message: 'top selling item categories sent successfully',
   })
   @Get('item-categories/top-selling')
-  async findTopSellingItemCategories(@Query() query: FindAnalyticsQueryDto) {
+  async findTopSellingItemCategories(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response =
-        await this.dashboardService.findTopSellingItemCategories(query);
+      const response = await this.dashboardService.findTopSellingItemCategories(
+        query,
+        user,
+      );
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
