@@ -84,7 +84,6 @@ export class ItemService {
     });
 
     this.logger.log(`Retrieved ${items.count} items`);
-    // this.logger.log(itemList);
     return items.rows;
   }
 
