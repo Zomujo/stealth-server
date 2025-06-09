@@ -36,8 +36,8 @@ select
 	count(distinct patient_id ) customers,
 	count(distinct s.id) transactions,
 	sum(total) revenue,
-	count(distinct si.item_id) unique_items,
 	sum(si.quantity) items_sold,
+	round(sum(si.quantity) / coalesce(nullif(count(distinct s.id), 0), 1), 0) avg_items_per_trans,
 	count(distinct case when sa.type = 'INCREMENT' then sa.quantity end) items_returned
 from sales s
 JOIN sale_items si ON s.id = si.sale_id
@@ -51,8 +51,8 @@ select
 	count(distinct patient_id ) customers,
 	count(distinct s.id ) transactions,
 	sum(total) revenue,
-	count(distinct si.item_id) unique_items,
 	sum(si.quantity) items_sold,
+	round(sum(si.quantity) / coalesce(nullif(count(distinct s.id), 0), 1), 0) avg_items_per_trans,
 	count(distinct case when sa.type = 'INCREMENT' then sa.quantity end) items_returned
 from sales s
 JOIN sale_items si ON s.id = si.sale_id
@@ -65,7 +65,7 @@ inventory as (
  SELECT
         COUNT(i.id)  total_items,
         SUM(b.quantity) total_stock,
-        COUNT(CASE WHEN b.validity  BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '60 days' THEN i.id END) AS soon_expiring
+        COUNT(distinct CASE WHEN b.validity  BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '60 days' THEN i.id END) AS soon_expiring
     FROM items i
     JOIN batches b ON b.item_id = i.id
 WHERE ${user.facility ? `i.facility_id = '${user.facility}'` : ''}
@@ -78,8 +78,11 @@ calculations as (
 		round((c.items_returned - p.items_returned) / coalesce(nullif(p.items_returned, 0), 1) * 100, 2) returnedChange,
 		round((c.transactions  - p.transactions ) / coalesce(nullif(p.transactions, 0), 1)  * 100, 2) transChange,
 		round((c.revenue - p.revenue  / p.revenue)::numeric  * 100, 2) revenueChange,
+		round((c.avg_items_per_trans - p.avg_items_per_trans) / coalesce(nullif(p.avg_items_per_trans, 0), 1)* 100, 2) avgChange,
+		round(c.items_sold /  (SELECT total_stock FROM inventory)::numeric, 2) turnover_rate,
 		c.items_sold  itemsTotal,
 		c.transactions transTotal,
+		c.avg_items_per_trans avg_trans,
 		c.items_returned totalItemsReturned,
 		c.customers totalCustomers,
 		round(c.revenue::numeric, 2) totalRevenue
@@ -120,17 +123,17 @@ select jsonb_build_object(
     'itemsReturned', jsonb_build_object(
         'total', totalItemsReturned,
         'percentageChange', returnedChange,
-		'changeType', case when returnedChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'changeType', case when returnedChange < 0  then 'DECREMENT' else 'INCREMENT' end
     ),
     'inventoryTurnoverRate', jsonb_build_object(
-        'total', totalItemsReturned,
-        'percentageChange', returnedChange,
-		'changeType', case when returnedChange > 0  then 'INCREMENT' else 'DECREMENT' end
+        'total', turnover_rate,
+        'percentageChange', 0,
+		    'changeType', 'NONE'
     ),
-    'averageItemsPerTransaction', jsonb_build_object(
-        'total', totalItemsReturned,
-        'percentageChange', returnedChange,
-		'changeType', case when returnedChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'averageItemsPerTransaction', jsonb_build_object(
+        'total', avg_trans,
+        'percentageChange', avgChange,
+		'changeType', case when avgChange > 0  then 'INCREMENT' else 'DECREMENT' end
     )
 ) as res
 from calculations;
@@ -265,10 +268,10 @@ from calculations;
 		SELECT jsonb_build_object(
     'fdates', jsonb_agg(to_char(${groupby}, 'YYYY-MM-DD HH24:MI')),
     'f_quantity', jsonb_agg(f_quantity)
-) as result
-FROM first
-union
-	SELECT jsonb_build_object(
+			) as result
+		FROM first
+		union
+		SELECT jsonb_build_object(
     'sdates', jsonb_agg(to_char(${groupby}, 'YYYY-MM-DD HH24:MI')),
     's_quantity', jsonb_agg(s_quantity)
 ) as result
@@ -306,42 +309,6 @@ FROM second;`,
     );
 
     return new SalesPaymentMethodDto(categories, quantities);
-  }
-
-  private computeItemStockLevel(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeTotalItemsSold(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeTotalTransactions(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeInventoryTurnoverRate(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeTotalRevenue(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeAverageItemsPerTransaction(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeTotalCustomers(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeExpiringSoonItems(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
-  }
-
-  private computeTotalItemsReturned(startDate: Date, endDate: Date) {
-    return `${startDate.toISOString()} ${endDate.toISOString()}`;
   }
   private applyWhere(
     { [Op.between]: [startDate, endDate] }: { [Op.between]: [Date, Date] },
