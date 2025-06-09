@@ -73,6 +73,16 @@ export class Item extends BaseModel {
   @Column(DataType.VIRTUAL)
   createdBy: string;
 
+  @Column({
+    type: DataType.VIRTUAL,
+    get(this: Item) {
+      return this.batches && this.batches.length
+        ? this.batches.reduce((accum, current) => accum + current.quantity, 0)
+        : 0;
+    },
+  })
+  totalQuantity: number;
+
   // relationships
 
   @ForeignKey(() => ItemCategory)

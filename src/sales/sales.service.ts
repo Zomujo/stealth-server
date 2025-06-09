@@ -94,11 +94,10 @@ export class SalesService {
 
     const finalData = await Promise.all(
       rows.map(async (saleItem) => {
-        const item = await this.itemService.findOne(saleItem.itemId, [
-          'id',
-          'name',
-          'sellingPrice',
-        ]);
+        const item = await this.itemService.fetchOne({
+          query: { id: saleItem.itemId },
+          fields: ['id', 'name', 'sellingPrice'],
+        });
         return {
           item: item,
           totalQuantity: +saleItem.totalQuantity,

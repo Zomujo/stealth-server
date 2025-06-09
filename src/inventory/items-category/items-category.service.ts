@@ -69,7 +69,7 @@ export class ItemCategoryService {
     const filter: FindAndCountOptions<ItemCategory> = {
       where: { facilityId, ...whereCondition, ...queryFilter.searchFilter },
       ...queryFilter.pageFilter,
-      include: [Item],
+      include: [{ model: Item, attributes: ['id'] }],
       attributes: { exclude: ['facilityId'] },
       distinct: true,
     };
@@ -79,10 +79,12 @@ export class ItemCategoryService {
     const plainCategories: ItemCategory[] = categories.rows.map((category) =>
       category.get({ plain: true }),
     );
+
     const modifiedCategories = plainCategories.map((category) => {
       delete category.items;
       return category;
     });
+
     return [modifiedCategories, categories.count];
   }
 

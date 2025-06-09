@@ -24,7 +24,7 @@ export function buildQuery<T>(
   }
 
   if (params.query) {
-    queryOptions.where = params.query;
+    queryOptions.where = { ...queryOptions.where, ...params.query };
   }
 
   if (params.fields) {

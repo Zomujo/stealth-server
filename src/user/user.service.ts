@@ -4,6 +4,10 @@ import { User } from '../auth/models/user.model';
 import { Facility } from '../admin/facility/models/facility.model';
 import { CreateSettingsDto } from './dto';
 import { Settings } from './models/setting.model';
+import { buildQuery } from '../core/shared/factory/query-builder.factory';
+import { QueryOptionsDto } from '../core/shared/dto/query-options.dto';
+import { IncludeOptions } from 'sequelize';
+import { Department } from '../admin/department/models/department.model';
 
 @Injectable()
 export class UserService {
@@ -11,6 +15,12 @@ export class UserService {
     @InjectModel(User) private userRepository: typeof User,
     @InjectModel(Settings) private settingsRepository: typeof Settings,
   ) {}
+
+  private populates: Record<string, IncludeOptions> = {
+    department: { model: Department, attributes: ['id', 'name'] },
+
+    facility: { model: Facility, attributes: ['id', 'name'] },
+  };
 
   async findOne(userId: string) {
     const user = await this.userRepository.findByPk(userId, {
@@ -29,6 +39,15 @@ export class UserService {
         'status',
       ],
     });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async fetchOne(options?: QueryOptionsDto<User>) {
+    const queryOptions = buildQuery<User>(options, this.populates);
+    const user = await this.userRepository.findOne(queryOptions);
     if (!user) {
       throw new NotFoundException('User not found');
     }

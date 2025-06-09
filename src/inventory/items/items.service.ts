@@ -5,7 +5,12 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
+import {
+  FindAndCountOptions,
+  IncludeOptions,
+  Op,
+  WhereOptions,
+} from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
@@ -37,6 +42,10 @@ import {
 } from 'date-fns';
 import { generateFilter } from '../../core/shared/factory';
 import { NotificationStatus } from '../../notification/enum';
+import { Facility } from '../../admin/facility/models/facility.model';
+import { Department } from '../../admin/department/models/department.model';
+import { QueryOptionsDto } from '../../core/shared/dto/query-options.dto';
+import { buildQuery } from '../../core/shared/factory/query-builder.factory';
 
 @Injectable()
 export class ItemService {
@@ -49,6 +58,19 @@ export class ItemService {
   ) {
     this.logger = new Logger(ItemService.name);
   }
+
+  private populates: Record<string, IncludeOptions> = {
+    category: { model: ItemCategory, attributes: ['id', 'name'] },
+
+    batches: {
+      model: Batch,
+      attributes: ['id', 'batchNumber', 'quantity', 'validity'],
+    },
+
+    department: { model: Department, attributes: ['id', 'name'] },
+
+    facility: { model: Facility, attributes: ['id', 'name'] },
+  };
 
   /**
    * Creates a new item.
@@ -174,17 +196,29 @@ export class ItemService {
    * @returns A promise that resolves to the found item.
    * @throws {NotFoundEception} If the item with the given ID is not found.
    */
-  async findOne(id: string, attributes?: (keyof Item)[]) {
+  async findOne(id: string) {
     this.logger.log(`finding item with id: ${id}`);
-    const item = await this.itemRepo.findByPk(id, {
-      ...(attributes && { attributes }),
-    });
+    const item = await this.itemRepo.findByPk(id);
     if (!item) {
       throw new NotFoundException(`item with id: ${id} not found`);
     }
 
     this.logger.log(`Found items category with ID: ${id}`);
     return item;
+  }
+
+  async fetchOne(options?: QueryOptionsDto<Item>) {
+    const queryOptions = buildQuery<Item>(options, this.populates);
+    const item = await this.itemRepo.findOne(queryOptions);
+    if (!item) {
+      throw new NotFoundException(`item not found`);
+    }
+    return item;
+  }
+
+  async fetchAndCountAll(options?: QueryOptionsDto<Item>) {
+    const queryOptions = buildQuery<Item>(options, this.populates);
+    return this.itemRepo.findAndCountAll(queryOptions);
   }
 
   /**

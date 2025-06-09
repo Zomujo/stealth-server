@@ -9,14 +9,16 @@ import { NotificationController } from './notification.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { NotificationModel } from './models/notification.model';
 import { User } from '../auth/models/user.model';
+import { SmsModule } from './sms/sms.module';
 
 @Global()
 @Module({
   imports: [
     SequelizeModule.forFeature([NotificationModel, User]),
-    MailModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    MailModule,
+    SmsModule,
   ],
   providers: [NotificationsGateway, NotificationService],
   controllers: [NotificationController],

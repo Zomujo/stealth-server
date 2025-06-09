@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import {
-  AfterFind,
   BelongsTo,
   Column,
   DataType,
@@ -58,19 +57,11 @@ export class ItemCategory extends BaseModel {
     example: 100,
     description: 'Number of items under category',
   })
-  @Column({ type: DataType.VIRTUAL })
+  @Column({
+    type: DataType.VIRTUAL,
+    get(this: ItemCategory) {
+      return this.items && this.items.length ? this.items.length : 0;
+    },
+  })
   itemCount: number;
-
-  @AfterFind
-  static async calculateItemCount(instance: ItemCategory[] | ItemCategory) {
-    if (Array.isArray(instance)) {
-      for (const category of instance) {
-        if (category.items) {
-          category.itemCount = category.items ? category.items.length : 0;
-        }
-      }
-    } else {
-      instance.itemCount = instance.items ? instance.items.length : 0;
-    }
-  }
 }

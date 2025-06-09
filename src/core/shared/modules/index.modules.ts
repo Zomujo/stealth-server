@@ -11,6 +11,7 @@ import { OrdersModule } from '../../../orders/orders.module';
 import { PatientModule } from '../../../patient/patient.module';
 import { ComplaintsModule } from '../../../complaints/complaints.module';
 import { DashboardModule } from '../../../dashboard/dashboard.module';
+import { ImsStockmateModule } from '../../../ims-stockmate/ims-stockmate.module';
 
 export const IndexModules = [
   NotificationModule,
@@ -26,4 +27,5 @@ export const IndexModules = [
   PatientModule,
   ComplaintsModule,
   DashboardModule,
+  ImsStockmateModule,
 ];
