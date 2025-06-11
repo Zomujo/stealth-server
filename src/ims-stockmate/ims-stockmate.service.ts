@@ -72,8 +72,16 @@ export class ImsStockmateService {
           facilityId: ownershipQuery.facilityId,
           departmentId: ownershipQuery.departmentId,
         });
+        const jsonBatch = {
+          status: batch.status,
+          createdAt: format(batch.createdAt, 'EEEE, MMMM do, yyyy'),
+          expiresAt: format(batch.validity, 'EEEE, MMMM do, yyyy'),
+          batchNumber: batch.batchNumber,
+          quantity: batch.quantity,
+        };
+        // batch.get({ plain: true });
         return {
-          batch: batch.get({ plain: true }),
+          batch: jsonBatch,
           message: `✅ Stocked ${cmd.quantity} ${cmd.item}(s) to batch ${cmd.batch}`,
         };
       }
