@@ -1,4 +1,11 @@
-import { IsEnum, IsNotEmpty, IsString, IsUUID, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import {
   AfterFind,
   BelongsTo,
@@ -64,7 +71,7 @@ export class StockAdjustment extends BaseModel {
     description: 'Notes about the stock adjustment',
   })
   @Column(DataType.TEXT)
-  @IsNotEmpty()
+  @IsOptional()
   notes: string;
 
   @ApiProperty({
