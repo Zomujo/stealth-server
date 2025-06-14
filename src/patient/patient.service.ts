@@ -3,8 +3,15 @@ import { Patient } from './models/patient.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreatePatientDto, FindPatientDto, UpdatePatientDto } from './dto';
 import { Sale } from '../sales/models/sales.model';
-import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
+import {
+  FindAndCountOptions,
+  IncludeOptions,
+  Op,
+  WhereOptions,
+} from 'sequelize';
 import { User } from '../auth/models/user.model';
+import { buildQuery } from '../core/shared/factory/query-builder.factory';
+import { QueryOptionsDto } from '../core/shared/dto/query-options.dto';
 
 @Injectable()
 export class PatientService {
@@ -12,6 +19,10 @@ export class PatientService {
     @InjectModel(Patient) private patientRepository: typeof Patient,
   ) {}
 
+  private populate: Record<string, IncludeOptions> = {
+    createdBy: { model: User, attributes: ['id', 'fullName', 'email'] },
+    sales: { model: Sale, attributes: ['id', 'saleNumber', 'status'] },
+  };
   async create(dto: CreatePatientDto, createdBy: string) {
     const patient = await this.patientRepository.create({
       ...dto,
@@ -23,6 +34,18 @@ export class PatientService {
   async findAll(query: FindPatientDto) {
     const filters = this.applyFilter(query);
     const patients = await this.patientRepository.findAll(filters);
+    return patients;
+  }
+
+  async find(query: QueryOptionsDto<Patient>) {
+    const filters = buildQuery<Patient>(query, this.populate);
+    const patients = await this.patientRepository.findAll(filters);
+    return patients;
+  }
+
+  async findAndCount(query: QueryOptionsDto<Patient>) {
+    const filters = buildQuery<Patient>(query, this.populate);
+    const patients = await this.patientRepository.findAndCountAll(filters);
     return patients;
   }
 
@@ -49,7 +72,7 @@ export class PatientService {
       includeOption = { include: [Sale] };
     }
     const patient = await this.patientRepository.findOne({
-      where: { cardIdentificationNumber: id },
+      where: { cardIdentificationNumber: { [Op.iLike]: `%${id}%` } },
       ...includeOption,
     });
     if (!patient) {

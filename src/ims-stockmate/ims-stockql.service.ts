@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ExpireType, ParsedImsStockQlCommand } from './dto';
+import {
+  ExpireType,
+  IMSQLAction,
+  ParsedImsStockQlCommand,
+  SellActionOptions,
+} from './dto';
+import { SalePaymentType } from '../sales/models/sales.model';
 
 @Injectable()
 export class ImsStockQlService {
@@ -53,18 +59,15 @@ export class ImsStockQlService {
     for (const seg of segments) {
       const cmd = this.normalizeInput(seg);
       const parts = cmd.split(' ');
-
-      const action = this.fuzzyMatch(parts[0], [
-        'STOCK',
-        'ADD',
-        'QUERY',
-        'SHOW',
-        'LIST',
-      ]);
+      const actions = ['STOCK', 'ADD', 'QUERY', 'SHOW', 'LIST', 'SELL'];
+      const action = this.fuzzyMatch(parts[0], actions);
       if (!action) {
         results.push({
-          action: 'QUERY',
-          errorOptions: { action: 'QUERY', error: `Unknown command: "${seg}"` },
+          action: 'UNKNOWN',
+          errorOptions: {
+            action: 'UNKNOWN',
+            error: `Unknown command: "${seg}"`,
+          },
         });
         continue;
       }
@@ -139,6 +142,24 @@ export class ImsStockQlService {
           continue;
         }
 
+        const listPatientsMatch = cmd.match(
+          /^LIST\s+PATIENTS\s*(?:["']?(.*?)["']?)?$/,
+        );
+        console.log(cmd, listPatientsMatch);
+        if (listPatientsMatch) {
+          results.push({
+            action: 'LIST',
+            listOptions: {
+              action: 'LIST',
+              listType: 'PATIENTS',
+              patientQuery: listPatientsMatch[1]
+                ? this.stripQuotes(listPatientsMatch[1].toLowerCase())
+                : null,
+            },
+          });
+          continue;
+        }
+
         const listBatchMatch = cmd.match(/^LIST BATCHES FOR "?(.+?)"?$/);
         const nlListBatch = cmd.match(/^(SHOW|LIST) BATCHES FOR "?(.+?)"?$/);
         if (listBatchMatch || nlListBatch) {
@@ -159,15 +180,83 @@ export class ImsStockQlService {
         }
       }
 
-      results.push({
-        action: 'QUERY',
-        errorOptions: {
-          action: 'QUERY',
-          error: `Could not understand: "${seg}"`,
-        },
-      });
+      if (['SELL'].includes(action)) {
+        const sellItemsMatch = cmd.match(
+          /^SELL\s*(TO\s*"?.*?"?)*\s*(USING\s*"?.*?"?)*\s*(?:WITH\s*ITEMS|AND\s*ITEMS|SELL\s*ITEMS|ITEMS)\s*(.*)$/,
+        );
+        console.log(cmd, sellItemsMatch);
+
+        if (sellItemsMatch && sellItemsMatch.length > 1) {
+          const [_, ...remainder] = sellItemsMatch;
+          const sellActionOptions = this.parseAndSerialize(remainder);
+          console.log('sell action options', sellActionOptions);
+          results.push({
+            action: 'SELL',
+            sellOptions: {
+              ...sellActionOptions,
+            },
+          });
+        }
+      }
+
+      if (!actions.includes(action)) {
+        results.push({
+          action: action as IMSQLAction,
+          errorOptions: {
+            action: action as IMSQLAction,
+            error: `Could not understand: "${seg}"`,
+          },
+        });
+      }
     }
 
     return results;
+  }
+
+  parseAndSerialize(salesQuery: string[] | RegExpMatchArray) {
+    const salesAction: SellActionOptions = {
+      action: 'SELL',
+      saleItems: [],
+    };
+
+    const parseItemsString = (input: string) => {
+      const regex = /\(([^,]+),\s*(\d+)\)/g;
+      const result = [];
+      let match: RegExpExecArray;
+
+      while ((match = regex.exec(input)) !== null) {
+        result.push({
+          batchNumber: match[1],
+          quantity: Number(match[2]),
+        });
+      }
+      if ((match = regex.exec(input)) !== null) {
+        salesAction.saleItems = result;
+      }
+      return;
+    };
+
+    const parsePatientString = (input: string) => {
+      const match = input.match(/^TO\s*["']?(.*?)["']?$/);
+      if (match && match.length > 1) {
+        salesAction.patientCardId = match[1];
+      }
+      return;
+    };
+
+    const parsePaymentString = (input: string) => {
+      const match = input.match(/USING\s*["']?(.+?)["']?$/);
+      if (match && match.length > 1) {
+        salesAction.paymentType = match[1].toUpperCase() as SalePaymentType;
+      }
+      return;
+    };
+
+    for (const query of salesQuery) {
+      parsePatientString(query);
+      parsePaymentString(query);
+      parseItemsString(query);
+    }
+    return salesAction;
   }
 }

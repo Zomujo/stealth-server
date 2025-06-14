@@ -8,7 +8,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IncludeOptions } from 'sequelize';
+import { FindAttributeOptions, IncludeOptions } from 'sequelize';
 
 export class QueryOptionsDto<T> {
   @ApiPropertyOptional({
@@ -24,7 +24,7 @@ export class QueryOptionsDto<T> {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  fields?: (keyof T)[];
+  fields?: FindAttributeOptions | (keyof T)[];
 
   @ApiPropertyOptional({
     type: [String],

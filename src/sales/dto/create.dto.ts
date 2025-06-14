@@ -99,6 +99,29 @@ export class CreateSaleDto {
   total: number;
 }
 
+export class SmsCreateSale extends PartialType(
+  OmitType(CreateSaleDto, ['notes', 'saleItems']),
+) {
+  @IsNotEmpty()
+  @IsArray()
+  @ArrayMinSize(1)
+  saleItems: {
+    batchNumber: string;
+    batchId?: string;
+    quantity: number;
+    itemId?: string;
+  }[];
+
+  @IsOptional()
+  createdById?: string;
+
+  @IsNotEmpty()
+  departmentId: string;
+
+  @IsNotEmpty()
+  facilityId: string;
+}
+
 export class CreateSaleResponseDto extends IntersectionType(
   GenericResponseDto,
   OmitType(CreateSaleDto, ['patientCardId']),

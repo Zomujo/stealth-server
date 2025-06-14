@@ -6,6 +6,7 @@ import {
   FindItemDto,
   FetchSalesReportDataQueryDto,
   FetchTopSellingReportDataQueryDto,
+  SmsCreateSale,
 } from './dto/';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sale } from './models/sales.model';
@@ -143,6 +144,14 @@ export class SalesService {
   async create(dto: CreateSaleDto, user: IUserPayload) {
     const transaction = await this.sequelize.transaction();
     try {
+      if (dto.patientCardId) {
+        const patient = await this.patientService.findByCardId(
+          dto.patientCardId,
+          false,
+        );
+        dto.patientId = patient.id;
+      }
+
       const saleItems = await Promise.all(
         dto.saleItems.map(async (saleItem, index) => {
           const batch = await this.batchService.findIndividual(
@@ -169,17 +178,10 @@ export class SalesService {
       dto.subTotal = parseFloat(subTotal.toFixed(2));
       dto.total = parseFloat(subTotal.toFixed(2));
 
-      if (dto.patientCardId) {
-        const patient = await this.patientService.findByCardId(
-          dto.patientCardId,
-          false,
-        );
-        dto.patientId = patient.id;
-      }
-
       const sale = await this.saleRepository.create(
         {
           ...dto,
+          createdById: user.sub,
           saleItems,
           departmentId: user.department,
           facilityId: user.facility,
@@ -191,6 +193,85 @@ export class SalesService {
         saleId: sale.id,
         departmentId: user.department,
         facilityId: user.facility,
+        ...saleItem,
+      }));
+
+      const _newItems = await this.saleItemRepository.bulkCreate(
+        refinedSaleItems,
+        { transaction },
+      );
+      await transaction.commit();
+
+      return sale;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
+  async smsSale(dto: SmsCreateSale) {
+    const transaction = await this.sequelize.transaction();
+    try {
+      if (dto.patientCardId) {
+        const patient = await this.patientService.findByCardId(
+          dto.patientCardId,
+          false,
+        );
+        dto.patientId = patient.id;
+      }
+
+      const saleItems = await Promise.all(
+        dto.saleItems.map(async (saleItem, index) => {
+          const batch = await this.batchService.fetchOne({
+            query: {
+              batchNumber: { [Op.iLike]: `%${saleItem.batchNumber}%` },
+              departmentId: dto.departmentId,
+              facilityId: dto.facilityId,
+            },
+            fields: [['id', 'batchId'], 'quantity', 'itemId'],
+            populate: [
+              {
+                model: Item,
+                attributes: ['id', 'name', 'brandName', 'sellingPrice'],
+              },
+            ],
+          });
+          const modBatch = batch.get({ plain: true });
+          await this.batchService.removeStock(
+            modBatch.batchId,
+            saleItem.quantity,
+          );
+          dto.saleItems[index].batchId = modBatch.batchId;
+          dto.saleItems[index].itemId = modBatch.itemId;
+          return {
+            ...modBatch,
+            quantity: saleItem.quantity,
+          };
+        }),
+      );
+
+      const subTotal = saleItems.reduce((total: number, saleItem: any) => {
+        return total + saleItem.item.sellingPrice * saleItem.quantity;
+      }, 0);
+
+      dto.saleNumber = `S-${new Date().getTime()}`;
+      dto.subTotal = parseFloat(subTotal.toFixed(2));
+      dto.total = parseFloat(subTotal.toFixed(2));
+
+      const sale = await this.saleRepository.create(
+        {
+          ...dto,
+          saleItems,
+          departmentId: dto.departmentId,
+          facilityId: dto.facilityId,
+        },
+        { transaction },
+      );
+
+      const refinedSaleItems = dto.saleItems.map((saleItem) => ({
+        saleId: sale.id,
+        departmentId: dto.departmentId,
+        facilityId: dto.facilityId,
         ...saleItem,
       }));
 

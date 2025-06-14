@@ -494,8 +494,9 @@ export class ItemService {
       notification.message = `${item.name} is almost out of stock. ${quantity} pieces left`;
       notification.linkName = 'Restock';
       notification.linkRoute = `/items/${item.id}/batches`;
+    } else {
+      return;
     }
-
     await this.notificationService.sendNotification(
       notification,
       Features.ITEMS,

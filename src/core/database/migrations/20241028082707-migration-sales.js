@@ -92,6 +92,17 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
+      createdById: {
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        type: Sequelize.UUID,
+        allowNull: true,
+        field: 'created_by_id',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+      },
     });
   },
 

@@ -166,6 +166,14 @@ export class BatchService {
       populate: ['supplier', 'createdBy'],
     });
   }
+  async fetchOne(options?: QueryOptionsDto<Batch>) {
+    const queryOptions = buildQuery<Batch>(options, this.populates);
+    const batch = await this.batchRepo.findOne(queryOptions);
+    if (!batch) {
+      throw new NotFoundException('batch not found');
+    }
+    return batch;
+  }
 
   async find(options?: QueryOptionsDto<Batch>) {
     const queryOptions = buildQuery<Batch>(options, this.populates);

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ParsedImsStockQlCommand, TwilioWebhookDto } from './dto';
 import { ItemService } from '../inventory/items/items.service';
 import * as yaml from 'js-yaml';
@@ -9,14 +9,19 @@ import { Op } from 'sequelize';
 import { ItemCategory } from '../inventory/items-category/models/items-category.model';
 import { Batch } from '../inventory/items/models';
 import { BatchService } from '../inventory/items/batches/batch.service';
+import { SalesService } from '../sales/sales.service';
+import { SalePaymentType } from '../sales/models/sales.model';
+import { PatientService } from '../patient/patient.service';
 
 @Injectable()
 export class ImsStockmateService {
   constructor(
     private itemService: ItemService,
+    private imsStockQlService: ImsStockQlService,
     private batchService: BatchService,
     private userService: UserService,
-    private imsStockQlService: ImsStockQlService,
+    private salesService: SalesService,
+    private patientService: PatientService,
   ) {}
 
   async create(dto: TwilioWebhookDto) {
@@ -36,9 +41,28 @@ export class ImsStockmateService {
     const parsedCommands = this.imsStockQlService.parse(dto.body);
 
     const responses = await Promise.all(
-      parsedCommands.map((cmd) =>
-        this.handleParsedCommand(cmd, ownershipQuery, user.id),
-      ),
+      parsedCommands.map(async (cmd) => {
+        try {
+          const result = await this.handleParsedCommand(
+            cmd,
+            ownershipQuery,
+            user.id,
+          );
+          return result;
+        } catch (error) {
+          if (error instanceof HttpException) {
+            return {
+              statusCode: error.getStatus(),
+              message: error.message,
+            };
+          } else {
+            return {
+              statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: error.message,
+            };
+          }
+        }
+      }),
     );
 
     const serializedOutput = yaml.dump({ responses });
@@ -50,11 +74,12 @@ export class ImsStockmateService {
     ownershipQuery: Record<string, any>,
     userId: string,
   ): Promise<any> {
-    if (command.errorOptions && command.errorOptions.error)
+    if (command.errorOptions && command.errorOptions.error) {
       return {
-        action: command.errorOptions.action,
-        message: `❌ ${command.errorOptions.error}`,
+        action: command.action,
+        message: `❌${command.errorOptions.error}`,
       };
+    }
 
     switch (command.action) {
       default:
@@ -79,13 +104,34 @@ export class ImsStockmateService {
           batchNumber: batch.batchNumber,
           quantity: batch.quantity,
         };
-        // batch.get({ plain: true });
         return {
           batch: jsonBatch,
           message: `✅ Stocked ${cmd.quantity} ${cmd.item}(s) to batch ${cmd.batch}`,
         };
       }
+      case 'SELL': {
+        const cmd = command.sellOptions;
+        const sale = await this.salesService.smsSale({
+          ...(cmd.patientCardId && { patientCardId: cmd.patientCardId }),
+          paymentType: cmd.paymentType ?? SalePaymentType.CASH,
+          saleItems: cmd.saleItems,
+          createdById: userId,
+          facilityId: ownershipQuery.facilityId,
+          departmentId: ownershipQuery.departmentId,
+        });
 
+        const jsonSale = {
+          status: sale.status,
+          paymentType: sale.paymentType,
+          saleNumber: sale.saleNumber,
+          subTotal: sale.subTotal,
+          total: sale.total,
+        };
+        return {
+          sale: jsonSale,
+          message: `✅ Sale completed successfully`,
+        };
+      }
       case 'QUERY': {
         const cmd = command.queryOptions;
         const item = await this.itemService.fetchOne({
@@ -111,7 +157,6 @@ export class ImsStockmateService {
         itemJson.batches = formatedBatches;
         return itemJson;
       }
-
       case 'LIST': {
         const cmd = command.listOptions;
         const whereOptions: Record<string, any> = {};
@@ -158,26 +203,29 @@ export class ImsStockmateService {
             rows: items.rows.map((row) => row.toJSON()),
           };
           return itemsJson;
-        }
-        if (cmd.listType === 'BATCHES') {
-          const searchOptions: Record<string, any> = {};
-          if (cmd.item) {
-            searchOptions.search = cmd.item;
-            searchOptions.searchFields = ['name'];
-          }
-          const items = await this.itemService.fetchAndCountAll({
+        } else if (cmd.listType === 'BATCHES') {
+          return { message: 'yet to be implemented' };
+        } else if (cmd.listType === 'PATIENTS') {
+          const patients = await this.patientService.findAndCount({
             query: {
-              ...ownershipQuery,
+              ...(cmd.patientQuery && {
+                [Op.or]: [
+                  { name: { [Op.iLike]: `%${cmd.patientQuery}%` } },
+                  {
+                    cardIdentificationNumber: {
+                      [Op.iLike]: `%${cmd.patientQuery}%`,
+                    },
+                  },
+                ],
+              }),
             },
-            ...searchOptions,
-            fields: ['name'],
-            sort: 'name',
+            fields: ['name', 'cardIdentificationNumber'],
           });
-          const itemsJson = {
-            count: items.count,
-            rows: items.rows.map((row) => row.toJSON()),
+          const patientsJson = {
+            total: patients.count,
+            patients: patients.rows.map((patient) => patient.toJSON()),
           };
-          return itemsJson;
+          return patientsJson;
         }
       }
     }
