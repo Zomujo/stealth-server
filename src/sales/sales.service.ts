@@ -15,7 +15,7 @@ import { FindAndCountOptions } from 'sequelize';
 import { Op } from 'sequelize';
 import { BatchService } from '../inventory/items/batches/batch.service';
 import { Patient } from '../patient/models/patient.model';
-import { Batch, Item } from '../inventory/items/models';
+import { Batch, Item, Markup } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { PatientService } from '../patient/patient.service';
 import { endOfDay, endOfToday, startOfDay, startOfToday } from 'date-fns';
@@ -70,6 +70,10 @@ export class SalesService {
           model: Item,
           attributes: ['name', 'brandName', 'sellingPrice'],
           where: itemWhereConditions,
+        },
+        {
+          model: Markup,
+          attributes: ['type', 'amountType', 'amount'],
         },
       ],
       distinct: true,
@@ -167,9 +171,6 @@ export class SalesService {
             saleItem.quantity,
           );
           const modBatch = batch.get({ plain: true });
-
-          // batchSellingPrices[index].batchId = saleItem.batchId;
-          // batchSellingPrices[index].sellingPrice = modBatch.item.sellingPrice;
 
           batchSellingPrices.push({
             batchId: saleItem.batchId,
