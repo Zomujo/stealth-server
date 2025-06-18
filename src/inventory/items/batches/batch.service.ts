@@ -292,6 +292,10 @@ export class BatchService {
       include: [
         { model: Supplier, attributes: ['id', 'name'] },
         { model: Item, attributes: ['id', 'name'] },
+        {
+          model: Markup,
+          attributes: ['type', 'amountType', 'amount'],
+        },
       ],
     });
     return { rows, count };

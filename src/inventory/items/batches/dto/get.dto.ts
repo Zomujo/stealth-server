@@ -11,6 +11,7 @@ import { PaginationRequestDto } from '../../../../core/shared/dto/pagination.dto
 import { IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { addDays } from 'date-fns';
+import { GetMarkupDto } from '../../markup/dto';
 
 export class OneBatch extends IntersectionType(
   CreateBatchDto,
@@ -40,6 +41,11 @@ export class BatchResponseDto extends IntersectionType(
     type: GetNoPaginateDto,
   })
   item: GetNoPaginateDto;
+
+  @ApiResponseProperty({
+    type: GetMarkupDto,
+  })
+  markup: GetMarkupDto;
 }
 
 export class BatchesNoPaginate extends IntersectionType(
