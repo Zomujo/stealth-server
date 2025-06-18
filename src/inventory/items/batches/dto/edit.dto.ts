@@ -1,7 +1,7 @@
 import { ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { CreateBatchDto } from './create.dto';
 import { UpdateMarkupDto } from '../../markup/dto';
-import { IsOptional } from 'class-validator';
+import { IsObject, IsOptional } from 'class-validator';
 
 export class UpdateBatchDto extends PartialType(
   OmitType(CreateBatchDto, ['itemId', 'supplierId', 'markup']),
@@ -11,5 +11,6 @@ export class UpdateBatchDto extends PartialType(
     description: 'The markup on the batch',
   })
   @IsOptional()
+  @IsObject()
   markup: UpdateMarkupDto;
 }

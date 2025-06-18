@@ -1,7 +1,13 @@
-import { ApiProperty, ApiResponseProperty, PickType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  ApiResponseProperty,
+  PickType,
+} from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -55,11 +61,12 @@ export class CreateBatchDto extends PickType(CreateItemDto, ['createdById']) {
   @ItemExists()
   itemId: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: CreateMarkupDto,
     description: 'The markup on the batch',
   })
-  @IsNotEmpty()
+  @IsOptional()
+  @IsObject()
   markup: CreateMarkupDto;
 
   @ApiResponseProperty({
