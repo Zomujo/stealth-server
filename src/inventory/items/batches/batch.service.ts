@@ -166,9 +166,11 @@ export class BatchService {
 
     const _result = await batch.update({ ...dto });
 
-    dto.markup.itemId = batch.itemId;
+    if (dto.markup) {
+      dto.markup.itemId = batch.itemId;
 
-    const _markup = await this.markupService.update(batch.id, dto.markup);
+      const _markup = await this.markupService.update(batch.id, dto.markup);
+    }
 
     this.logger.log(`Updated item with ID: ${id}`);
     return;
