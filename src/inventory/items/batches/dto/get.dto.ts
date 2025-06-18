@@ -66,3 +66,12 @@ export class FetchBatchesQueryDto extends PaginationRequestDto {
   @Type(() => Date)
   validityEndDate: Date;
 }
+
+export class ExpiredAlert {
+  facilityId: string;
+  departmentId?: string;
+  @Type(() => Number)
+  nearExpiry: number;
+  @Type(() => Number)
+  expired: number;
+}

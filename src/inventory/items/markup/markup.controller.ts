@@ -49,11 +49,6 @@ export class MarkupController {
   //   }
   // }
 
-  // @Get()
-  // findAll() {
-  //   return this.markupService.findAll();
-  // }
-
   // @CustomApiResponse(['success', 'authorize'], {
   //   type: MarkupDto,
   //   message: 'Markup fetched successfully',
@@ -61,16 +56,16 @@ export class MarkupController {
   // @Permission(Features.ITEMS, PermissionLevel.READ_WRITE)
   // @Get()
   // async findOne(@Param('batchId', ParseUUIDPipe) batchId: string) {
-  //   try {
-  //     const response = await this.markupService.findOne(batchId);
-  //     return new ApiSuccessResponseDto(
-  //       response,
-  //       HttpStatus.OK,
-  //       'Markup fetched successfully',
-  //     );
-  //   } catch (error) {
-  //     throwError(this.logger, error);
-  //   }
+  // try {
+  //   const response = await this.markupService.findOne(batchId);
+  //   return new ApiSuccessResponseDto(
+  //     response,
+  //     HttpStatus.OK,
+  //     'Markup fetched successfully',
+  //   );
+  // } catch (error) {
+  //   throwError(this.logger, error);
+  // }
   // }
 
   // @CustomApiResponse(['success', 'authorize'], {

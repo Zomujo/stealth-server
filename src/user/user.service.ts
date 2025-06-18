@@ -6,14 +6,27 @@ import { CreateSettingsDto } from './dto';
 import { Settings } from './models/setting.model';
 import { buildQuery } from '../core/shared/factory/query-builder.factory';
 import { QueryOptionsDto } from '../core/shared/dto/query-options.dto';
-import { IncludeOptions } from 'sequelize';
+import { IncludeOptions, Op, QueryTypes } from 'sequelize';
 import { Department } from '../admin/department/models/department.model';
+import { Sequelize } from 'sequelize-typescript';
+import { ExpiredAlert } from '../inventory/items/batches/dto';
+import { Cron } from '@nestjs/schedule';
+import { NotificationService } from '../notification/notification.service';
+import { Features } from '../core/shared/enums/permissions.enum';
+import { CreateNotificationDto } from '../notification/dto';
+import { NotificationStatus } from '../notification/enum';
+import { MailService } from '../notification/mail/mail.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User) private userRepository: typeof User,
     @InjectModel(Settings) private settingsRepository: typeof Settings,
+    private readonly notificationService: NotificationService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
+    private readonly sequelize: Sequelize,
   ) {}
 
   private populates: Record<string, IncludeOptions> = {
@@ -52,6 +65,121 @@ export class UserService {
     //   throw new NotFoundException('User not found');
     // }
     return user;
+  }
+
+  @Cron('0 30 10 * * 1-6')
+  // @Cron('45 * * * * *')
+  async fetchExpiredBatches() {
+    const [results] = await this.sequelize.query(
+      `
+      SELECT b.facility_id "facilityId", b.department_id "departmentId", COUNT(*) FILTER (
+      WHERE validity BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL :dateInterval
+      ) AS "nearExpiry",
+       COUNT(*) FILTER(WHERE validity < CURRENT_DATE) AS expired
+       FROM batches b
+       GROUP BY b.facility_id, b.department_id;`,
+      {
+        replacements: { dateInterval: '60 days' },
+        type: QueryTypes.SELECT,
+      },
+    );
+    const finalResults = (
+      Array.isArray(results) ? results : [results]
+    ) as ExpiredAlert[];
+
+    const facilityIds = finalResults.map((result) => result.facilityId);
+    const departmentIds = finalResults.map((result) => result.departmentId);
+
+    const users = await this.userRepository.findAll({
+      where: {
+        facilityId: facilityIds,
+        departmentId: {
+          [Op.or]: [
+            ...(departmentIds.includes(null) ? [{ [Op.is]: null }] : []),
+            ...(departmentIds.filter((v) => v !== null).length > 0
+              ? [{ [Op.in]: departmentIds.filter((v) => v !== null) }]
+              : []),
+          ],
+        },
+        role: { [Op.iLike]: `%admin%` },
+      },
+      attributes: [
+        'facilityId',
+        'departmentId',
+        'email',
+        'phoneNumber',
+        'fullName',
+        'role',
+      ],
+    });
+
+    const userData = users.map((user) => {
+      const modUser = user.toJSON();
+      const expiredAlertData = finalResults.find(
+        (result) =>
+          result.facilityId === user.facilityId &&
+          result.departmentId === user.departmentId,
+      );
+      modUser.expired = +expiredAlertData.expired;
+      modUser.nearExpiry = +expiredAlertData.nearExpiry;
+      return modUser;
+    });
+
+    // [{
+    //   facilityId: '7ffc433e-1530-459c-b5c2-720db4d5b044',
+    //   departmentId: null,
+    //   email: 'asare4ster@gmail.com',
+    //   phoneNumber: '0244335567',
+    //   fullName: 'Foster Asare',
+    //   role: 'Central Admin',
+    //   expired: 1,
+    //   nearExpiry: 1
+    // }]
+
+    userData.forEach(async (data: any) => {
+      const expiredMessage = data.expired
+        ? `${data.expired} expired item${data.expired < 2 ? '' : 's'}`
+        : '';
+      const nearExpiryMessage = data.nearExpiry
+        ? `${data.nearExpiry} item${data.expired < 2 ? '' : 's'} near expiry`
+        : '';
+      const notification = new CreateNotificationDto();
+
+      notification.status = NotificationStatus.UNREAD;
+      notification.message = `Expiry Alert!!. You have ${expiredMessage} ${data.expired && data.nearExpiry && 'and '}${nearExpiryMessage}`;
+      notification.linkName = 'View';
+      notification.linkRoute = '/expiry?page=1';
+      await this.notificationService.sendNotification(
+        notification,
+        Features.ITEMS,
+        { facility: data.facilityId, department: data.departmentId },
+      );
+      data.linkRoute = notification.linkRoute;
+      data.linkName = notification.linkName;
+      this.sendResetPasswordConfirmation(data);
+      console.log(notification);
+    });
+
+    console.log(userData);
+    return users;
+  }
+
+  private sendResetPasswordConfirmation(data: any) {
+    const email = {
+      from: this.configService.get<string>('EMAIL_FROM'),
+      to: data.email,
+      subject: 'EXPIRY ALERT ‼️‼️ - Stealth',
+      template: './expiryReport',
+      context: {
+        fullName: data.fullName,
+        expired: data.expired,
+        nearExpiry: data.nearExpiry,
+        linkRoute: data.linkRoute,
+        linkName: data.linkName,
+      },
+    };
+
+    this.mailService.send(email);
   }
 
   async addSettings(dto: CreateSettingsDto, userId: string) {

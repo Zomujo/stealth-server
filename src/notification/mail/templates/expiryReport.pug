@@ -1,0 +1,16 @@
+extends baseEmail
+
+block content
+  p Dear #{fullName},
+  p This is to notify you that your inventory contains:
+  ul
+    li #{expired} expired item(s)
+    li #{nearExpiry} item(s) nearing expiry
+  p Please take immediate action to review these items and ensure proper handling.
+  if linkName && linkRoute
+  - const fullLink = `https://ims-v2-frontend.vercel.app/${linkRoute}`
+    p
+      a(href=fullLink) #{linkName}
+  p Thank you for your attention.
+  p Best regards,
+  p Stealth IMS
