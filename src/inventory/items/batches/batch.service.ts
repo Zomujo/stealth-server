@@ -59,6 +59,18 @@ export class BatchService {
   };
 
   async create(createBatchDto: CreateBatchDto): Promise<Batch> {
+    const existingBatch = await this.batchRepo.findOne({
+      where: {
+        batchNumber: createBatchDto.batchNumber,
+        facilityId: createBatchDto.facilityId,
+        departmentId: createBatchDto.departmentId,
+      },
+    });
+
+    if (existingBatch) {
+      throw new BadRequestException('Batch already exists');
+    }
+
     const supplier = await this.supplierService.exists(
       createBatchDto.supplierId,
     );
