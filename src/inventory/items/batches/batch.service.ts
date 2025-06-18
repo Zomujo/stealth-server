@@ -25,6 +25,7 @@ import { Facility } from '../../../admin/facility/models/facility.model';
 import { buildQuery } from '../../../core/shared/factory/query-builder.factory';
 import { IUserPayload } from '../../../auth/interface/payload.interface';
 import { addDays, endOfDay, startOfDay, startOfToday } from 'date-fns';
+import { MarkupService } from '../markup/markup.service';
 
 @Injectable()
 export class BatchService {
@@ -34,6 +35,7 @@ export class BatchService {
     @InjectModel(Batch) private readonly batchRepo: typeof Batch,
     @InjectModel(Item) private readonly itemRepo: typeof Item,
     private readonly supplierService: SuppliersService,
+    private readonly markupService: MarkupService,
     private eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(BatchService.name);
@@ -88,6 +90,15 @@ export class BatchService {
     this.eventEmitter.emit('quantity.increased', {
       itemId: createBatchDto.itemId,
     });
+    if (createBatchDto.markup) {
+      createBatchDto.markup.batchId = batch.id;
+      createBatchDto.markup.itemId = createBatchDto.itemId;
+      createBatchDto.markup.createdById = createBatchDto.createdById;
+      createBatchDto.markup.departmentId = createBatchDto.departmentId;
+      createBatchDto.markup.facilityId = createBatchDto.facilityId;
+
+      const _markup = await this.markupService.create(createBatchDto.markup);
+    }
     return batch;
   }
 
@@ -153,13 +164,11 @@ export class BatchService {
       }
     }
 
-    const result = await this.batchRepo.update(
-      { ...dto },
-      { where: { id: id } },
-    );
-    if (result[0] == 0) {
-      throw new NotFoundException(`batch with id ${id} not found`);
-    }
+    const _result = await batch.update({ ...dto });
+
+    dto.markup.itemId = batch.itemId;
+
+    const _markup = await this.markupService.update(batch.id, dto.markup);
 
     this.logger.log(`Updated item with ID: ${id}`);
     return;
@@ -325,6 +334,7 @@ export class BatchService {
         include: [
           { model: Supplier, attributes: ['id', 'name'] },
           { model: Item, attributes: ['id', 'name'] },
+          { model: Markup, attributes: ['id', 'type', 'amountType', 'amount'] },
         ],
       };
     } else {

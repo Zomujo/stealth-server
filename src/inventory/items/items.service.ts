@@ -12,7 +12,6 @@ import {
   WhereOptions,
 } from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
-import { User } from '../../auth/models/user.model';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { BatchService } from './batches/batch.service';
 import {
@@ -52,7 +51,6 @@ export class ItemService {
   private readonly logger: Logger;
   constructor(
     @InjectModel(Item) private readonly itemRepo: typeof Item,
-    @InjectModel(User) private readonly userRepo: typeof User,
     private readonly batchService: BatchService,
     private notificationService: NotificationService,
   ) {

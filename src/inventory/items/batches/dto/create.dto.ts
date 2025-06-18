@@ -12,6 +12,7 @@ import { ItemExists, SupplierExists } from '../../../../core/shared/validators';
 import { CreateItemDto } from '../../dto';
 import { format } from 'date-fns';
 import { Type } from 'class-transformer';
+import { CreateMarkupDto } from '../../markup/dto';
 
 export class CreateBatchDto extends PickType(CreateItemDto, ['createdById']) {
   @ApiProperty({
@@ -53,6 +54,13 @@ export class CreateBatchDto extends PickType(CreateItemDto, ['createdById']) {
   @IsUUID()
   @ItemExists()
   itemId: string;
+
+  @ApiProperty({
+    type: CreateMarkupDto,
+    description: 'The markup on the batch',
+  })
+  @IsNotEmpty()
+  markup: CreateMarkupDto;
 
   @ApiResponseProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',
