@@ -62,6 +62,7 @@ export class BatchService {
     const existingBatch = await this.batchRepo.findOne({
       where: {
         batchNumber: createBatchDto.batchNumber,
+        itemId: createBatchDto.itemId,
         facilityId: createBatchDto.facilityId,
         departmentId: createBatchDto.departmentId,
       },
