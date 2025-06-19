@@ -44,11 +44,7 @@ export class BatchService {
 	private populates: Record<string, IncludeOptions> = {
 		supplier: { model: Supplier, attributes: ['id', 'name'] },
 
-		createdBy: {
-			model: User,
-			as: 'createdBy',
-			attributes: ['id', 'fullName', 'email'],
-		},
+		createdBy: { model: User, attributes: ['id', 'fullName', 'email'] },
 
 		item: { model: Item, attributes: ['id', 'name'] },
 
@@ -185,7 +181,7 @@ export class BatchService {
 		return batch;
 	}
 
-	async update(id: string, dto: UpdateBatchDto, userId: string) {
+	async update(id: string, dto: UpdateBatchDto, user: IUserPayload) {
 		const batch = await this.findOne(id);
 		if (dto.quantity) {
 			if (dto.quantity > batch.quantity) {
@@ -195,7 +191,7 @@ export class BatchService {
 			}
 		}
 
-		const _result = await batch.update({ ...dto, updatedById: userId });
+		const _result = await batch.update({ ...dto, updatedById: user.sub });
 
 		if (dto.markup) {
 			dto.markup.itemId = batch.itemId;
@@ -206,7 +202,7 @@ export class BatchService {
 			const _markup = await this.markupService.update(
 				batch.id,
 				dto.markup,
-				userId,
+				user.sub,
 			);
 		}
 
@@ -383,13 +379,7 @@ export class BatchService {
 			};
 		} else {
 			options = {
-				include: [
-					{
-						model: User,
-						as: 'createdBy',
-						attributes: ['id', 'fullName', 'email'],
-					},
-				],
+				include: [{ model: User, attributes: ['id', 'fullName', 'email'] }],
 			};
 		}
 		const batch = await this.batchRepo.findByPk(id, {

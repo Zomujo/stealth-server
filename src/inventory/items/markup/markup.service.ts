@@ -20,11 +20,7 @@ export class MarkupService {
 	private populates: Record<string, IncludeOptions> = {
 		batch: { model: Batch, attributes: ['id', 'batchNumber'] },
 
-		createdBy: {
-			model: User,
-			as: 'createdBy',
-			attributes: ['id', 'fullName', 'email'],
-		},
+		createdBy: { model: User, attributes: ['id', 'fullName', 'email'] },
 
 		item: { model: Item, attributes: ['id', 'name'] },
 
@@ -68,19 +64,27 @@ export class MarkupService {
 	}
 
 	async update(batchId: string, dto: UpdateMarkupDto, userId: string) {
-		const markup = await this.findOne(batchId);
 		const batch = await this.batchRepo.findByPk(batchId, {
 			attributes: ['id', 'itemId'],
 		});
 		dto.itemId = batch.itemId;
 		dto.batchId = batch.id;
 
-		await markup.update({ ...dto, updatedById: userId });
-		return markup;
+		try {
+			const markup = await this.findOne(batchId);
+			await markup.update({ ...dto, updatedById: userId });
+			return markup;
+		} catch {
+			const markup = await this.markupRepo.create({
+				...dto,
+				createdById: userId,
+			});
+			return markup;
+		}
 	}
 
-	async remove(batchId: string, deletedBy: string) {
+	async remove(batchId: string) {
 		const markup = await this.findOne(batchId);
-		await markup.destroy({ userId: deletedBy } as any);
+		await markup.destroy();
 	}
 }
