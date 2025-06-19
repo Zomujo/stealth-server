@@ -1,11 +1,10 @@
 import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Table,
-  HasMany,
-  AllowNull,
+	BelongsTo,
+	Column,
+	DataType,
+	ForeignKey,
+	Table,
+	HasMany,
 } from 'sequelize-typescript';
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from 'src/admin/facility/models/facility.model';
@@ -18,129 +17,105 @@ import { DosageForm } from '../dto';
 import { User } from 'src/auth/models/user.model';
 
 @Table({
-  tableName: 'items',
-  underscored: true,
-  paranoid: true,
-  timestamps: true,
+	tableName: 'items',
+	underscored: true,
+	paranoid: true,
+	timestamps: true,
 })
 export class Item extends BaseModel {
-  @Column
-  name: string;
+	@Column
+	name: string;
 
-  @Column({ type: DataType.STRING, field: 'brand_name' })
-  brandName: string;
+	@Column({ type: DataType.STRING, field: 'brand_name' })
+	brandName: string;
 
-  @Column({ type: DataType.STRING, field: 'dosage_form' })
-  dosageForm: DosageForm;
+	@Column({ type: DataType.STRING, field: 'dosage_form' })
+	dosageForm: DosageForm;
 
-  @Column({ type: DataType.DOUBLE, allowNull: false, field: 'cost_price' })
-  costPrice: number;
+	@Column({ type: DataType.DOUBLE, allowNull: false, field: 'cost_price' })
+	costPrice: number;
 
-  @Column({ type: DataType.DOUBLE, allowNull: false, field: 'selling_price' })
-  sellingPrice: number;
+	@Column({ type: DataType.DOUBLE, allowNull: false, field: 'selling_price' })
+	sellingPrice: number;
 
-  @Column
-  code: string;
+	@Column
+	code: string;
 
-  @Column
-  fdaApproval: string;
+	@Column
+	fdaApproval: string;
 
-  @Column({ field: 'ISO' })
-  ISO: string;
+	@Column({ field: 'ISO' })
+	ISO: string;
 
-  @Column
-  manufacturer: string;
+	@Column
+	manufacturer: string;
 
-  @Column
-  strength: string;
+	@Column
+	strength: string;
 
-  @Column({ field: 'unit_of_measurement' })
-  unitOfMeasurement: string;
+	@Column({ field: 'unit_of_measurement' })
+	unitOfMeasurement: string;
 
-  @Column({ type: DataType.TEXT, field: 'storage_req' })
-  storageReq: string;
+	@Column({ type: DataType.TEXT, field: 'storage_req' })
+	storageReq: string;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, field: 'reorder_point' })
-  reorderPoint: number;
+	@Column({ type: DataType.INTEGER, allowNull: false, field: 'reorder_point' })
+	reorderPoint: number;
 
-  @Column({
-    type: DataType.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'),
-    allowNull: false,
-  })
-  status: string;
+	@Column({
+		type: DataType.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'),
+		allowNull: false,
+	})
+	status: string;
 
-  @Column({
-    type: DataType.VIRTUAL,
-    get(this: Item) {
-      return this.batches && this.batches.length
-        ? this.batches.reduce((accum, current) => accum + current.quantity, 0)
-        : 0;
-    },
-  })
-  totalQuantity: number;
+	@Column({
+		type: DataType.VIRTUAL,
+		get(this: Item) {
+			return this.batches && this.batches.length
+				? this.batches.reduce((accum, current) => accum + current.quantity, 0)
+				: 0;
+		},
+	})
+	totalQuantity: number;
 
-  // relationships
+	// relationships
 
-  @ForeignKey(() => ItemCategory)
-  @Column({
-    type: DataType.UUID,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-    field: 'category_id',
-  })
-  categoryId: string;
+	@ForeignKey(() => ItemCategory)
+	@Column({
+		type: DataType.UUID,
+		onUpdate: 'CASCADE',
+		onDelete: 'CASCADE',
+		field: 'category_id',
+	})
+	categoryId: string;
 
-  @BelongsTo(() => ItemCategory)
-  category: ItemCategory;
+	@BelongsTo(() => ItemCategory)
+	category: ItemCategory;
 
-  @ForeignKey(() => Facility)
-  @Column({
-    type: DataType.UUID,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  facilityId: string;
+	@ForeignKey(() => Facility)
+	@Column({
+		type: DataType.UUID,
+		onUpdate: 'CASCADE',
+		onDelete: 'CASCADE',
+	})
+	facilityId: string;
 
-  @BelongsTo(() => Facility)
-  facility: Facility;
+	@BelongsTo(() => Facility)
+	facility: Facility;
 
-  @ForeignKey(() => Department)
-  @Column({ allowNull: true })
-  departmentId: string;
+	@ForeignKey(() => Department)
+	@Column({ allowNull: true })
+	departmentId: string;
 
-  @BelongsTo(() => Department)
-  department: Department;
+	@BelongsTo(() => Department)
+	department: Department;
 
-  @HasMany(() => Batch)
-  batches: Batch[];
+	@HasMany(() => Batch)
+	batches: Batch[];
 
-  @HasMany(() => StockAdjustment)
-  stockAdjustments: StockAdjustment[];
+	@HasMany(() => StockAdjustment)
+	stockAdjustments: StockAdjustment[];
 
-  @HasMany(() => DepartmentRequest)
-  departmentRequests: DepartmentRequest[];
-
-  @AllowNull
-  @ForeignKey(() => User)
-  @Column
-  createdById: string;
-
-  @BelongsTo(() => User)
-  createdBy: User;
-
-  @AllowNull
-  @ForeignKey(() => User)
-  @Column
-  updatedById: string;
-
-  @BelongsTo(() => User)
-  updatedBy: User;
-
-  @AllowNull
-  @ForeignKey(() => User)
-  @Column
-  deletedById: string;
-
-  @BelongsTo(() => User)
-  deletedBy: User;
+	@HasMany(() => DepartmentRequest)
+	departmentRequests: DepartmentRequest[];
 }

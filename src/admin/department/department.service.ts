@@ -10,155 +10,151 @@ import { generateFilter } from '../../core/shared/factory';
 
 @Injectable()
 export class DepartmentService {
-  private readonly logger: Logger;
-  constructor(
-    @InjectModel(Department)
-    private readonly departmentRepo: typeof Department,
-    private readonly notificationService: NotificationService,
-  ) {
-    this.logger = new Logger(DepartmentService.name);
-  }
+	private readonly logger: Logger;
+	constructor(
+		@InjectModel(Department)
+		private readonly departmentRepo: typeof Department,
+		private readonly notificationService: NotificationService,
+	) {
+		this.logger = new Logger(DepartmentService.name);
+	}
 
-  /**
-   * Creates a new department.
-   *
-   * @param createDepartmentDto - The DTO containing the data for creating a department.
-   * @returns A promise that resolves to the created department.
-   * @throws {BadRequestException} If there is a unique constraint error.
-   * @throws {InternalServerErrorException} If there is an internal server error.
-   */
-  async create(
-    createDepartmentDto: CreateDepartmentDto,
-    facilityId: string,
-    adminId: string,
-  ): Promise<Department> {
-    const department = await this.departmentRepo.create(
-      {
-        ...createDepartmentDto,
-        facilityId,
-        createdById: adminId,
-      },
-      { user: 'hello', validate: true },
-    );
-    this.notificationService.notifyAdmin({
-      message: 'Department has been created successfully',
-      url: '/settings/departments',
-    });
-    return department;
-  }
+	/**
+	 * Creates a new department.
+	 *
+	 * @param createDepartmentDto - The DTO containing the data for creating a department.
+	 * @returns A promise that resolves to the created department.
+	 * @throws {BadRequestException} If there is a unique constraint error.
+	 * @throws {InternalServerErrorException} If there is an internal server error.
+	 */
+	async create(
+		createDepartmentDto: CreateDepartmentDto,
+		facilityId: string,
+		adminId: string,
+	): Promise<Department> {
+		const department = await this.departmentRepo.create({
+			...createDepartmentDto,
+			facilityId,
+			createdById: adminId,
+		});
+		this.notificationService.notifyAdmin({
+			message: 'Department has been created successfully',
+			url: '/settings/departments',
+		});
+		return department;
+	}
 
-  /**
-   * Retrieves all departments.
-   *
-   * @param limit - The maximum number of categories to retrieve.
-   * @returns A promise that resolves to an array of DepartmentResponse objects.
-   * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
-   */
-  async findAllNoPaginate(facilityId: string) {
-    const filter: FindAndCountOptions<Department> = {
-      where: {
-        facilityId,
-      },
-      attributes: ['id', 'name'],
-      order: [['updatedAt', 'DESC']],
-    };
-    const departments = await this.departmentRepo.findAll(filter);
+	/**
+	 * Retrieves all departments.
+	 *
+	 * @param limit - The maximum number of categories to retrieve.
+	 * @returns A promise that resolves to an array of DepartmentResponse objects.
+	 * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
+	 */
+	async findAllNoPaginate(facilityId: string) {
+		const filter: FindAndCountOptions<Department> = {
+			where: {
+				facilityId,
+			},
+			attributes: ['id', 'name'],
+			order: [['updatedAt', 'DESC']],
+		};
+		const departments = await this.departmentRepo.findAll(filter);
 
-    return departments;
-  }
+		return departments;
+	}
 
-  /**
-   * Retrieves all departments.
-   *
-   * @param limit - The maximum number of categories to retrieve.
-   * @returns A promise that resolves to an array of DepartmentResponse objects.
-   * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
-   */
-  async findAll(query: PaginationRequestDto, facilityId: string) {
-    const searchByName = { name: { [Op.iLike]: `%${query.search}%` } };
+	/**
+	 * Retrieves all departments.
+	 *
+	 * @param limit - The maximum number of categories to retrieve.
+	 * @returns A promise that resolves to an array of DepartmentResponse objects.
+	 * @throws {InternalServerErrorException} if an error occurs while retrieving the categories.
+	 */
+	async findAll(query: PaginationRequestDto, facilityId: string) {
+		const searchByName = { name: { [Op.iLike]: `%${query.search}%` } };
 
-    const queryFilter = generateFilter(query, searchByName);
+		const queryFilter = generateFilter(query, searchByName);
 
-    const filter: FindAndCountOptions<Department> = {
-      where: {
-        facilityId,
-        ...queryFilter.searchFilter,
-      },
-      ...queryFilter.pageFilter,
-      attributes: { exclude: ['createdById', 'updatedById'] },
-      include: [
-        { model: User, as: 'createdBy', attributes: ['id', 'fullName'] },
-        { model: User, as: 'updatedBy', attributes: ['id', 'fullName'] },
-      ],
-      distinct: true,
-    };
-    const { rows, count } = await this.departmentRepo.findAndCountAll(filter);
+		const filter: FindAndCountOptions<Department> = {
+			where: {
+				facilityId,
+				...queryFilter.searchFilter,
+			},
+			...queryFilter.pageFilter,
+			attributes: { exclude: ['createdById', 'updatedById'] },
+			include: [
+				{ model: User, as: 'createdBy', attributes: ['id', 'fullName'] },
+				{ model: User, as: 'updatedBy', attributes: ['id', 'fullName'] },
+			],
+			distinct: true,
+		};
+		const { rows, count } = await this.departmentRepo.findAndCountAll(filter);
 
-    return { rows, count };
-  }
+		return { rows, count };
+	}
 
-  /**
-   * Finds a department by its ID.
-   *
-   * @param id - The ID of the department to find.
-   * @returns A promise that resolves to the found department.
-   * @throws {NotFoundException} If the department with the given ID is not found.
-   * @throws {InternalServerErrorException} If an internal server error occurs.
-   */
-  async findOne(id: string) {
-    this.logger.log(`Finding department by ID`);
-    const department = await this.departmentRepo.findByPk(id, {
-      include: [{ all: true }],
-    });
+	/**
+	 * Finds a department by its ID.
+	 *
+	 * @param id - The ID of the department to find.
+	 * @returns A promise that resolves to the found department.
+	 * @throws {NotFoundException} If the department with the given ID is not found.
+	 * @throws {InternalServerErrorException} If an internal server error occurs.
+	 */
+	async findOne(id: string) {
+		this.logger.log(`Finding department by ID`);
+		const department = await this.departmentRepo.findByPk(id, {
+			include: [{ all: true }],
+		});
 
-    if (!department) {
-      throw new NotFoundException(`Department with id: ${id} not found`);
-    }
-    return department;
-  }
+		if (!department) {
+			throw new NotFoundException(`Department with id: ${id} not found`);
+		}
+		return department;
+	}
 
-  /**
-   * Updates a department.
-   *
-   * @param id - The ID of the department.
-   * @param updateDepartmentDto - The DTO containing the updated department data.
-   * @returns A Promise that resolves to the updated department.
-   * @throws InternalServerErrorException if an error occurs during the update process.
-   */
-  async update(
-    id: string,
-    updateDepartmentDto: UpdateDepartmentDto,
-    adminId: string,
-  ) {
-    this.logger.log(`Updating department`);
-    const result = await this.departmentRepo.update(
-      { ...updateDepartmentDto, updatedById: adminId },
-      { where: { id } },
-    );
-    const affected = result[0];
-    if (affected == 0) {
-      throw new NotFoundException(`Department with id ${id} not found`);
-    }
-    return;
-  }
+	/**
+	 * Updates a department.
+	 *
+	 * @param id - The ID of the department.
+	 * @param updateDepartmentDto - The DTO containing the updated department data.
+	 * @returns A Promise that resolves to the updated department.
+	 * @throws InternalServerErrorException if an error occurs during the update process.
+	 */
+	async update(
+		id: string,
+		updateDepartmentDto: UpdateDepartmentDto,
+		adminId: string,
+	) {
+		this.logger.log(`Updating department`);
+		const result = await this.departmentRepo.update(
+			{ ...updateDepartmentDto, updatedById: adminId },
+			{ where: { id } },
+		);
+		const affected = result[0];
+		if (affected == 0) {
+			throw new NotFoundException(`Department with id ${id} not found`);
+		}
+		return;
+	}
 
-  /**
-   * Removes a department by its ID.
-   *
-   * @param id - The ID of the department to remove.
-   * @returns A promise that resolves to the result of the removal operation.
-   * @throws {InternalServerErrorException} If an error occurs during the removal operation.
-   */
-  async remove(id: string, deletedBy: string) {
-    this.logger.log(`Removing department with ID: ${id}`);
-    const res = await this.departmentRepo.destroy({
-      where: { id: id },
-      force: true,
-      userId: deletedBy,
-    } as any);
+	/**
+	 * Removes a department by its ID.
+	 *
+	 * @param id - The ID of the department to remove.
+	 * @returns A promise that resolves to the result of the removal operation.
+	 * @throws {InternalServerErrorException} If an error occurs during the removal operation.
+	 */
+	async remove(id: string, deletedBy: string) {
+		this.logger.log(`Removing department with ID: ${id}`);
+		const res = await this.departmentRepo.destroy({
+			where: { id: id },
+			force: true,
+		});
 
-    if (res == 0) {
-      throw new NotFoundException(`Department with id ${id} not found`);
-    }
-  }
+		if (res == 0) {
+			throw new NotFoundException(`Department with id ${id} not found`);
+		}
+	}
 }

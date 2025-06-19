@@ -12,82 +12,75 @@ import { Facility } from '../../../admin/facility/models/facility.model';
 
 @Injectable()
 export class MarkupService {
-  constructor(
-    @InjectModel(Markup) private readonly markupRepo: typeof Markup,
-    @InjectModel(Batch) private readonly batchRepo: typeof Batch,
-  ) {}
+	constructor(
+		@InjectModel(Markup) private readonly markupRepo: typeof Markup,
+		@InjectModel(Batch) private readonly batchRepo: typeof Batch,
+	) { }
 
-  private populates: Record<string, IncludeOptions> = {
-    batch: { model: Batch, attributes: ['id', 'batchNumber'] },
+	private populates: Record<string, IncludeOptions> = {
+		batch: { model: Batch, attributes: ['id', 'batchNumber'] },
 
-    createdBy: {
-      model: User,
-      as: 'createdBy',
-      attributes: ['id', 'fullName', 'email'],
-    },
+		createdBy: {
+			model: User,
+			as: 'createdBy',
+			attributes: ['id', 'fullName', 'email'],
+		},
 
-    item: { model: Item, attributes: ['id', 'name'] },
+		item: { model: Item, attributes: ['id', 'name'] },
 
-    department: { model: Department, attributes: ['id', 'name'] },
+		department: { model: Department, attributes: ['id', 'name'] },
 
-    facility: { model: Facility, attributes: ['id', 'name'] },
-  };
+		facility: { model: Facility, attributes: ['id', 'name'] },
+	};
 
-  async create(dto: CreateMarkupDto) {
-    const batch = await this.batchRepo.findByPk(dto.batchId, {
-      attributes: ['id', 'itemId'],
-    });
-    if (!batch) {
-      throw new NotFoundException('batch not found');
-    }
-    dto.itemId = batch.itemId;
+	async create(dto: CreateMarkupDto) {
+		const batch = await this.batchRepo.findByPk(dto.batchId, {
+			attributes: ['id', 'itemId'],
+		});
+		if (!batch) {
+			throw new NotFoundException('batch not found');
+		}
+		dto.itemId = batch.itemId;
 
-    const markup = await this.markupRepo.create({
-      ...dto,
-    });
-    return markup;
-  }
+		const markup = await this.markupRepo.create({
+			...dto,
+		});
+		return markup;
+	}
 
-  findAll() {
-    return `This action returns all markup`;
-  }
+	findAll() {
+		return `This action returns all markup`;
+	}
 
-  async findOne(batchId: string) {
-    const markup = await this.markupRepo.findOne({ where: { batchId } });
-    if (!markup) {
-      throw new NotFoundException('markup not found');
-    }
-    return markup;
-  }
+	async findOne(batchId: string) {
+		const markup = await this.markupRepo.findOne({ where: { batchId } });
+		if (!markup) {
+			throw new NotFoundException('markup not found');
+		}
+		return markup;
+	}
 
-  async fetchOne(options: QueryOptionsDto<Markup>) {
-    const queryOptions = buildQuery<Markup>(options, this.populates);
-    const markup = await this.markupRepo.findOne(queryOptions);
+	async fetchOne(options: QueryOptionsDto<Markup>) {
+		const queryOptions = buildQuery<Markup>(options, this.populates);
+		const markup = await this.markupRepo.findOne(queryOptions);
 
-    return markup;
-  }
+		return markup;
+	}
 
-  async update(batchId: string, dto: UpdateMarkupDto, userId: string) {
-    const batch = await this.batchRepo.findByPk(batchId, {
-      attributes: ['id', 'itemId'],
-    });
-    dto.itemId = batch.itemId;
-    dto.batchId = batch.id;
+	async update(batchId: string, dto: UpdateMarkupDto, userId: string) {
+		const markup = await this.findOne(batchId);
+		const batch = await this.batchRepo.findByPk(batchId, {
+			attributes: ['id', 'itemId'],
+		});
+		dto.itemId = batch.itemId;
+		dto.batchId = batch.id;
 
-    const markup = await this.markupRepo.findOne({ where: { batchId } });
-    if (!markup) {
-      const newMarkup = await this.markupRepo.create({
-        ...dto,
-        createdById: userId,
-      });
-      return newMarkup;
-    }
-    await markup.update({ ...dto, updatedById: userId });
-    return markup;
-  }
+		await markup.update({ ...dto, updatedById: userId });
+		return markup;
+	}
 
-  async remove(batchId: string, deletedBy: string) {
-    const markup = await this.findOne(batchId);
-    await markup.destroy({ userId: deletedBy } as any);
-  }
+	async remove(batchId: string, deletedBy: string) {
+		const markup = await this.findOne(batchId);
+		await markup.destroy({ userId: deletedBy } as any);
+	}
 }

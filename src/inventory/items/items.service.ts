@@ -1,30 +1,30 @@
 import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  NotImplementedException,
+	Injectable,
+	Logger,
+	NotFoundException,
+	NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import {
-  FindAndCountOptions,
-  IncludeOptions,
-  Op,
-  WhereOptions,
+	FindAndCountOptions,
+	IncludeOptions,
+	Op,
+	WhereOptions,
 } from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { BatchService } from './batches/batch.service';
 import {
-  ChangeQuantityEvent,
-  ChangeType,
-  CreateItemDto,
-  FetchExpiredQueryDto,
-  ItemCounts,
-  ItemPaginationDto,
-  ItemStatus,
-  OneItem,
-  TotalItemsDto,
-  UpdateItemDto,
+	ChangeQuantityEvent,
+	ChangeType,
+	CreateItemDto,
+	FetchExpiredQueryDto,
+	ItemCounts,
+	ItemPaginationDto,
+	ItemStatus,
+	OneItem,
+	TotalItemsDto,
+	UpdateItemDto,
 } from './dto';
 import { Batch, BatchValidityStatus, Item } from './models';
 import { IUserPayload } from '../../auth/interface/payload.interface';
@@ -33,11 +33,11 @@ import { NotificationService } from '../../notification/notification.service';
 import { CreateNotificationDto } from '../../notification/dto';
 import { Features } from '../../core/shared/enums/permissions.enum';
 import {
-  addDays,
-  endOfMonth,
-  startOfMonth,
-  startOfToday,
-  subMonths,
+	addDays,
+	endOfMonth,
+	startOfMonth,
+	startOfToday,
+	subMonths,
 } from 'date-fns';
 import { generateFilter } from '../../core/shared/factory';
 import { NotificationStatus } from '../../notification/enum';
@@ -48,492 +48,489 @@ import { buildQuery } from '../../core/shared/factory/query-builder.factory';
 
 @Injectable()
 export class ItemService {
-  private readonly logger: Logger;
-  constructor(
-    @InjectModel(Item) private readonly itemRepo: typeof Item,
-    private readonly batchService: BatchService,
-    private notificationService: NotificationService,
-  ) {
-    this.logger = new Logger(ItemService.name);
-  }
+	private readonly logger: Logger;
+	constructor(
+		@InjectModel(Item) private readonly itemRepo: typeof Item,
+		private readonly batchService: BatchService,
+		private notificationService: NotificationService,
+	) {
+		this.logger = new Logger(ItemService.name);
+	}
 
-  private populates: Record<string, IncludeOptions> = {
-    category: { model: ItemCategory, attributes: ['id', 'name'] },
+	private populates: Record<string, IncludeOptions> = {
+		category: { model: ItemCategory, attributes: ['id', 'name'] },
 
-    batches: {
-      model: Batch,
-      attributes: ['id', 'batchNumber', 'quantity', 'validity'],
-    },
+		batches: {
+			model: Batch,
+			attributes: ['id', 'batchNumber', 'quantity', 'validity'],
+		},
 
-    department: { model: Department, attributes: ['id', 'name'] },
+		department: { model: Department, attributes: ['id', 'name'] },
 
-    facility: { model: Facility, attributes: ['id', 'name'] },
-  };
+		facility: { model: Facility, attributes: ['id', 'name'] },
+	};
 
-  /**
-   * Creates a new item.
-   *
-   * @param createItemDto - The DTO containing the item information.
-   * @returns A promise that resolves to the created item.
-   * @throws If any error occurs during the creation process.
-   */
-  async create(createItemDto: CreateItemDto): Promise<OneItem> {
-    const createdItem = await this.itemRepo.create({
-      ...createItemDto,
-      status: ItemStatus.OUT_OF_STOCK,
-    });
+	/**
+	 * Creates a new item.
+	 *
+	 * @param createItemDto - The DTO containing the item information.
+	 * @returns A promise that resolves to the created item.
+	 * @throws If any error occurs during the creation process.
+	 */
+	async create(createItemDto: CreateItemDto): Promise<OneItem> {
+		const createdItem = await this.itemRepo.create({
+			...createItemDto,
+			status: ItemStatus.OUT_OF_STOCK,
+		});
 
-    const oneItem = createdItem.toJSON();
-    this.logger.log(`Item added successfully. id: ${createdItem.id}`);
-    return oneItem;
-  }
+		const oneItem = createdItem.toJSON();
+		this.logger.log(`Item added successfully. id: ${createdItem.id}`);
+		return oneItem;
+	}
 
-  /**
-   * Retrieves all items with no pagination
-   *
-   * @returns A promise that resolves to an array of OneItem and the total count of items.
-   * @throws Throws an error if there was an issue retrieving the items.
-   */
-  async findWithNoPaginate(facilityId: string) {
-    const items = await this.itemRepo.findAndCountAll({
-      where: {
-        facilityId,
-      },
-      attributes: ['id', 'name'],
-      order: [['updatedAt', 'DESC']],
-    });
+	/**
+	 * Retrieves all items with no pagination
+	 *
+	 * @returns A promise that resolves to an array of OneItem and the total count of items.
+	 * @throws Throws an error if there was an issue retrieving the items.
+	 */
+	async findWithNoPaginate(facilityId: string) {
+		const items = await this.itemRepo.findAndCountAll({
+			where: {
+				facilityId,
+			},
+			attributes: ['id', 'name'],
+			order: [['updatedAt', 'DESC']],
+		});
 
-    this.logger.log(`Retrieved ${items.count} items`);
-    return items.rows;
-  }
+		this.logger.log(`Retrieved ${items.count} items`);
+		return items.rows;
+	}
 
-  async fetchItemsWithValidity(
-    query: FetchExpiredQueryDto,
-    user: IUserPayload,
-  ) {
-    const filter: FindAndCountOptions<Batch> = this.filterBuilder(user, query);
+	async fetchItemsWithValidity(
+		query: FetchExpiredQueryDto,
+		user: IUserPayload,
+	) {
+		const filter: FindAndCountOptions<Batch> = this.filterBuilder(user, query);
 
-    const { rows, count } = await this.batchService.findBySpecs(filter);
+		const { rows, count } = await this.batchService.findBySpecs(filter);
 
-    return { rows, count };
-  }
+		return { rows, count };
+	}
 
-  /**
-   * Retrieves all items based on the provided query parameters.
-   *
-   * @param query - The query parameters for filtering items.
-   * @returns A promise that resolves to an array of OneItem and the total count of items.
-   * @throws Throws an error if there was an issue retrieving the items.
-   */
-  async findAll(query: ItemPaginationDto) {
-    const filter = this.applyFilter(query);
-    const items = await this.itemRepo.findAndCountAll(filter);
+	/**
+	 * Retrieves all items based on the provided query parameters.
+	 *
+	 * @param query - The query parameters for filtering items.
+	 * @returns A promise that resolves to an array of OneItem and the total count of items.
+	 * @throws Throws an error if there was an issue retrieving the items.
+	 */
+	async findAll(query: ItemPaginationDto) {
+		const filter = this.applyFilter(query);
+		const items = await this.itemRepo.findAndCountAll(filter);
 
-    const itemList = await Promise.all(
-      items.rows.map(async (item) => {
-        const modItem: Item = item.get({ plain: true });
-        // const batches = await this.batchService.findAll(modItem.id);
-        const whereOptions: Record<string, any> = { itemId: modItem.id };
-        if (query.departmentId) {
-          whereOptions.departmentId = query.departmentId;
-        }
-        const totalStock =
-          await this.batchService.calculateTotalBatchStock(whereOptions);
-        // delete modItem.status;
-        if (totalStock > modItem.reorderPoint) {
-          modItem.status = ItemStatus.STOCKED;
-        } else if (totalStock === 0) {
-          modItem.status = ItemStatus.OUT_OF_STOCK;
-        } else {
-          modItem.status = ItemStatus.LOW;
-        }
-        return {
-          ...modItem,
-          totalStock,
-        };
-      }),
-    );
+		const itemList = await Promise.all(
+			items.rows.map(async (item) => {
+				const modItem: Item = item.get({ plain: true });
+				// const batches = await this.batchService.findAll(modItem.id);
+				const whereOptions: Record<string, any> = { itemId: modItem.id };
+				if (query.departmentId) {
+					whereOptions.departmentId = query.departmentId;
+				}
+				const totalStock =
+					await this.batchService.calculateTotalBatchStock(whereOptions);
+				// delete modItem.status;
+				if (totalStock > modItem.reorderPoint) {
+					modItem.status = ItemStatus.STOCKED;
+				} else if (totalStock === 0) {
+					modItem.status = ItemStatus.OUT_OF_STOCK;
+				} else {
+					modItem.status = ItemStatus.LOW;
+				}
+				return {
+					...modItem,
+					totalStock,
+				};
+			}),
+		);
 
-    this.logger.log(`Retrieved ${items.count} items`);
+		this.logger.log(`Retrieved ${items.count} items`);
 
-    return new PaginatedDataResponseDto(
-      itemList,
-      query.page || 1,
-      query.pageSize || 10,
-      items.count,
-    );
-  }
+		return new PaginatedDataResponseDto(
+			itemList,
+			query.page || 1,
+			query.pageSize || 10,
+			items.count,
+		);
+	}
 
-  async assignStatus() {
-    const items = await this.itemRepo.findAll({
-      attributes: ['id', 'name', 'status', 'reorderPoint'],
-      include: [{ model: Batch, attributes: ['id', 'quantity'] }],
-    });
+	async assignStatus() {
+		const items = await this.itemRepo.findAll({
+			attributes: ['id', 'name', 'status', 'reorderPoint'],
+			include: [{ model: Batch, attributes: ['id', 'quantity'] }],
+		});
 
-    items.forEach((item) => {
-      const totalQuantity = item.batches.reduce(
-        (accum, batch) => accum + batch.quantity,
-        0,
-      );
+		items.forEach((item) => {
+			const totalQuantity = item.batches.reduce(
+				(accum, batch) => accum + batch.quantity,
+				0,
+			);
 
-      if (totalQuantity == 0) {
-        item.status = ItemStatus.OUT_OF_STOCK;
-      } else if (totalQuantity > item.reorderPoint) {
-        item.status = ItemStatus.STOCKED;
-      } else {
-        item.status = ItemStatus.LOW;
-      }
-      item.save();
-    });
-    return 'adjusted';
-  }
-  /**
-   * Finds a item by its ID.
-   *
-   * @param id - The ID of the item to find.
-   * @returns A promise that resolves to the found item.
-   * @throws {NotFoundEception} If the item with the given ID is not found.
-   */
-  async findOne(id: string) {
-    this.logger.log(`finding item with id: ${id}`);
-    const item = await this.itemRepo.findByPk(id);
-    if (!item) {
-      throw new NotFoundException(`item with id: ${id} not found`);
-    }
+			if (totalQuantity == 0) {
+				item.status = ItemStatus.OUT_OF_STOCK;
+			} else if (totalQuantity > item.reorderPoint) {
+				item.status = ItemStatus.STOCKED;
+			} else {
+				item.status = ItemStatus.LOW;
+			}
+			item.save();
+		});
+		return 'adjusted';
+	}
+	/**
+	 * Finds a item by its ID.
+	 *
+	 * @param id - The ID of the item to find.
+	 * @returns A promise that resolves to the found item.
+	 * @throws {NotFoundEception} If the item with the given ID is not found.
+	 */
+	async findOne(id: string) {
+		this.logger.log(`finding item with id: ${id}`);
+		const item = await this.itemRepo.findByPk(id);
+		if (!item) {
+			throw new NotFoundException(`item with id: ${id} not found`);
+		}
 
-    this.logger.log(`Found items category with ID: ${id}`);
-    return item;
-  }
+		this.logger.log(`Found items category with ID: ${id}`);
+		return item;
+	}
 
-  async fetchOne(options?: QueryOptionsDto<Item>) {
-    const queryOptions = buildQuery<Item>(options, this.populates);
-    const item = await this.itemRepo.findOne(queryOptions);
-    if (!item) {
-      throw new NotFoundException(`item not found`);
-    }
-    return item;
-  }
+	async fetchOne(options?: QueryOptionsDto<Item>) {
+		const queryOptions = buildQuery<Item>(options, this.populates);
+		const item = await this.itemRepo.findOne(queryOptions);
+		if (!item) {
+			throw new NotFoundException(`item not found`);
+		}
+		return item;
+	}
 
-  async fetchAndCountAll(options?: QueryOptionsDto<Item>) {
-    const queryOptions = buildQuery<Item>(options, this.populates);
-    return this.itemRepo.findAndCountAll(queryOptions);
-  }
+	async fetchAndCountAll(options?: QueryOptionsDto<Item>) {
+		const queryOptions = buildQuery<Item>(options, this.populates);
+		return this.itemRepo.findAndCountAll(queryOptions);
+	}
 
-  /**
-   * Updates a item with the specified ID.
-   *
-   * @param id - The ID of the item to update.
-   * @param updateItemDto - The data to update the item with.
-   * @throws {NotFoundException} If the item with the specified ID is not found.
-   * @returns A Promise that resolves to void.
-   */
-  async update(
-    id: string,
-    updateItemDto: UpdateItemDto,
-    userId?: string,
-  ): Promise<void> {
-    const result = await this.itemRepo.update(
-      { ...updateItemDto, ...(userId && { updatedById: userId }) },
-      { where: { id: id } },
-    );
-    if (result[0] == 0) {
-      throw new NotFoundException(`item with id ${id} not found`);
-    }
-    this.logger.log(`Updated item with ID: ${id}`);
-    return;
-  }
+	/**
+	 * Updates a item with the specified ID.
+	 *
+	 * @param id - The ID of the item to update.
+	 * @param updateItemDto - The data to update the item with.
+	 * @throws {NotFoundException} If the item with the specified ID is not found.
+	 * @returns A Promise that resolves to void.
+	 */
+	async update(
+		id: string,
+		updateItemDto: UpdateItemDto,
+		userId?: string,
+	): Promise<void> {
+		const result = await this.itemRepo.update(
+			{ ...updateItemDto, ...(userId && { updatedById: userId }) },
+			{ where: { id: id } },
+		);
+		if (result[0] == 0) {
+			throw new NotFoundException(`item with id ${id} not found`);
+		}
+		this.logger.log(`Updated item with ID: ${id}`);
+		return;
+	}
 
-  /**
-   * Removes a item from the inventory.
-   *
-   * @param id - The ID of the item to be removed.
-   * @throws {NotFoundException} If the item with the given ID is not found.
-   */
-  async remove(id: string, userId: string): Promise<void> {
-    await this.itemRepo.update({ deletedById: userId }, { where: { id: id } });
-    const res = await this.itemRepo.destroy({
-      where: { id: id },
-      userId,
-    } as any);
-    if (res == 0) {
-      throw new NotFoundException(`item with id ${id} not found`);
-    }
-    this.logger.log(`Deleted Item with id: ${id}`);
-  }
+	/**
+	 * Removes a item from the inventory.
+	 *
+	 * @param id - The ID of the item to be removed.
+	 * @throws {NotFoundException} If the item with the given ID is not found.
+	 */
+	async remove(id: string, userId: string): Promise<void> {
+		await this.itemRepo.update({ deletedById: userId }, { where: { id: id } });
+		const res = await this.itemRepo.destroy({ where: { id: id } });
+		if (res == 0) {
+			throw new NotFoundException(`item with id ${id} not found`);
+		}
+		this.logger.log(`Deleted Item with id: ${id}`);
+	}
 
-  async getAnalytics(itemId: string) {
-    return new NotImplementedException(
-      `Retrieving analytics not implemented ${itemId}`,
-    );
-  }
+	async getAnalytics(itemId: string) {
+		return new NotImplementedException(
+			`Retrieving analytics not implemented ${itemId}`,
+		);
+	}
 
-  async getItemCount(user: IUserPayload) {
-    const whereOptions: any = { facilityId: user.facility };
+	async getItemCount(user: IUserPayload) {
+		const whereOptions: any = { facilityId: user.facility };
 
-    const totalItems = await this.itemRepo.count({
-      where: { ...whereOptions },
-    });
+		const totalItems = await this.itemRepo.count({
+			where: { ...whereOptions },
+		});
 
-    const itemsOutOfStock = await this.itemRepo.count({
-      include: [
-        {
-          model: Batch,
-          as: 'batches',
-          required: false,
-          where: {
-            ...(user.department && { departmentId: user.department }),
-          },
-        },
-      ],
-      where: {
-        '$batches.id$': {
-          [Op.is]: null,
-        },
-        ...whereOptions,
-      },
-      distinct: true,
-    });
-    const itemsHighStocked = totalItems - itemsOutOfStock;
+		const itemsOutOfStock = await this.itemRepo.count({
+			include: [
+				{
+					model: Batch,
+					as: 'batches',
+					required: false,
+					where: {
+						...(user.department && { departmentId: user.department }),
+					},
+				},
+			],
+			where: {
+				'$batches.id$': {
+					[Op.is]: null,
+				},
+				...whereOptions,
+			},
+			distinct: true,
+		});
+		const itemsHighStocked = totalItems - itemsOutOfStock;
 
-    const itemsLowStocked = totalItems - (itemsOutOfStock + itemsHighStocked);
+		const itemsLowStocked = totalItems - (itemsOutOfStock + itemsHighStocked);
 
-    let total: number =
-      await this.batchService.calculateTotalStock(whereOptions);
-    if (user.department) {
-      total = await this.batchService.calculateTotalBatchStock({
-        departmentId: user.department,
-      });
-    }
-    const totalStock = total;
+		let total: number =
+			await this.batchService.calculateTotalStock(whereOptions);
+		if (user.department) {
+			total = await this.batchService.calculateTotalBatchStock({
+				departmentId: user.department,
+			});
+		}
+		const totalStock = total;
 
-    const totalItemsObject = await this.computeTotalItems(totalItems);
-    const itemAnalytics = new ItemCounts();
-    itemAnalytics.totalItems = totalItemsObject;
-    itemAnalytics.totalStock = totalStock;
-    itemAnalytics.outOfStock = itemsOutOfStock;
-    itemAnalytics.highStocked = itemsHighStocked;
-    itemAnalytics.lowStocked = itemsLowStocked;
+		const totalItemsObject = await this.computeTotalItems(totalItems);
+		const itemAnalytics = new ItemCounts();
+		itemAnalytics.totalItems = totalItemsObject;
+		itemAnalytics.totalStock = totalStock;
+		itemAnalytics.outOfStock = itemsOutOfStock;
+		itemAnalytics.highStocked = itemsHighStocked;
+		itemAnalytics.lowStocked = itemsLowStocked;
 
-    return itemAnalytics;
-  }
+		return itemAnalytics;
+	}
 
-  private filterBuilder(user: IUserPayload, query: FetchExpiredQueryDto) {
-    const itemWhereConditions: Record<string, any> = {};
-    const batchWhereConditions: Record<string, any> = {};
+	private filterBuilder(user: IUserPayload, query: FetchExpiredQueryDto) {
+		const itemWhereConditions: Record<string, any> = {};
+		const batchWhereConditions: Record<string, any> = {};
 
-    itemWhereConditions.facilityId = { [Op.eq]: user.facility };
+		itemWhereConditions.facilityId = { [Op.eq]: user.facility };
 
-    if (query.search) {
-      itemWhereConditions.name = {
-        [Op.iLike]: `%${query.search}%`,
-      };
-    }
+		if (query.search) {
+			itemWhereConditions.name = {
+				[Op.iLike]: `%${query.search}%`,
+			};
+		}
 
-    const today = startOfToday();
-    switch (query.status) {
-      case BatchValidityStatus.EXPIRED:
-        batchWhereConditions.validity = { [Op.lte]: today };
-        break;
-      case BatchValidityStatus.CRITICAL: {
-        const tomorrow = addDays(today, 1);
-        const thirtyDays = addDays(today, 30);
-        batchWhereConditions.validity = {
-          [Op.between]: [tomorrow, thirtyDays],
-        };
-        break;
-      }
-      case BatchValidityStatus.APPROACHING: {
-        const thirtyDays = addDays(today, 31);
-        const ninetyDays = addDays(today, 90);
-        batchWhereConditions.validity = {
-          [Op.between]: [thirtyDays, ninetyDays],
-        };
-        break;
-      }
-      case BatchValidityStatus.SAFE: {
-        const ninetyDays = addDays(today, 91);
-        batchWhereConditions.validity = { [Op.gte]: ninetyDays };
-        break;
-      }
-      default:
-        break;
-    }
+		const today = startOfToday();
+		switch (query.status) {
+			case BatchValidityStatus.EXPIRED:
+				batchWhereConditions.validity = { [Op.lte]: today };
+				break;
+			case BatchValidityStatus.CRITICAL: {
+				const tomorrow = addDays(today, 1);
+				const thirtyDays = addDays(today, 30);
+				batchWhereConditions.validity = {
+					[Op.between]: [tomorrow, thirtyDays],
+				};
+				break;
+			}
+			case BatchValidityStatus.APPROACHING: {
+				const thirtyDays = addDays(today, 31);
+				const ninetyDays = addDays(today, 90);
+				batchWhereConditions.validity = {
+					[Op.between]: [thirtyDays, ninetyDays],
+				};
+				break;
+			}
+			case BatchValidityStatus.SAFE: {
+				const ninetyDays = addDays(today, 91);
+				batchWhereConditions.validity = { [Op.gte]: ninetyDays };
+				break;
+			}
+			default:
+				break;
+		}
 
-    if (query.startDate && !query.status) {
-      batchWhereConditions.validity = { [Op.gte]: query.startDate };
-    }
-    if (query.endDate && !query.status) {
-      batchWhereConditions.validity = { [Op.lte]: query.endDate };
-    }
+		if (query.startDate && !query.status) {
+			batchWhereConditions.validity = { [Op.gte]: query.startDate };
+		}
+		if (query.endDate && !query.status) {
+			batchWhereConditions.validity = { [Op.lte]: query.endDate };
+		}
 
-    const filter: FindAndCountOptions<Batch> = {
-      where: {
-        departmentId: user.department,
-        ...batchWhereConditions,
-      },
-      limit: query.pageSize || 10,
-      offset: query.pageSize * (query.page - 1) || 0,
-      order: [['validity', 'ASC']],
-      attributes: [
-        ['id', 'batchId'],
-        'batchNumber',
-        'validity',
-        'status',
-        'quantity',
-      ],
-      include: [
-        {
-          model: Item,
-          attributes: ['id', 'name'],
-          where: itemWhereConditions,
-        },
-      ],
-      distinct: true,
-    };
-    return filter;
-  }
+		const filter: FindAndCountOptions<Batch> = {
+			where: {
+				departmentId: user.department,
+				...batchWhereConditions,
+			},
+			limit: query.pageSize || 10,
+			offset: query.pageSize * (query.page - 1) || 0,
+			order: [['validity', 'ASC']],
+			attributes: [
+				['id', 'batchId'],
+				'batchNumber',
+				'validity',
+				'status',
+				'quantity',
+			],
+			include: [
+				{
+					model: Item,
+					attributes: ['id', 'name'],
+					where: itemWhereConditions,
+				},
+			],
+			distinct: true,
+		};
+		return filter;
+	}
 
-  private async computeTotalItems(total: number) {
-    const startOfPreviousMonth = startOfMonth(subMonths(new Date(), 1));
-    const endOfPreviousMonth = endOfMonth(subMonths(new Date(), 1));
+	private async computeTotalItems(total: number) {
+		const startOfPreviousMonth = startOfMonth(subMonths(new Date(), 1));
+		const endOfPreviousMonth = endOfMonth(subMonths(new Date(), 1));
 
-    const lastMonthTotal: number = await this.itemRepo.count({
-      where: {
-        updatedAt: {
-          [Op.gte]: startOfPreviousMonth,
-          [Op.lt]: endOfPreviousMonth,
-        },
-      },
-    });
+		const lastMonthTotal: number = await this.itemRepo.count({
+			where: {
+				updatedAt: {
+					[Op.gte]: startOfPreviousMonth,
+					[Op.lt]: endOfPreviousMonth,
+				},
+			},
+		});
 
-    let totalChange: number;
-    let changeType: ChangeType;
+		let totalChange: number;
+		let changeType: ChangeType;
 
-    if (total > lastMonthTotal) {
-      totalChange = total - lastMonthTotal;
-      changeType = ChangeType.Increase;
-    } else if (total < lastMonthTotal) {
-      totalChange = lastMonthTotal - total;
-      changeType = ChangeType.Decrease;
-    } else {
-      totalChange = 0;
-      changeType = ChangeType.None;
-    }
+		if (total > lastMonthTotal) {
+			totalChange = total - lastMonthTotal;
+			changeType = ChangeType.Increase;
+		} else if (total < lastMonthTotal) {
+			totalChange = lastMonthTotal - total;
+			changeType = ChangeType.Decrease;
+		} else {
+			totalChange = 0;
+			changeType = ChangeType.None;
+		}
 
-    const change = (totalChange / (lastMonthTotal || totalChange)) * 100;
-    const percentageChange = Math.round(change * 100) / 100;
+		const change = (totalChange / (lastMonthTotal || totalChange)) * 100;
+		const percentageChange = Math.round(change * 100) / 100;
 
-    const totalItemsObject = new TotalItemsDto();
-    totalItemsObject.count = total;
-    totalItemsObject.changeType = changeType;
-    totalItemsObject.percentageDifference = percentageChange;
-    return totalItemsObject;
-  }
+		const totalItemsObject = new TotalItemsDto();
+		totalItemsObject.count = total;
+		totalItemsObject.changeType = changeType;
+		totalItemsObject.percentageDifference = percentageChange;
+		return totalItemsObject;
+	}
 
-  /**
-   * Applies the filter options to construct the FindAndCountOptions object for querying items.
-   *
-   * @param query - The ItemPaginationDto object containing the filter options.
-   * @returns The FindAndCountOptions object with the applied filter options.
-   */
-  private applyFilter(query: ItemPaginationDto): FindAndCountOptions<Item> {
-    // query.departmentId && { departmentId: query.departmentId };
-    const queryFilter = generateFilter(query);
-    const whereOptions: WhereOptions<Item> = {
-      [Op.and]: [
-        query.facilityId && { facilityId: query.facilityId },
-        query.search && {
-          [Op.or]: [
-            { name: { [Op.iLike]: `%${query.search}%` } },
-            { brandName: { [Op.iLike]: `%${query.search}` } },
-          ],
-        },
-        query.status && {
-          status: query.status,
-        },
-        query.categories && {
-          categoryId: query.categories,
-        },
-      ],
-    };
-    return {
-      where: { ...whereOptions, ...queryFilter.searchFilter },
-      ...queryFilter.pageFilter,
-      attributes: [
-        'id',
-        'name',
-        'status',
-        'reorderPoint',
-        'createdAt',
-        'updatedAt',
-      ],
-      include: [{ model: ItemCategory, attributes: ['id', 'name'] }],
-      distinct: true,
-    };
-  }
+	/**
+	 * Applies the filter options to construct the FindAndCountOptions object for querying items.
+	 *
+	 * @param query - The ItemPaginationDto object containing the filter options.
+	 * @returns The FindAndCountOptions object with the applied filter options.
+	 */
+	private applyFilter(query: ItemPaginationDto): FindAndCountOptions<Item> {
+		// query.departmentId && { departmentId: query.departmentId };
+		const queryFilter = generateFilter(query);
+		const whereOptions: WhereOptions<Item> = {
+			[Op.and]: [
+				query.facilityId && { facilityId: query.facilityId },
+				query.search && {
+					[Op.or]: [
+						{ name: { [Op.iLike]: `%${query.search}%` } },
+						{ brandName: { [Op.iLike]: `%${query.search}` } },
+					],
+				},
+				query.status && {
+					status: query.status,
+				},
+				query.categories && {
+					categoryId: query.categories,
+				},
+			],
+		};
+		return {
+			where: { ...whereOptions, ...queryFilter.searchFilter },
+			...queryFilter.pageFilter,
+			attributes: [
+				'id',
+				'name',
+				'status',
+				'reorderPoint',
+				'createdAt',
+				'updatedAt',
+			],
+			include: [{ model: ItemCategory, attributes: ['id', 'name'] }],
+			distinct: true,
+		};
+	}
 
-  @OnEvent('quantity.changed')
-  async handleQuantityChangedEvent(payload: ChangeQuantityEvent) {
-    this.logger.log(`quantity.changed event; itemId: ${payload.itemId}`);
-    let quantity = 0;
-    const batches = await this.batchService.findBySpecs({
-      where: { itemId: payload.itemId },
-    });
-    if (batches.count) {
-      quantity = batches.rows.reduce(
-        (total, batch) => total + batch.quantity,
-        0,
-      );
-    }
-    const item = await this.findOne(payload.itemId);
-    let itemStatus: ItemStatus;
-    const notification = new CreateNotificationDto();
-    notification.status = NotificationStatus.UNREAD;
+	@OnEvent('quantity.changed')
+	async handleQuantityChangedEvent(payload: ChangeQuantityEvent) {
+		this.logger.log(`quantity.changed event; itemId: ${payload.itemId}`);
+		let quantity = 0;
+		const batches = await this.batchService.findBySpecs({
+			where: { itemId: payload.itemId },
+		});
+		if (batches.count) {
+			quantity = batches.rows.reduce(
+				(total, batch) => total + batch.quantity,
+				0,
+			);
+		}
+		const item = await this.findOne(payload.itemId);
+		let itemStatus: ItemStatus;
+		const notification = new CreateNotificationDto();
+		notification.status = NotificationStatus.UNREAD;
 
-    if (quantity === 0) {
-      itemStatus = ItemStatus.OUT_OF_STOCK;
-      notification.message = `${item.name} is out of stock. Restock now`;
-      notification.linkName = 'Restock';
-      notification.linkRoute = `/items/${item.id}/batches`;
-    } else if (quantity < item.reorderPoint) {
-      itemStatus = ItemStatus.LOW;
-      notification.message = `${item.name} is almost out of stock. ${quantity} pieces left`;
-      notification.linkName = 'Restock';
-      notification.linkRoute = `/items/${item.id}/batches`;
-    } else {
-      return;
-    }
-    await this.notificationService.sendNotification(
-      notification,
-      Features.ITEMS,
-      { facility: item.facilityId, department: item.departmentId },
-    );
+		if (quantity === 0) {
+			itemStatus = ItemStatus.OUT_OF_STOCK;
+			notification.message = `${item.name} is out of stock. Restock now`;
+			notification.linkName = 'Restock';
+			notification.linkRoute = `/items/${item.id}/batches`;
+		} else if (quantity < item.reorderPoint) {
+			itemStatus = ItemStatus.LOW;
+			notification.message = `${item.name} is almost out of stock. ${quantity} pieces left`;
+			notification.linkName = 'Restock';
+			notification.linkRoute = `/items/${item.id}/batches`;
+		} else {
+			return;
+		}
+		await this.notificationService.sendNotification(
+			notification,
+			Features.ITEMS,
+			{ facility: item.facilityId, department: item.departmentId },
+		);
 
-    await this.update(payload.itemId, {
-      status: itemStatus,
-    });
-  }
+		await this.update(payload.itemId, {
+			status: itemStatus,
+		});
+	}
 
-  @OnEvent('quantity.increased')
-  async handleQuantityIncreasedEvent(payload: ChangeQuantityEvent) {
-    this.logger.log(`quantity.increased event; itemId: ${payload.itemId}`);
-    const item = await this.findOne(payload.itemId);
-    const notification = new CreateNotificationDto();
-    notification.status = NotificationStatus.UNREAD;
+	@OnEvent('quantity.increased')
+	async handleQuantityIncreasedEvent(payload: ChangeQuantityEvent) {
+		this.logger.log(`quantity.increased event; itemId: ${payload.itemId}`);
+		const item = await this.findOne(payload.itemId);
+		const notification = new CreateNotificationDto();
+		notification.status = NotificationStatus.UNREAD;
 
-    const itemStatus: ItemStatus = ItemStatus.STOCKED;
-    notification.message = `${item.name} just got stocked`;
-    notification.linkName = 'View';
-    notification.linkRoute = `/items/${item.id}/batches`;
+		const itemStatus: ItemStatus = ItemStatus.STOCKED;
+		notification.message = `${item.name} just got stocked`;
+		notification.linkName = 'View';
+		notification.linkRoute = `/items/${item.id}/batches`;
 
-    await this.notificationService.sendNotification(
-      notification,
-      Features.ITEMS,
-      { facility: item.facilityId, department: item.departmentId },
-    );
+		await this.notificationService.sendNotification(
+			notification,
+			Features.ITEMS,
+			{ facility: item.facilityId, department: item.departmentId },
+		);
 
-    await this.update(payload.itemId, {
-      status: itemStatus,
-    });
-  }
+		await this.update(payload.itemId, {
+			status: itemStatus,
+		});
+	}
 }
