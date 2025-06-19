@@ -10,7 +10,7 @@ import { IncludeOptions, Op, QueryTypes } from 'sequelize';
 import { Department } from '../admin/department/models/department.model';
 import { Sequelize } from 'sequelize-typescript';
 import { ExpiredAlert } from '../inventory/items/batches/dto';
-import { Cron } from '@nestjs/schedule';
+// import { Cron } from '@nestjs/schedule';
 import { NotificationService } from '../notification/notification.service';
 import { Features } from '../core/shared/enums/permissions.enum';
 import { CreateNotificationDto } from '../notification/dto';
@@ -67,7 +67,7 @@ export class UserService {
     return user;
   }
 
-  @Cron('0 30 10 * * 1-6')
+  // @Cron('0 30 10 * * 1-6')
   // @Cron('45 * * * * *')
   async fetchExpiredBatches() {
     const [results] = await this.sequelize.query(
@@ -137,27 +137,29 @@ export class UserService {
     // }]
 
     userData.forEach(async (data: any) => {
-      const expiredMessage = data.expired
-        ? `${data.expired} expired item${data.expired < 2 ? '' : 's'}`
-        : '';
-      const nearExpiryMessage = data.nearExpiry
-        ? `${data.nearExpiry} item${data.expired < 2 ? '' : 's'} near expiry`
-        : '';
-      const notification = new CreateNotificationDto();
+      if (data.expired || data.nearExpiry) {
+        const expiredMessage = data.expired
+          ? `${data.expired} expired item${data.expired < 2 ? '' : 's'}`
+          : '';
+        const nearExpiryMessage = data.nearExpiry
+          ? `${data.nearExpiry} item${data.expired < 2 ? '' : 's'} near expiry`
+          : '';
+        const notification = new CreateNotificationDto();
 
-      notification.status = NotificationStatus.UNREAD;
-      notification.message = `Expiry Alert!!. You have ${expiredMessage} ${data.expired && data.nearExpiry && 'and '}${nearExpiryMessage}`;
-      notification.linkName = 'View';
-      notification.linkRoute = '/expiry?page=1';
-      await this.notificationService.sendNotification(
-        notification,
-        Features.ITEMS,
-        { facility: data.facilityId, department: data.departmentId },
-      );
-      data.linkRoute = notification.linkRoute;
-      data.linkName = notification.linkName;
-      this.sendResetPasswordConfirmation(data);
-      console.log(notification);
+        notification.status = NotificationStatus.UNREAD;
+        notification.message = `Expiry Alert!!. You have ${expiredMessage} ${data.expired && data.nearExpiry && 'and '}${nearExpiryMessage}`;
+        notification.linkName = 'View';
+        notification.linkRoute = '/expiry?page=1';
+        await this.notificationService.sendNotification(
+          notification,
+          Features.ITEMS,
+          { facility: data.facilityId, department: data.departmentId },
+        );
+        data.linkRoute = notification.linkRoute;
+        data.linkName = notification.linkName;
+        this.sendResetPasswordConfirmation(data);
+        console.log(notification);
+      }
     });
 
     console.log(userData);

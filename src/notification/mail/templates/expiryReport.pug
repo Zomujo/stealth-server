@@ -4,7 +4,9 @@ block content
   p Dear #{fullName},
   p This is to notify you that your inventory contains:
   ul
+  if expired !== 0
     li #{expired} expired item(s)
+  if nearExpiry !== 0
     li #{nearExpiry} item(s) nearing expiry
   p Please take immediate action to review these items and ensure proper handling.
   if linkName && linkRoute
