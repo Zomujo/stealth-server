@@ -1,4 +1,11 @@
-import { AllowNull, Column, HasMany, Table } from 'sequelize-typescript';
+import {
+  AllowNull,
+  BelongsTo,
+  Column,
+  ForeignKey,
+  HasMany,
+  Table,
+} from 'sequelize-typescript';
 import { BaseModel } from 'src/core/shared/models/base.model';
 import { User } from 'src/auth/models/user.model';
 import { ApiProperty } from '@nestjs/swagger';
@@ -66,4 +73,25 @@ export class Facility extends BaseModel {
   // })
   // @HasMany(() => Item)
   // items: Item[];
+
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

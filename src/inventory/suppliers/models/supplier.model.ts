@@ -11,6 +11,7 @@ import {
 import { Batch } from 'src/inventory/items/models';
 import { BaseModel } from 'src/core/shared/models/base.model';
 import { Facility } from '../../../admin/facility/models/facility.model';
+import { User } from 'src/auth/models/user.model';
 
 export enum StatusType {
   ACTIVE = 'Active',
@@ -126,6 +127,30 @@ export class Supplier extends BaseModel {
 
   @HasMany(() => Batch)
   batches: Batch[];
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 
   @AfterFind
   static async afterFindSuppliersHook(

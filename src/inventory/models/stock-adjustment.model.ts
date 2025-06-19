@@ -18,6 +18,7 @@ import { Facility } from 'src/admin/facility/models/facility.model';
 import { Batch, Item } from 'src/inventory/items/models';
 import { BaseModel } from 'src/core/shared/models/base.model';
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { User } from 'src/auth/models/user.model';
 
 export enum StockAdjustmentType {
   REDUCTION = 'REDUCTION',
@@ -137,4 +138,25 @@ export class StockAdjustment extends BaseModel {
 
   @BelongsTo(() => Department)
   department: Department;
+
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

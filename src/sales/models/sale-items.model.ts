@@ -11,6 +11,7 @@ import { Batch, Item } from '../../inventory/items/models';
 import { Sale } from './sales.model';
 import { Facility } from '../../admin/facility/models/facility.model';
 import { Department } from '../../admin/department/models/department.model';
+import { User } from '../../auth/models/user.model';
 
 @Table({
   tableName: 'sale_items',
@@ -65,4 +66,25 @@ export class SaleItem extends BaseModel {
 
   @BelongsTo(() => Facility)
   facility: Facility;
+
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

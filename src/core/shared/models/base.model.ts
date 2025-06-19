@@ -1,17 +1,13 @@
 import { UUID } from 'sequelize';
 import {
   AllowNull,
-  BelongsTo,
   Column,
   CreatedAt,
   DataType,
   DeletedAt,
-  ForeignKey,
   Model,
   UpdatedAt,
 } from 'sequelize-typescript';
-import { User } from '../../../auth/models/user.model';
-import { ApiResponseProperty } from '@nestjs/swagger';
 
 export abstract class BaseModel extends Model {
   @Column({
@@ -27,50 +23,22 @@ export abstract class BaseModel extends Model {
   createdAt: Date;
 
   @AllowNull
-  @ForeignKey(() => User)
-  @Column({ field: 'created_by_id' })
+  @Column({ field: 'created_by_id', type: DataType.UUID })
   createdById: string;
-
-  @ApiResponseProperty({
-    type: () => User,
-    example: {
-      id: 'b7a3fb48-6b76-4998-9cd3-4de5b8a18837',
-      name: 'Some Admin',
-    },
-  })
-  @BelongsTo(() => User)
-  createdBy: User;
 
   @UpdatedAt
   @Column({ type: DataType.DATE, field: 'updated_at' })
   updatedAt: Date;
 
   @AllowNull
-  @ForeignKey(() => User)
-  @Column({ field: 'updated_by_id' })
+  @Column({ field: 'updated_by_id', type: DataType.UUID })
   updatedById: string;
 
-  @ApiResponseProperty({
-    type: () => User,
-    example: null,
-  })
-  @BelongsTo(() => User)
-  updatedBy: User;
-
-  @AllowNull
   @DeletedAt
   @Column({ type: DataType.DATE, field: 'deleted_at' })
   deletedAt: Date;
 
   @AllowNull
-  @ForeignKey(() => User)
-  @Column({ field: 'deleted_by_id' })
+  @Column({ field: 'deleted_by_id', type: DataType.UUID })
   deletedById: string;
-
-  @ApiResponseProperty({
-    type: () => User,
-    example: null,
-  })
-  @BelongsTo(() => User)
-  deletedBy: User;
 }

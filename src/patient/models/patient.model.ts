@@ -1,6 +1,16 @@
-import { Column, DataType, HasMany, Table, Unique } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Table,
+  Unique,
+  AllowNull,
+} from 'sequelize-typescript';
 import { BaseModel } from '../../core/shared/models/base.model';
 import { Sale } from '../../sales/models/sales.model';
+import { User } from '../../auth/models/user.model';
 
 @Table({
   tableName: 'patients',
@@ -21,4 +31,28 @@ export class Patient extends BaseModel {
 
   @HasMany(() => Sale)
   sales: Sale[];
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

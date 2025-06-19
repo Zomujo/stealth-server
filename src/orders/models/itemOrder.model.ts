@@ -10,6 +10,7 @@ import { OrderStatus } from 'src/core/shared/enums/itemOrder.enum';
 import { Item } from '../../inventory/items/models';
 import { Supplier } from '../../inventory/suppliers/models/supplier.model';
 import { Facility } from '../../admin/facility/models/facility.model';
+import { User } from 'src/auth/models/user.model';
 @Table({
   tableName: 'item_orders',
   underscored: true,
@@ -65,4 +66,28 @@ export class ItemOrder extends BaseModel {
 
   @BelongsTo(() => Facility)
   facility: Facility;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

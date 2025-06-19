@@ -14,6 +14,7 @@ import { Patient } from '../../patient/models/patient.model';
 import { Department } from '../../admin/department/models/department.model';
 import { Facility } from '../../admin/facility/models/facility.model';
 import { SaleItem } from './sale-items.model';
+import { User } from 'src/auth/models/user.model';
 
 export enum PaymentStatus {
   PAID = 'PAID',
@@ -82,4 +83,25 @@ export class Sale extends BaseModel {
 
   @BelongsTo(() => Facility)
   facility: Facility;
+
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

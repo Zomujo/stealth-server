@@ -11,6 +11,7 @@ import { Facility } from '../../../admin/facility/models/facility.model';
 import { Batch } from './batch.model';
 import { Item } from '.';
 import { AmountType, MarkupType } from '../markup/dto';
+import { User } from '../../../auth/models/user.model';
 
 @Table({
   tableName: 'markups',
@@ -53,4 +54,28 @@ export class Markup extends BaseModel {
 
   @BelongsTo(() => Facility)
   facility: Facility;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

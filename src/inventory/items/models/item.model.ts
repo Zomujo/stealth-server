@@ -5,6 +5,7 @@ import {
   ForeignKey,
   Table,
   HasMany,
+  AllowNull,
 } from 'sequelize-typescript';
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from 'src/admin/facility/models/facility.model';
@@ -14,6 +15,7 @@ import { BaseModel } from 'src/core/shared/models/base.model';
 import { Batch } from '.';
 import { StockAdjustment } from '../../models/stock-adjustment.model';
 import { DosageForm } from '../dto';
+import { User } from 'src/auth/models/user.model';
 
 @Table({
   tableName: 'items',
@@ -117,4 +119,28 @@ export class Item extends BaseModel {
 
   @HasMany(() => DepartmentRequest)
   departmentRequests: DepartmentRequest[];
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

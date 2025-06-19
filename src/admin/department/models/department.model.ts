@@ -9,7 +9,6 @@ import {
 } from 'sequelize-typescript';
 import { BaseModel } from '../../../core/shared/models/base.model';
 import { User } from '../../../auth/models/user.model';
-// import { Item } from '../../../inventory/items/models/item.model';
 import { Facility } from '../../facility/models/facility.model';
 import { DepartmentRequest } from 'src/department-requests/models/department-requests.model';
 import { StockAdjustment } from 'src/inventory/models/stock-adjustment.model';
@@ -51,4 +50,40 @@ export class Department extends BaseModel {
 
   @HasMany(() => DepartmentRequest)
   departmentRequests: DepartmentRequest[];
+
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'The ID of the user who created the department',
+  })
+  @IsUUID()
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174001',
+    description: 'The ID of the user who last updated the department',
+  })
+  @IsUUID()
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174002',
+    description: 'The ID of the user who deleted the department',
+  })
+  @IsUUID()
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

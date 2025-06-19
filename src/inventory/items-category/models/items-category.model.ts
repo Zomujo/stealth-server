@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import {
+  AllowNull,
   BelongsTo,
   Column,
   DataType,
@@ -11,6 +12,7 @@ import {
 import { Item } from 'src/inventory/items/models/item.model';
 import { BaseModel } from 'src/core/shared/models/base.model';
 import { Facility } from '../../../admin/facility/models/facility.model';
+import { User } from '../../../auth/models/user.model';
 
 export enum ItemCategoryStatus {
   ACTIVE = 'ACTIVE',
@@ -66,4 +68,28 @@ export class ItemCategory extends BaseModel {
     },
   })
   itemCount: number;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

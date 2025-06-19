@@ -1,5 +1,6 @@
 import {
   AfterFind,
+  AllowNull,
   BelongsTo,
   Column,
   DataType,
@@ -7,7 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../core/shared/models/base.model';
-import { User } from './user.model';
+import { User } from '../../auth/models/user.model';
 import { formatDistance } from 'date-fns';
 
 export enum StatusType {
@@ -28,6 +29,30 @@ export class LoginSession extends BaseModel {
 
   @BelongsTo(() => User)
   user: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 
   @Column
   browser: string;

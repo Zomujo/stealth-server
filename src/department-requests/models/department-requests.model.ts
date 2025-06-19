@@ -4,11 +4,13 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  AllowNull,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../core/shared/models/base.model';
 import { Item } from 'src/inventory/items/models/item.model';
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from '../../admin/facility/models/facility.model';
+import { User } from '../../auth/models/user.model';
 
 export enum DepartmentRequestStatus {
   PENDING = 'PENDING',
@@ -61,4 +63,27 @@ export class DepartmentRequest extends BaseModel {
 
   @Column({ type: DataType.TEXT, field: 'additional_notes' })
   additionalNotes: string;
+
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }

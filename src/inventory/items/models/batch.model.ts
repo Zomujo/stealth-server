@@ -13,6 +13,7 @@ import { Item, Markup } from '.';
 import { Department } from '../../../admin/department/models/department.model';
 import { Facility } from '../../../admin/facility/models/facility.model';
 import { differenceInDays, startOfToday } from 'date-fns';
+import { User } from 'src/auth/models/user.model';
 
 export enum BatchValidityStatus {
   EXPIRED = 'EXPIRED',
@@ -88,4 +89,28 @@ export class Batch extends BaseModel {
 
   @HasOne(() => Markup)
   markup: Markup;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  createdById: string;
+
+  @BelongsTo(() => User)
+  createdBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  updatedById: string;
+
+  @BelongsTo(() => User)
+  updatedBy: User;
+
+  @AllowNull
+  @ForeignKey(() => User)
+  @Column
+  deletedById: string;
+
+  @BelongsTo(() => User)
+  deletedBy: User;
 }
