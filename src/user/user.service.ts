@@ -17,6 +17,7 @@ import { CreateNotificationDto } from '../notification/dto';
 import { NotificationStatus } from '../notification/enum';
 import { MailService } from '../notification/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UserService {
@@ -67,7 +68,7 @@ export class UserService {
     return user;
   }
 
-  // @Cron('0 30 10 * * 1-6')
+  @Cron('0 30 10 * * 1-6')
   // @Cron('45 * * * * *')
   async fetchExpiredBatches() {
     const [results] = await this.sequelize.query(

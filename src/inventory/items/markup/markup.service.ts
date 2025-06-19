@@ -64,14 +64,23 @@ export class MarkupService {
   }
 
   async update(batchId: string, dto: UpdateMarkupDto, userId: string) {
-    const markup = await this.findOne(batchId);
     const batch = await this.batchRepo.findByPk(batchId, {
       attributes: ['id', 'itemId'],
     });
     dto.itemId = batch.itemId;
+    dto.batchId = batch.id;
 
-    await markup.update({ ...dto, updatedById: userId });
-    return markup;
+    try {
+      const markup = await this.findOne(batchId);
+      await markup.update({ ...dto, updatedById: userId });
+      return markup;
+    } catch {
+      const markup = await this.markupRepo.create({
+        ...dto,
+        createdById: userId,
+      });
+      return markup;
+    }
   }
 
   async remove(batchId: string) {

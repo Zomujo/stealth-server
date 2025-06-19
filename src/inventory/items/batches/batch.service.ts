@@ -181,7 +181,7 @@ export class BatchService {
     return batch;
   }
 
-  async update(id: string, dto: UpdateBatchDto, userId: string) {
+  async update(id: string, dto: UpdateBatchDto, user: IUserPayload) {
     const batch = await this.findOne(id);
     if (dto.quantity) {
       if (dto.quantity > batch.quantity) {
@@ -191,15 +191,18 @@ export class BatchService {
       }
     }
 
-    const _result = await batch.update({ ...dto, updatedById: userId });
+    const _result = await batch.update({ ...dto, updatedById: user.sub });
 
     if (dto.markup) {
       dto.markup.itemId = batch.itemId;
+      dto.markup.batchId = batch.id;
+      dto.markup.departmentId = user.department;
+      dto.markup.facilityId = user.facility;
 
       const _markup = await this.markupService.update(
         batch.id,
         dto.markup,
-        userId,
+        user.sub,
       );
     }
 
