@@ -9,6 +9,7 @@ import { PatientModels } from '../../../patient/models';
 import { NotificationModels } from '../../../notification/models';
 import { UserSecondaryModels } from '../../../user/models';
 import { ComplaintsModels } from '../../../complaints/models';
+import { AuditModels } from '../../../audit/models';
 
 export const IndexModels = [
   ...AdminModels,
@@ -22,4 +23,5 @@ export const IndexModels = [
   ...NotificationModels,
   ...UserSecondaryModels,
   ...ComplaintsModels,
+  ...AuditModels,
 ];

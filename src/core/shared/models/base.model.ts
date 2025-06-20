@@ -1,21 +1,23 @@
-import { UUID } from 'sequelize';
 import {
+  AfterCreate,
+  AfterDestroy,
+  AfterUpdate,
   AllowNull,
   Column,
   CreatedAt,
   DataType,
+  Default,
   DeletedAt,
   Model,
+  PrimaryKey,
   UpdatedAt,
 } from 'sequelize-typescript';
+import { AuditLog } from '../../../audit/models/audit.entity';
 
 export abstract class BaseModel extends Model {
-  @Column({
-    type: UUID,
-    defaultValue: DataType.UUIDV4,
-    allowNull: false,
-    primaryKey: true,
-  })
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
   id: string;
 
   @CreatedAt
@@ -41,4 +43,60 @@ export abstract class BaseModel extends Model {
   @AllowNull
   @Column({ field: 'deleted_by_id', type: DataType.UUID })
   deletedById: string;
+
+  @AfterCreate
+  static async logCreate(instance: BaseModel, options: any) {
+    if (options.skipAudit) return;
+
+    await AuditLog.create(
+      {
+        userId: options.userId || null,
+        action: 'CREATE',
+        tableName: instance.constructor.name,
+        recordId: instance.id,
+        after: instance.toJSON(),
+        source: 'sequelize-hook',
+        description: `Created ${instance.constructor.name}`,
+      },
+      { transaction: options.transaction },
+    );
+  }
+
+  @AfterUpdate
+  static async logUpdate(instance: BaseModel, options: any) {
+    if (options.skipAudit) return;
+
+    await AuditLog.create(
+      {
+        userId: options.userId || null,
+        action: 'UPDATE',
+        tableName: instance.constructor.name,
+        recordId: instance.id,
+        before: instance.previous(),
+        after: instance.dataValues,
+        source: 'sequelize-hook',
+        description: `Updated ${instance.constructor.name}`,
+      },
+      { transaction: options.transaction },
+    );
+  }
+
+  @AfterDestroy
+  static async logDelete(instance: BaseModel, options: any) {
+    if (options.skipAudit) return;
+
+    await AuditLog.create(
+      {
+        userId: options.userId || null,
+        action: 'DELETE',
+        tableName: instance.constructor.name,
+        recordId: instance.id,
+        before: instance.toJSON(),
+        after: null,
+        source: 'sequelize-hook',
+        description: `Deleted ${instance.constructor.name}`,
+      },
+      { transaction: options.transaction },
+    );
+  }
 }
