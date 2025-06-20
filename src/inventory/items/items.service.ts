@@ -251,7 +251,10 @@ export class ItemService {
 	 */
 	async remove(id: string, userId: string): Promise<void> {
 		await this.itemRepo.update({ deletedById: userId }, { where: { id: id } });
-		const res = await this.itemRepo.destroy({ where: { id: id } });
+		const res = await this.itemRepo.destroy({
+			where: { id: id },
+			userId,
+		} as any);
 		if (res == 0) {
 			throw new NotFoundException(`item with id ${id} not found`);
 		}

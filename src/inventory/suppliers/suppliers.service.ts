@@ -163,7 +163,8 @@ export class SuppliersService {
 		const supplier = await this.supplierRepo.destroy({
 			where: { id },
 			force: true,
-		});
+			userId,
+		} as any);
 		if (supplier == 0) {
 			throw new NotFoundException('Supplier not found');
 		}
@@ -174,7 +175,8 @@ export class SuppliersService {
 		const supplier = await this.supplierRepo.destroy({
 			where: { id: ids },
 			force: true,
-		});
+			userId,
+		} as any);
 		if (supplier == 0) {
 			throw new NotFoundException('Suppliers not found');
 		}

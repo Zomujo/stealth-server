@@ -180,7 +180,8 @@ export class ItemCategoryService {
 		const res = await this.itemCategoryRepo.destroy({
 			where: { id: id },
 			force: true,
-		});
+			userId,
+		} as any);
 
 		if (res == 0) {
 			throw new NotFoundException(`Category with id ${id} not found`);

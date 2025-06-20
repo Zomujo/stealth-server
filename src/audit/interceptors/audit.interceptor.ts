@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { Sequelize } from 'sequelize-typescript';
 import { AuditsService } from '../audit.service';
-import { AUDIT_METADATA_KEY, AuditOptions } from '../decorators';
+import { AUDIT_METADATA_KEY, AuditOptions } from '../decorator';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -36,8 +36,6 @@ export class AuditInterceptor implements NestInterceptor {
 
     const baseLog = {
       userId: user?.sub,
-      facilityId: user?.facility,
-      departmentId: user?.department,
       ipAddress: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
       userAgent: req.headers['user-agent'],
       requestUrl: req.originalUrl,

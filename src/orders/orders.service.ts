@@ -161,11 +161,12 @@ export class ItemOrdersService {
 	}
 
 	// Delete a specific item order by ID
-	async deleteItemOrder(id: string) {
+	async deleteItemOrder(id: string, userId: string) {
 		const rows = await this.itemOrderModel.destroy({
 			where: { id },
 			force: true,
-		});
+			userId,
+		} as any);
 		if (rows == 0) {
 			throw new NotFoundException('Item Order not found');
 		}

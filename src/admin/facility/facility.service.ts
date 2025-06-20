@@ -121,7 +121,8 @@ export class FacilityService {
 		const res = await this.facilityRepo.destroy({
 			where: { id: id },
 			force: true,
-		});
+			userId: deletedBy,
+		} as any);
 
 		if (res == 0) {
 			throw new NotFoundException(`Facility with id ${id} not found`);

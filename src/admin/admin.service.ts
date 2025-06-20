@@ -190,7 +190,7 @@ export class AdminService {
 		if (!user) {
 			throw new NotFoundException('personnel not found');
 		}
-		await user.destroy({ force: true });
+		await user.destroy({ force: true, userId: deletedBy } as any);
 
 		const deletedAt = new Date().toUTCString();
 		this.sendDeletedAccountConfirmation(user.email, deletedAt);

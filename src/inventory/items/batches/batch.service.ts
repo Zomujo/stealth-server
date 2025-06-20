@@ -44,11 +44,11 @@ export class BatchService {
 	private populates: Record<string, IncludeOptions> = {
 		supplier: { model: Supplier, attributes: ['id', 'name'] },
 
-    createdBy: {
-      model: User,
-      as: 'createdBy',
-      attributes: ['id', 'fullName', 'email'],
-    },
+		createdBy: {
+			model: User,
+			as: 'createdBy',
+			attributes: ['id', 'fullName', 'email'],
+		},
 
 		item: { model: Item, attributes: ['id', 'name'] },
 
@@ -370,36 +370,36 @@ export class BatchService {
 		return totalStock;
 	}
 
-  async findOne(id: string, isPopulated: boolean = false): Promise<Batch> {
-    let options = {};
-    if (isPopulated) {
-      options = {
-        attributes: ['id', 'createdAt', 'validity', 'batchNumber', 'quantity'],
-        include: [
-          { model: Supplier, attributes: ['id', 'name'] },
-          { model: Item, attributes: ['id', 'name'] },
-          { model: Markup, attributes: ['id', 'type', 'amountType', 'amount'] },
-        ],
-      };
-    } else {
-      options = {
-        include: [
-          {
-            model: User,
-            as: 'createdBy',
-            attributes: ['id', 'fullName', 'email'],
-          },
-        ],
-      };
-    }
-    const batch = await this.batchRepo.findByPk(id, {
-      ...options,
-    });
-    if (!batch) {
-      throw new NotFoundException(`Batch with ID ${id} not found`);
-    }
-    return batch;
-  }
+	async findOne(id: string, isPopulated: boolean = false): Promise<Batch> {
+		let options = {};
+		if (isPopulated) {
+			options = {
+				attributes: ['id', 'createdAt', 'validity', 'batchNumber', 'quantity'],
+				include: [
+					{ model: Supplier, attributes: ['id', 'name'] },
+					{ model: Item, attributes: ['id', 'name'] },
+					{ model: Markup, attributes: ['id', 'type', 'amountType', 'amount'] },
+				],
+			};
+		} else {
+			options = {
+				include: [
+					{
+						model: User,
+						as: 'createdBy',
+						attributes: ['id', 'fullName', 'email'],
+					},
+				],
+			};
+		}
+		const batch = await this.batchRepo.findByPk(id, {
+			...options,
+		});
+		if (!batch) {
+			throw new NotFoundException(`Batch with ID ${id} not found`);
+		}
+		return batch;
+	}
 
 	async findIndividual(id: string) {
 		this.logger.log(`finding a batch`);
@@ -428,7 +428,7 @@ export class BatchService {
 		batch.quantity -= qty;
 		if (batch.quantity == 0) {
 			batch.deletedById = userId;
-			await batch.destroy();
+			await batch.destroy({ userId } as any);
 		} else {
 			batch.updatedById = userId;
 			await batch.save();
@@ -452,7 +452,7 @@ export class BatchService {
 		const batch = await this.findOne(id);
 		this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
 		batch.deletedById = userId;
-		await batch.destroy();
+		await batch.destroy({ userId } as any);
 		this.logger.log(`Batch deleted successfully. ID: ${id}`);
 	}
 

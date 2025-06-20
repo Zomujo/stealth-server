@@ -32,11 +32,14 @@ export class DepartmentService {
 		facilityId: string,
 		adminId: string,
 	): Promise<Department> {
-		const department = await this.departmentRepo.create({
-			...createDepartmentDto,
-			facilityId,
-			createdById: adminId,
-		});
+		const department = await this.departmentRepo.create(
+			{
+				...createDepartmentDto,
+				facilityId,
+				createdById: adminId,
+			},
+			{ user: 'hello', validate: true },
+		);
 		this.notificationService.notifyAdmin({
 			message: 'Department has been created successfully',
 			url: '/settings/departments',
@@ -151,7 +154,8 @@ export class DepartmentService {
 		const res = await this.departmentRepo.destroy({
 			where: { id: id },
 			force: true,
-		});
+			userId: deletedBy,
+		} as any);
 
 		if (res == 0) {
 			throw new NotFoundException(`Department with id ${id} not found`);
