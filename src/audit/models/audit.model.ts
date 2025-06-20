@@ -10,7 +10,30 @@ import {
   AllowNull,
 } from 'sequelize-typescript';
 
-@Table({ tableName: 'audit_logs', timestamps: true, underscored: true })
+@Table({
+  tableName: 'audit_logs',
+  underscored: true,
+  indexes: [
+    {
+      fields: ['user_id'],
+    },
+    {
+      fields: ['action'],
+    },
+    {
+      fields: ['table_name'],
+    },
+    {
+      fields: ['record_id'],
+    },
+    {
+      fields: ['created_at'],
+    },
+    {
+      fields: ['correlation_id'],
+    },
+  ],
+})
 export class AuditLog extends Model<AuditLog> {
   @PrimaryKey
   @Default(DataType.UUIDV4)
@@ -72,8 +95,10 @@ export class AuditLog extends Model<AuditLog> {
   correlationId: string;
 
   @CreatedAt
+  @Column({ type: DataType.DATE, field: 'created_at' })
   createdAt: Date;
 
   @UpdatedAt
+  @Column({ type: DataType.DATE, field: 'updated_at' })
   updatedAt: Date;
 }

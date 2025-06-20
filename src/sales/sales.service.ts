@@ -662,7 +662,8 @@ export class SalesService {
 
     const destroyedRows = await this.saleRepository.destroy({
       where: { id },
-    });
+      userId,
+    } as any);
 
     if (destroyedRows == 0) {
       throw new NotFoundException(`Sale not found`);

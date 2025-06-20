@@ -211,9 +211,12 @@ export class SuppliersController {
   })
   @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('sub', ParseUUIDPipe) userId: string,
+  ) {
     try {
-      await this.suppliersService.remove(id);
+      await this.suppliersService.remove(id, userId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Supplier deleted successfully',
@@ -228,9 +231,12 @@ export class SuppliersController {
   })
   @Permission(Features.SUPPLIERS, PermissionLevel.READ_WRITE_DELETE)
   @Delete()
-  async removeBulk(@Body() dto: DeleteItemsDto) {
+  async removeBulk(
+    @Body() dto: DeleteItemsDto,
+    @GetUser('sub', ParseUUIDPipe) userId: string,
+  ) {
     try {
-      await this.suppliersService.removeBulk(dto.ids);
+      await this.suppliersService.removeBulk(dto.ids, userId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Suppliers deleted successfully',

@@ -1,3 +1,3 @@
-import { AuditLog } from './audit.entity';
+import { AuditLog } from './audit.model';
 
 export const AuditModels = [AuditLog];

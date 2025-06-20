@@ -204,7 +204,8 @@ export class DepartmentRequestsService {
     );
     const deletedRequest = await this.departmentRequestRepository.destroy({
       where: { id },
-    });
+      userId,
+    } as any);
     if (deletedRequest == 0) {
       throw new NotFoundException('Request not found');
     }

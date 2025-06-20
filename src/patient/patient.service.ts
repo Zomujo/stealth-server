@@ -110,7 +110,8 @@ export class PatientService {
     );
     const deletedPatient = await this.patientRepository.destroy({
       where: { id },
-    });
+      userId: deletedBy,
+    } as any);
     if (deletedPatient == 0) {
       throw new NotFoundException('Patient not found');
     }

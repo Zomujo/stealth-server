@@ -430,10 +430,11 @@ export class AuthService {
     return;
   }
 
-  async removeSession(id: string) {
+  async removeSession(id: string, deletedBy: string) {
     const session = await this.loginSessionRepository.destroy({
       where: { id },
-    });
+      userId: deletedBy,
+    } as any);
     if (session == 0) {
       throw new NotFoundException('Session not found');
     }

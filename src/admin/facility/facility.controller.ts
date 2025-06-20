@@ -122,9 +122,12 @@ export class FacilityController {
     message: 'Facility deleted successfully',
   })
   @HttpCode(HttpStatus.OK)
-  async deleteFacility(@Param('id') id: string) {
+  async deleteFacility(
+    @Param('id') id: string,
+    @GetUser('sub', ParseUUIDPipe) adminId: string,
+  ) {
     try {
-      await this.facilityService.remove(id);
+      await this.facilityService.remove(id, adminId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Facility deleted successfully',

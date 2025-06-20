@@ -428,7 +428,7 @@ export class BatchService {
     batch.quantity -= qty;
     if (batch.quantity == 0) {
       batch.deletedById = userId;
-      await batch.destroy();
+      await batch.destroy({ userId } as any);
     } else {
       batch.updatedById = userId;
       await batch.save();
@@ -452,7 +452,7 @@ export class BatchService {
     const batch = await this.findOne(id);
     this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
     batch.deletedById = userId;
-    await batch.destroy();
+    await batch.destroy({ userId } as any);
     this.logger.log(`Batch deleted successfully. ID: ${id}`);
   }
 

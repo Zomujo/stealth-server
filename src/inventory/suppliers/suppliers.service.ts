@@ -159,22 +159,24 @@ export class SuppliersService {
     return;
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     const supplier = await this.supplierRepo.destroy({
       where: { id },
       force: true,
-    });
+      userId,
+    } as any);
     if (supplier == 0) {
       throw new NotFoundException('Supplier not found');
     }
     return;
   }
 
-  async removeBulk(ids: string[]) {
+  async removeBulk(ids: string[], userId: string) {
     const supplier = await this.supplierRepo.destroy({
       where: { id: ids },
       force: true,
-    });
+      userId,
+    } as any);
     if (supplier == 0) {
       throw new NotFoundException('Suppliers not found');
     }

@@ -170,9 +170,12 @@ export class DepartmentController {
   @Permission(Features.DEPARTMENTS, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async deleteDepartment(@Param('id') id: string) {
+  async deleteDepartment(
+    @Param('id') id: string,
+    @GetUser('sub', ParseUUIDPipe) adminId: string,
+  ) {
     try {
-      const _response = await this.departmentService.remove(id);
+      const _response = await this.departmentService.remove(id, adminId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Department deleted successfully',

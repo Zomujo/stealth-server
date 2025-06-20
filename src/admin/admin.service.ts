@@ -185,12 +185,12 @@ export class AdminService {
     return;
   }
 
-  async removeUser(personnelId: string) {
+  async removeUser(personnelId: string, deletedBy: string) {
     const user = await this.userRepository.findByPk(personnelId);
     if (!user) {
       throw new NotFoundException('personnel not found');
     }
-    await user.destroy({ force: true });
+    await user.destroy({ force: true, userId: deletedBy } as any);
 
     const deletedAt = new Date().toUTCString();
     this.sendDeletedAccountConfirmation(user.email, deletedAt);

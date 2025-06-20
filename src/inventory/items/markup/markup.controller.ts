@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { MarkupService } from './markup.service';
 import { CustomApiResponse } from '../../../core/shared/docs/decorators';
-import { Permission } from '../../../auth/decorator';
+import { GetUser, Permission } from '../../../auth/decorator';
 import { MarkupDto } from './dto';
 import {
   Features,
@@ -99,9 +99,12 @@ export class MarkupController {
   })
   @Permission(Features.ITEMS, PermissionLevel.READ_WRITE)
   @Delete()
-  async remove(@Param('batchId', ParseUUIDPipe) batchId: string) {
+  async remove(
+    @Param('batchId', ParseUUIDPipe) batchId: string,
+    @GetUser('sub', ParseUUIDPipe) userId: string,
+  ) {
     try {
-      const _response = await this.markupService.remove(batchId);
+      const _response = await this.markupService.remove(batchId, userId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Markup deleted successfully',

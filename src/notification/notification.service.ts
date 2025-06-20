@@ -109,8 +109,15 @@ export class NotificationService {
     return;
   }
 
-  async remove(id: string) {
-    const deleted = await this.notifcationRepo.destroy({ where: { id } });
+  async remove(id: string, userId?: string) {
+    const userOptions: Record<string, any> = {};
+    if (userId) {
+      userOptions.userId = userId;
+    }
+    const deleted = await this.notifcationRepo.destroy({
+      where: { id },
+      ...userOptions,
+    } as any);
     if (deleted == 0) {
       throw new NotFoundException('Notification not found');
     }

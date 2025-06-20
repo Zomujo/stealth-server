@@ -165,9 +165,12 @@ export class ItemOrdersController {
   })
   @Permission(Features.DRUG_ORDERS, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
-  async deleteItemOrder(@Param('id') id: string) {
+  async deleteItemOrder(
+    @Param('id') id: string,
+    @GetUser('sub', ParseUUIDPipe) userId: string,
+  ) {
     try {
-      const _deletedOrder = await this.orderService.deleteItemOrder(id);
+      const _deletedOrder = await this.orderService.deleteItemOrder(id, userId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'Item order deleted successfully',
