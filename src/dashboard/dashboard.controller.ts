@@ -13,6 +13,8 @@ import {
 } from './dto';
 import { throwError } from '../core/shared/responses/error.response';
 import { ApiSuccessResponseDto } from '../core/shared/responses/success.response';
+import { GetUser } from 'src/auth/decorator';
+import { IUserPayload } from 'src/auth/interface/payload.interface';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -24,9 +26,12 @@ export class DashboardController {
     message: 'general analytics sent successfully',
   })
   @Get('general')
-  async findAll(@Query() query: FindGeneralAnalyticsQueryDto) {
+  async findAll(
+    @Query() query: FindGeneralAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response = await this.dashboardService.findAll(query);
+      const response = await this.dashboardService.findAll(query, user);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
@@ -42,9 +47,16 @@ export class DashboardController {
     message: 'top selling items sent successfully',
   })
   @Get('items/top-selling')
-  async findTopSellingItems(@Query() query: FindAnalyticsQueryDto) {
+  async findTopSellingItems(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response = await this.dashboardService.findTopSellingItems(query);
+      const response = await this.dashboardService.findSellingItems(
+        query,
+        user,
+        'desc',
+      );
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
@@ -60,9 +72,16 @@ export class DashboardController {
     message: 'least selling items sent successfully',
   })
   @Get('items/least-selling')
-  async findLeastSellingItems(@Query() query: FindAnalyticsQueryDto) {
+  async findLeastSellingItems(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response = await this.dashboardService.findLeastSellingItems(query);
+      const response = await this.dashboardService.findSellingItems(
+        query,
+        user,
+        'asc',
+      );
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
@@ -78,9 +97,12 @@ export class DashboardController {
     message: 'sales trend sent successfully',
   })
   @Get('sales/trend')
-  async getSalesTrend(@Query() query: FindAnalyticsQueryDto) {
+  async getSalesTrend(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response = await this.dashboardService.getSalesTrend(query);
+      const response = await this.dashboardService.getSalesTrend(query, user);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
@@ -96,10 +118,15 @@ export class DashboardController {
     message: 'top selling item categories sent successfully',
   })
   @Get('item-categories/top-selling')
-  async findTopSellingItemCategories(@Query() query: FindAnalyticsQueryDto) {
+  async findTopSellingItemCategories(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response =
-        await this.dashboardService.findTopSellingItemCategories(query);
+      const response = await this.dashboardService.findTopSellingItemCategories(
+        query,
+        user,
+      );
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
@@ -115,9 +142,12 @@ export class DashboardController {
     message: 'sales trend sent successfully',
   })
   @Get('sales/daily')
-  async getDailySales(@Query() query: FindAnalyticsQueryDto) {
+  async getDailySales(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response = await this.dashboardService.getDailySales(query);
+      const response = await this.dashboardService.getDailySales(query, user);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,
@@ -133,10 +163,15 @@ export class DashboardController {
     message: 'sales payment methods sent successfully',
   })
   @Get('sales/payment-methods')
-  async getSalesPaymentMethods(@Query() query: FindAnalyticsQueryDto) {
+  async getSalesPaymentMethods(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
-      const response =
-        await this.dashboardService.getSalesPaymentMethods(query);
+      const response = await this.dashboardService.getSalesPaymentMethods(
+        query,
+        user,
+      );
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.OK,

@@ -175,12 +175,13 @@ export class ItemCategoryService {
    * @returns A promise that resolves to the result of the removal operation.
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
-  async remove(id: string): Promise<void> {
+  async remove(id: string, userId: string): Promise<void> {
     this.logger.log(`Removing items category with ID: ${id}`);
     const res = await this.itemCategoryRepo.destroy({
       where: { id: id },
       force: true,
-    });
+      userId,
+    } as any);
 
     if (res == 0) {
       throw new NotFoundException(`Category with id ${id} not found`);

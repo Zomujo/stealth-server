@@ -218,7 +218,8 @@ export class ReportsService {
     );
     const destroyedRows = await this.reportRepository.destroy({
       where: { id },
-    });
+      userId,
+    } as any);
 
     if (destroyedRows == 0) {
       throw new NotFoundException(`Report not found`);

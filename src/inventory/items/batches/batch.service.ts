@@ -44,7 +44,11 @@ export class BatchService {
   private populates: Record<string, IncludeOptions> = {
     supplier: { model: Supplier, attributes: ['id', 'name'] },
 
-    createdBy: { model: User, attributes: ['id', 'fullName', 'email'] },
+    createdBy: {
+      model: User,
+      as: 'createdBy',
+      attributes: ['id', 'fullName', 'email'],
+    },
 
     item: { model: Item, attributes: ['id', 'name'] },
 
@@ -379,7 +383,13 @@ export class BatchService {
       };
     } else {
       options = {
-        include: [{ model: User, attributes: ['id', 'fullName', 'email'] }],
+        include: [
+          {
+            model: User,
+            as: 'createdBy',
+            attributes: ['id', 'fullName', 'email'],
+          },
+        ],
       };
     }
     const batch = await this.batchRepo.findByPk(id, {
@@ -418,7 +428,7 @@ export class BatchService {
     batch.quantity -= qty;
     if (batch.quantity == 0) {
       batch.deletedById = userId;
-      await batch.destroy();
+      await batch.destroy({ userId } as any);
     } else {
       batch.updatedById = userId;
       await batch.save();
@@ -442,7 +452,7 @@ export class BatchService {
     const batch = await this.findOne(id);
     this.eventEmitter.emit('quantity.changed', { itemId: batch.itemId });
     batch.deletedById = userId;
-    await batch.destroy();
+    await batch.destroy({ userId } as any);
     this.logger.log(`Batch deleted successfully. ID: ${id}`);
   }
 

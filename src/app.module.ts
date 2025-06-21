@@ -6,6 +6,7 @@ import { IndexModules } from './core/shared/modules/index.modules';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
+import { AuditsModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { HealthModule } from './health/health.module';
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     HealthModule,
+    AuditsModule,
     ...IndexModules,
   ],
 })

@@ -79,33 +79,33 @@ export class CreateSaleDto {
     description: 'Additional notes for the sale',
   })
   @IsOptional()
-  notes: string;
+  notes?: string;
 
   @ApiResponseProperty({
     example: '0723e7a1-ec12-4cdb-b4d5-6169dba540c6',
   })
-  patientId: string;
+  patientId?: string;
 
   @ApiResponseProperty({
     example: 'S-1234',
   })
-  saleNumber: string;
+  saleNumber?: string;
 
   @ApiResponseProperty({
     example: 'PAID',
     enum: PaymentStatus,
   })
-  status: PaymentStatus;
+  status?: PaymentStatus;
 
   @ApiResponseProperty({
     example: 1600.0,
   })
-  subTotal: number;
+  subTotal?: number;
 
   @ApiResponseProperty({
     example: 1600.0,
   })
-  total: number;
+  total?: number;
 }
 
 export class SmsCreateSale extends PartialType(

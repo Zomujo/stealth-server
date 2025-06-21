@@ -15,17 +15,8 @@ export class SalesTrendDto {
   })
   trend: { dates: Date[]; quantities: number[] };
 
-  constructor() {
-    this.trend = {
-      dates: [
-        new Date('2025-03-05T00:00:00.000Z'),
-        new Date('2025-03-10T00:00:00.000Z'),
-        new Date('2025-03-15T00:00:00.000Z'),
-        new Date('2025-03-20T00:00:00.000Z'),
-        new Date('2025-03-25T00:00:00.000Z'),
-      ],
-      quantities: [190, 400, 600, 800, 1000],
-    };
+  constructor(dates: Date[], quantities: number[]) {
+    this.trend = { dates, quantities };
   }
 }
 
@@ -38,11 +29,8 @@ export class TopSellingCategoriesDto {
   })
   topSelling: { categories: string[]; quantities: number[] };
 
-  constructor() {
-    this.topSelling = {
-      categories: ['Syrup', 'Tablets', 'Analgesics', 'Inhalers'],
-      quantities: [54071, 161466, 81981, 67889],
-    };
+  constructor(categories: string[], quantities: number[]) {
+    this.topSelling = { categories, quantities };
   }
 }
 
@@ -63,18 +51,15 @@ export class DailySalesDto {
   })
   sales: { dates: Date[]; quantities: number[] }[];
 
-  constructor() {
+  constructor(
+    dates1: Date[],
+    first: number[],
+    dates2: Date[],
+    second: number[],
+  ) {
     this.sales = [
-      {
-        dates: [
-          new Date('2025-03-05T00:00:00.000Z'),
-          new Date('2025-03-10T00:00:00.000Z'),
-          new Date('2025-03-15T00:00:00.000Z'),
-          new Date('2025-03-20T00:00:00.000Z'),
-          new Date('2025-03-25T00:00:00.000Z'),
-        ],
-        quantities: [54071, 161466, 81981, 67889],
-      },
+      { dates: dates1, quantities: first },
+      { dates: dates2, quantities: second },
     ];
   }
 }
@@ -88,11 +73,8 @@ export class SalesPaymentMethodDto {
   })
   topSelling: { categories: string[]; quantities: number[] };
 
-  constructor() {
-    this.topSelling = {
-      categories: ['MobileMoney', 'Cash', 'Bank', 'Card'],
-      quantities: [54071, 161466, 81981, 67889],
-    };
+  constructor(categories: string[], quantities: number[]) {
+    this.topSelling = { categories, quantities };
   }
 }
 

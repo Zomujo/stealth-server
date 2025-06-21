@@ -179,9 +179,12 @@ export class ItemCategoryController {
   })
   @Permission(Features.ITEMS_CATEGORIES, PermissionLevel.READ_WRITE_DELETE)
   @Delete(':id')
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('sub', ParseUUIDPipe) userId: string,
+  ) {
     try {
-      await this.itemCategoryService.remove(id);
+      await this.itemCategoryService.remove(id, userId);
       return new ApiSuccessResponseNoData(
         HttpStatus.ACCEPTED,
         'Item deleted successfully',

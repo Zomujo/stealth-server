@@ -1,35 +1,38 @@
-GET {{baseUrl}}/items/analytics?facilityId={{facilityId}}
-Authorization: Bearer {{accessToken}} 
-
-GET {{baseUrl}}/dashboard/stat?facilityId={{facilityId}}
-Authorization: Bearer {{accessToken}} 
-
 ###
 GET {{baseUrl}}/dashboard/soon-to-expire?facilityId={{facilityId}}
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/usage?facilityId={{facilityId}}
+# @name general
+GET {{baseUrl}}/dashboard/general?startDate=2025-05-01&endDate=2025-06-06
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/top-selling-items?facilityId={{facilityId}}
+# @name top-selling-item
+GET {{baseUrl}}/dashboard/items/top-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/low-selling-items?facilityId={{facilityId}}
+# @name least-selling-item
+GET {{baseUrl}}/dashboard/items/least-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/top-categories?facilityId={{facilityId}}
+# @name top-selling-category
+GET {{baseUrl}}/dashboard/item-categories/top-selling?dateRange=this_year
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/sales-trend?facilityId={{facilityId}}&startDate=2024-11-11&endDate=2024-12-11
+# @name sales trend
+GET {{baseUrl}}/dashboard/sales/trend?dateRange=this_month
 Authorization: Bearer {{accessToken}}
 
 ###
-GET {{baseUrl}}/dashboard/daily-sales?facilityId={{facilityId}}&startDate=2024-11-15&endDate=2024-11-16
+# @name daily sales
+GET {{baseUrl}}/dashboard/sales/daily?dateRange=this_month
 Authorization: Bearer {{accessToken}}
 
-
+###
+# @name sales payment-methods
+GET {{baseUrl}}/dashboard/sales/payment-methods?dateRange=this_month
+Authorization: Bearer {{accessToken}}

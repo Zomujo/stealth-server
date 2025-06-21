@@ -193,7 +193,7 @@ export class StockAdjustmentsService {
         where: { id },
       },
     );
-    await adjustedStock.destroy();
+    await adjustedStock.destroy({ userId } as any);
 
     return;
   }

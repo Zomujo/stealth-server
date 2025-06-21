@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { CreateSmsDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { TwilioService } from 'nestjs-twilio';
-import { MessageInstance } from 'nestjs-twilio/node_modules/twilio/lib/rest/api/v2010/account/message';
 import AfricasTalking from 'africastalking';
 import { SMSMessageData } from './types';
+import { MessageInstance } from 'twilio/lib/rest/api/v2010/account/message';
 
 @Injectable()
 export class SmsService {

@@ -116,12 +116,13 @@ export class FacilityService {
    * @returns A promise that resolves to the result of the removal operation.
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
-  async remove(id: string) {
+  async remove(id: string, deletedBy: string) {
     this.logger.log('Removing facility by ID');
     const res = await this.facilityRepo.destroy({
       where: { id: id },
       force: true,
-    });
+      userId: deletedBy,
+    } as any);
 
     if (res == 0) {
       throw new NotFoundException(`Facility with id ${id} not found`);

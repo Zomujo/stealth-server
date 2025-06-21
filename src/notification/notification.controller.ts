@@ -122,9 +122,12 @@ export class NotificationController {
     message: 'Notification deleted successfully',
   })
   @Delete(':id')
-  async deleteNotifications(@Param('id', ParseUUIDPipe) id: string) {
+  async deleteNotifications(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('sub', ParseUUIDPipe) userId: string,
+  ) {
     try {
-      const _response = await this.notificationService.remove(id);
+      const _response = await this.notificationService.remove(id, userId);
 
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,

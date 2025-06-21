@@ -32,11 +32,14 @@ export class DepartmentService {
     facilityId: string,
     adminId: string,
   ): Promise<Department> {
-    const department = await this.departmentRepo.create({
-      ...createDepartmentDto,
-      facilityId,
-      createdById: adminId,
-    });
+    const department = await this.departmentRepo.create(
+      {
+        ...createDepartmentDto,
+        facilityId,
+        createdById: adminId,
+      },
+      { user: 'hello', validate: true },
+    );
     this.notificationService.notifyAdmin({
       message: 'Department has been created successfully',
       url: '/settings/departments',
@@ -146,12 +149,13 @@ export class DepartmentService {
    * @returns A promise that resolves to the result of the removal operation.
    * @throws {InternalServerErrorException} If an error occurs during the removal operation.
    */
-  async remove(id: string) {
+  async remove(id: string, deletedBy: string) {
     this.logger.log(`Removing department with ID: ${id}`);
     const res = await this.departmentRepo.destroy({
       where: { id: id },
       force: true,
-    });
+      userId: deletedBy,
+    } as any);
 
     if (res == 0) {
       throw new NotFoundException(`Department with id ${id} not found`);

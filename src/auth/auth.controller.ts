@@ -502,9 +502,12 @@ export class AuthController {
     message: 'Session deleted successfully',
   })
   @Delete('/session/:id')
-  async deleteSession(@Param('id', ParseUUIDPipe) id: string) {
+  async deleteSession(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('sub', ParseUUIDPipe) adminId: string,
+  ) {
     try {
-      await this.authService.removeSession(id);
+      await this.authService.removeSession(id, adminId);
       return new ApiSuccessResponseNoData(
         HttpStatus.OK,
         'session deleted successfully',
