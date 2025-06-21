@@ -70,6 +70,7 @@ module.exports = {
         patient_id: patients[faker.number.int(patients.length)]?.id,
         sub_total: total,
         status: 'PAID',
+        insured: false,
         created_at: createdAt,
         updated_at: updatedAt,
       });

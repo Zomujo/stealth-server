@@ -51,14 +51,14 @@ module.exports = {
           status: 'Active',
           deactivated_by: null,
           deleted_at: null,
-          deleted_by: null,
+          deleted_by_id: null,
           ...baseModelColumnsWithoutId,
         },
         {
           id: existingUser,
           full_name: 'Jack Frost',
           email: 'example@email.com',
-          phone_number: '0244335567',
+          phone_number: '0244335561',
           // facility_id: facilityId,
           department_id: null,
           role: 'Central Admin',
@@ -79,7 +79,7 @@ module.exports = {
           status: 'Active',
           deactivated_by: null,
           deleted_at: null,
-          deleted_by: null,
+          deleted_by_id: null,
           ...baseModelColumnsWithoutId,
         },
       ]);
@@ -104,8 +104,8 @@ module.exports = {
           name: 'Facility A',
           region: 'North',
           location: '123 Main St',
-          created_by: existingUser,
-          updated_by: null,
+          created_by_id: existingUser,
+          updated_by_id: null,
           ...baseModelColumns,
         },
       ]);
@@ -138,7 +138,9 @@ module.exports = {
 
     await queryInterface.bulkUpdate(
       'users',
-      { facility_id: existingFacility },
+      {
+        facility_id: existingFacility,
+      },
       { email: 'example@email.com' },
     );
   },
