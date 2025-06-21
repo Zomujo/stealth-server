@@ -11,8 +11,14 @@ module.exports = {
         allowNull: false,
       },
       userId: {
+        references: {
+          model: 'users',
+          key: 'id',
+        },
         type: Sequelize.UUID,
         field: 'user_id',
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       action: {
         type: Sequelize.STRING,
@@ -25,7 +31,6 @@ module.exports = {
       },
       recordId: {
         type: Sequelize.UUID,
-        allowNull: false,
         field: 'record_id',
       },
       before: {
@@ -65,6 +70,26 @@ module.exports = {
       correlationId: {
         type: Sequelize.STRING,
         field: 'correlation_id',
+      },
+      departmentId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'departments',
+          key: 'id',
+        },
+        field: 'department_id',
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+      facilityId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'facilities',
+          key: 'id',
+        },
+        field: 'facility_id',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       createdAt: {
         type: Sequelize.DATE,

@@ -40,6 +40,7 @@ export class AuditLog extends Model<AuditLog> {
   @Column(DataType.UUID)
   id: string;
 
+  // @ForeignKey(() => User)
   @Column
   userId: string;
 
@@ -49,6 +50,7 @@ export class AuditLog extends Model<AuditLog> {
   @Column
   tableName: string;
 
+  @AllowNull
   @Column
   recordId: string;
 
@@ -93,6 +95,16 @@ export class AuditLog extends Model<AuditLog> {
   @AllowNull
   @Column
   correlationId: string;
+
+  // @ForeignKey(() => Facility)
+  @AllowNull
+  @Column
+  facilityId: string;
+
+  // @ForeignKey(() => Department)
+  @AllowNull
+  @Column
+  departmentId: string;
 
   @CreatedAt
   @Column({ type: DataType.DATE, field: 'created_at' })

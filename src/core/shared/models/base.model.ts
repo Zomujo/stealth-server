@@ -49,6 +49,15 @@ export abstract class BaseModel extends Model {
     if (options.skipAudit) return;
     console.log(`${instance.constructor.name} created hook options:`, options);
 
+    const ownershipOptions: Record<string, any> = {};
+    const extendedInstance = instance as any;
+    if (extendedInstance.facilityId) {
+      ownershipOptions.facilityId = extendedInstance.facilityId;
+    }
+    if (extendedInstance.departmentId) {
+      ownershipOptions.departmentId = extendedInstance.departmentId;
+    }
+
     const [auditLog, created] = await AuditLog.findOrCreate({
       where: {
         userId: instance.createdById,
@@ -64,6 +73,7 @@ export abstract class BaseModel extends Model {
         after: instance.toJSON(),
         source: 'sequelize-hook',
         description: `Created ${instance.constructor.name}`,
+        ...ownershipOptions,
       },
       transaction: options.transaction,
     });
@@ -78,6 +88,7 @@ export abstract class BaseModel extends Model {
           after: instance.toJSON(),
           source: 'sequelize-hook',
           description: `Created ${instance.constructor.name}`,
+          ...ownershipOptions,
         },
         { transaction: options.transaction },
       );
@@ -88,6 +99,15 @@ export abstract class BaseModel extends Model {
   static async logUpdate(instance: BaseModel, options: any) {
     if (options.skipAudit) return;
     console.log(`${instance.constructor.name} updated hook options:`, options);
+
+    const ownershipOptions: Record<string, any> = {};
+    const extendedInstance = instance as any;
+    if (extendedInstance.facilityId) {
+      ownershipOptions.facilityId = extendedInstance.facilityId;
+    }
+    if (extendedInstance.departmentId) {
+      ownershipOptions.departmentId = extendedInstance.departmentId;
+    }
 
     const [auditLog, created] = await AuditLog.findOrCreate({
       where: {
@@ -105,6 +125,7 @@ export abstract class BaseModel extends Model {
         after: instance.dataValues,
         source: 'sequelize-hook',
         description: `Updated ${instance.constructor.name}`,
+        ...ownershipOptions,
       },
       transaction: options.transaction,
     });
@@ -120,6 +141,7 @@ export abstract class BaseModel extends Model {
           after: instance.dataValues,
           source: 'sequelize-hook',
           description: `Updated ${instance.constructor.name}`,
+          ...ownershipOptions,
         },
         { transaction: options.transaction },
       );
@@ -130,6 +152,15 @@ export abstract class BaseModel extends Model {
   static async logDelete(instance: BaseModel, options: any) {
     if (options.skipAudit) return;
     console.log(`${instance.constructor.name} deleted hook options:`, options);
+
+    const ownershipOptions: Record<string, any> = {};
+    const extendedInstance = instance as any;
+    if (extendedInstance.facilityId) {
+      ownershipOptions.facilityId = extendedInstance.facilityId;
+    }
+    if (extendedInstance.departmentId) {
+      ownershipOptions.departmentId = extendedInstance.departmentId;
+    }
 
     const [auditLog, created] = await AuditLog.findOrCreate({
       where: {
@@ -147,6 +178,7 @@ export abstract class BaseModel extends Model {
         after: null,
         source: 'sequelize-hook',
         description: `Deleted ${instance.constructor.name}`,
+        ...ownershipOptions,
       },
       transaction: options.transaction,
     });
@@ -162,6 +194,7 @@ export abstract class BaseModel extends Model {
           after: null,
           source: 'sequelize-hook',
           description: `Deleted ${instance.constructor.name}`,
+          ...ownershipOptions,
         },
         { transaction: options.transaction },
       );

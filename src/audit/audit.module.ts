@@ -4,7 +4,7 @@ import { AuditsController } from './audit.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AuditModels } from './models';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { AuditInterceptor } from './interceptor/audit.interceptor';
+import { AuditInterceptor } from './interceptors/audit.interceptor';
 
 @Module({
   imports: [SequelizeModule.forFeature(AuditModels)],
