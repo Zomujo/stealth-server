@@ -116,22 +116,22 @@ select jsonb_build_object(
 	'totalItemsSold',json_build_object(
 		'total', itemsTotal,
 		'percentageChange', itemChange,
-		'changeType', case when itemChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'changeType', case when itemChange < 0  then 'DECREMENT' else 'INCREMENT' end
 	),
 	'totalTransactions', json_build_object(
 		'total', transTotal,
 		'percentageChange', transChange,
-		'changeType', case when transChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'changeType', case when transChange < 0  then 'DECREMENT' else 'INCREMENT' end
 	),
 	'totalRevenue',json_build_object(
 		'total', totalRevenue,
 		'percentageChange', totalRevenue,
-		'changeType', case when revenueChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'changeType', case when revenueChange < 0  then 'DECREMENT' else 'INCREMENT' end
 	),
 	'customers', json_build_object(
 		'total', totalCustomers,
 		'percentageChange', customersChange,
-		'changeType', case when customersChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'changeType', case when customersChange < 0  then 'DECREMENT' else 'INCREMENT' end
 	) ,
 	'soonToExpireItems', jsonb_build_object(
         'total', (SELECT soon_expiring FROM inventory),
@@ -141,7 +141,7 @@ select jsonb_build_object(
     'itemsReturned', jsonb_build_object(
         'total', totalItemsReturned,
         'percentageChange', returnedChange,
-		'changeType', case when returnedChange < 0  then 'DECREMENT' else 'INCREMENT' end
+		'changeType', case when returnedChange  < 0  then 'DECREMENT' else 'INCREMENT' end
     ),
     'inventoryTurnoverRate', jsonb_build_object(
         'total', turnover_rate,
@@ -151,7 +151,7 @@ select jsonb_build_object(
 		'averageItemsPerTransaction', jsonb_build_object(
         'total', avg_trans,
         'percentageChange', avgChange,
-		'changeType', case when avgChange > 0  then 'INCREMENT' else 'DECREMENT' end
+		'changeType', case when avgChange < 0  then 'DECREMENT' else 'INCREMENT' end
     )
 ) as res
 from calculations;
