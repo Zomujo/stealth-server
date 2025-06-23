@@ -3,19 +3,6 @@ import { ChangeType } from '../../inventory/items/dto';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
-class AnalyticItem {
-  @ApiProperty()
-  itemName: string;
-
-  @ApiProperty()
-  quantity: number;
-
-  constructor(itemName: string, quantity: number) {
-    this.itemName = itemName;
-    this.quantity = quantity;
-  }
-}
-
 class MetricDto {
   @ApiProperty()
   total: number;
@@ -37,25 +24,51 @@ class MetricDto {
   }
 }
 
-class StockLevelDto extends MetricDto {
-  @ApiProperty()
+class StockDto {
+  @ApiResponseProperty({ example: 300 })
+  total: number;
+
+  @ApiResponseProperty({ example: 0 })
+  lowStocked: number;
+
+  @ApiResponseProperty({ example: 0 })
+  outOfStock: number;
+
+  @ApiResponseProperty({ example: 4500 })
   totalStock: number;
 
-  @ApiProperty({ type: [AnalyticItem] })
-  @Type(() => AnalyticItem)
-  @ValidateNested({ each: true })
-  items: AnalyticItem[];
+  @ApiResponseProperty({ example: 300 })
+  highStocked: number;
+
+  @ApiResponseProperty({ example: 258.78 })
+  stockDaysOnHand: number;
+}
+
+class StockLevelDto {
+  @ApiResponseProperty({ type: StockDto })
+  stock: StockDto;
+
+  @ApiResponseProperty({ example: 100 })
+  percentageChange: number;
+
+  @ApiProperty({ enum: ChangeType })
+  changeType: ChangeType;
 
   constructor(
-    totalStock: number = 0,
-    items: AnalyticItem[] = [],
-    total: number = 0,
+    stock: StockDto = {
+      total: 759,
+      lowStocked: 0,
+      outOfStock: 0,
+      totalStock: 444113,
+      highStocked: 759,
+      stockDaysOnHand: 1302.78,
+    },
     percentageChange: number = 0,
     changeType: ChangeType = ChangeType.None,
   ) {
-    super(total, percentageChange, changeType);
-    this.totalStock = totalStock;
-    this.items = items;
+    this.stock = stock;
+    this.percentageChange = percentageChange;
+    this.changeType = changeType;
   }
 }
 

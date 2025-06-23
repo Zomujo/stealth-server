@@ -9,10 +9,10 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
 import { PaginationRequestDto } from 'src/core/shared/dto/pagination.dto';
 import { CreateItemDto, ItemStatus } from './create-item.dto';
-import { OneBatch } from '../batches/dto';
 import { addDays } from 'date-fns';
 import { Type } from 'class-transformer';
 import { BatchValidityStatus } from '../models';
+import { GetNoPaginateDto } from '../../../core/shared/dto/get-no_paginate.dto';
 
 export class ItemPaginationDto extends PaginationRequestDto {
   @ApiPropertyOptional()
@@ -245,61 +245,24 @@ export class OneItem extends IntersectionType(
   GenericResponseDto,
 ) {
   @ApiResponseProperty({
-    example: 'John Doe,58dceb42-02bb-465f-bd5d-4b52ef181a18',
-  })
-  createdBy: string;
-
-  @ApiResponseProperty({
     example: 120,
   })
   totalStock: number;
-
-  @ApiResponseProperty({
-    example: [
-      {
-        id: 'b03a9850-d57b-4098-b319-0a58b81d3d23',
-        createdAt: '2024-12-19T19:25:36.865Z',
-        updatedAt: '2024-12-19T19:25:36.865Z',
-        itemId: '41bfd51a-d102-4911-b321-9acac90664cf',
-        validity: '2025-11-26T00:00:00.000Z',
-        batchNumber: 'BATCH41bf1',
-        quantity: 595,
-        createdBy: 'System',
-        supplierId: 'f7d7193b-e922-4b97-8bf4-27304141c4b7',
-        deletedAt: null,
-      },
-    ],
-  })
-  batches: OneBatch[];
 }
 
-export class ManyItem {
-  @ApiProperty()
-  itemId: string;
-  @ApiProperty()
-  name: string;
-  @ApiProperty()
-  brandName: string;
-  @ApiProperty({ description: 'Expiry date' })
-  validity: Date;
-  @ApiProperty()
-  batchNumber: string;
-  @ApiProperty({ description: 'The quantity of the item in the batch' })
-  quantity: number;
-  @ApiProperty()
-  supplierName: string;
-  @ApiProperty()
-  supplierId: string;
-  @ApiProperty()
-  status: ItemStatus;
-  @ApiProperty()
-  reorderPoint: number;
-  @ApiProperty()
-  category: string;
-  @ApiProperty()
-  categoryId: string;
-  @ApiProperty()
-  createdAt: Date;
+export class ManyItem extends IntersectionType(
+  PickType(CreateItemDto, ['name', 'status', 'reorderPoint']),
+  GenericResponseDto,
+) {
+  @ApiResponseProperty({
+    type: GetNoPaginateDto,
+  })
+  category: GetNoPaginateDto;
+
+  @ApiResponseProperty({
+    example: 200,
+  })
+  totalStock: number;
 }
 class CategoryDto {
   @ApiResponseProperty({

@@ -33,6 +33,7 @@ import {
   ItemAnalytics,
   ItemCounts,
   ItemPaginationDto,
+  ManyItem,
   OneItem,
   UpdateItemDto,
 } from './dto';
@@ -208,7 +209,7 @@ export class ItemController {
   }
 
   @CustomApiResponse(['paginated', 'authorize'], {
-    type: CreateItemDto,
+    type: ManyItem,
     isArray: true,
     message: 'Items retrieved successfully',
   })
