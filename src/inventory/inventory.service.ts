@@ -21,6 +21,7 @@ import {
 } from './dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { generateFilter } from '../core/shared/factory';
+import { User } from '../auth/models/user.model';
 
 @Injectable()
 export class StockAdjustmentsService {
@@ -105,6 +106,12 @@ export class StockAdjustmentsService {
       include: [
         { model: Item, attributes: ['id', 'name'] },
         { model: Batch, attributes: ['id', 'batchNumber'], paranoid: false },
+        {
+          model: User,
+          as: 'createdBy',
+          attributes: ['id', 'fullName'],
+          paranoid: false,
+        },
       ],
       attributes: [
         'id',
@@ -115,7 +122,6 @@ export class StockAdjustmentsService {
         'type',
         'quantity',
         'createdById',
-        'createdBy',
       ],
     });
 
@@ -273,6 +279,12 @@ export class StockAdjustmentsService {
       include: [
         { model: Item, attributes: ['id', 'name'] },
         { model: Batch, attributes: ['id', 'batchNumber'], paranoid: false },
+        {
+          model: User,
+          as: 'createdBy',
+          attributes: ['id', 'fullName'],
+          paranoid: false,
+        },
       ],
       ...itemOrderOptions,
       attributes: [
@@ -284,7 +296,6 @@ export class StockAdjustmentsService {
         'type',
         'quantity',
         'createdById',
-        'createdBy',
       ],
       distinct: true,
     };
