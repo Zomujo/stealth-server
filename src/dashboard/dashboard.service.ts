@@ -10,10 +10,7 @@ import {
   TopSellingCategoriesDto,
 } from './dto';
 import { Sequelize } from 'sequelize-typescript';
-import {
-  getDateRangeFilter,
-  getDateRangeFilterCompare,
-} from 'src/core/shared/factory';
+import { getDateRangeFilter } from 'src/core/shared/factory';
 import { IUserPayload } from 'src/auth/interface/payload.interface';
 import { Op } from 'sequelize';
 import sequelize from 'sequelize';
@@ -251,52 +248,35 @@ from calculations;
     return new TopSellingCategoriesDto(categories, quantities);
   }
 
-  async getDailySales(query: FindAnalyticsQueryDto, user: IUserPayload) {
-    const { bound, groupby } = getDateRangeFilterCompare(query.dateRange);
-    const [
-      {
-        result: { fdates, f_quantities },
-      },
-      {
-        result: { sdates, s_quantities },
-      },
-    ]: any = await this.sql.query(
-      `WITH first AS (
+  async getDailySales(query: FindGeneralAnalyticsQueryDto, user: IUserPayload) {
+    const { startDate, endDate } = query;
+    const { result }: any = await this.sql.query(
+      `WITH hourly_sales AS (
     SELECT
-        date_trunc('${groupby}', created_at) as ${groupby},
-        SUM(quantity) as f_quantity
+        to_char(date_trunc('hour', created_at), 'HH24:MI') as hour,
+        SUM(CASE WHEN '${startDate.toISOString()}'::date = date_trunc('day', created_at) THEN quantity ELSE 0 END) as f_quantity,
+        SUM(CASE WHEN '${endDate.toISOString()}'::date = date_trunc('day', created_at) THEN quantity ELSE 0 END) as s_quantity
     FROM sale_items
-    WHERE created_at < '${bound.toDateString()}'
-    ${user.facility ? `AND facility_id = '${user.facility}'` : ''}
-		${user.department ? `AND department_id = '${user.department}'` : ''}
-    GROUP BY ${groupby}
-		ORDER by ${groupby}
-		),
-		second AS (
-    SELECT
-        date_trunc('${groupby}', created_at) as ${groupby},
-        SUM(quantity) as s_quantity
-    FROM sale_items
-    WHERE created_at  >= '${bound.toDateString()}'
-    ${user.facility ? `AND facility_id = '${user.facility}'` : ''}
-		${user.department ? `AND department_id = '${user.department}'` : ''}
-    GROUP BY ${groupby}
-		ORDER by ${groupby}
-		)
-		SELECT jsonb_build_object(
-    'fdates', jsonb_agg(to_char(${groupby}, 'YYYY-MM-DD HH24:MI')),
-    'f_quantity', jsonb_agg(f_quantity)
-			) as result
-		FROM first
-		union
-		SELECT jsonb_build_object(
-    'sdates', jsonb_agg(to_char(${groupby}, 'YYYY-MM-DD HH24:MI')),
-    's_quantity', jsonb_agg(s_quantity)
-) as result
-FROM second;`,
-      { raw: true, type: sequelize.QueryTypes.SELECT },
+    WHERE created_at::date = '${startDate.toISOString()}'::date or created_at::date ='${endDate.toISOString()}'::date
+       ${user.facility ? `AND facility_id = '${user.facility}'` : ''}
+		   ${user.department ? `AND department_id = '${user.department}'` : ''}
+    GROUP BY hour
+    ORDER BY hour
+    )
+    SELECT jsonb_build_object(
+      'hours', jsonb_agg(hour),
+      'f_quantity', jsonb_agg(f_quantity),
+      's_quantity', jsonb_agg(s_quantity)
+    ) as result
+    FROM hourly_sales;`,
+      { plain: true, type: sequelize.QueryTypes.SELECT },
     );
-    return new DailySalesDto(fdates, f_quantities, sdates, s_quantities);
+    console.dir(result);
+    return new DailySalesDto(
+      result.hours,
+      result.f_quantity,
+      result.s_quantity,
+    );
   }
 
   async getSalesPaymentMethods(
