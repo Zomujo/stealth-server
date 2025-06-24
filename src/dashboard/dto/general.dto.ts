@@ -16,7 +16,7 @@ class AnalyticItem {
   }
 }
 
-class MetricDto {
+export class MetricDto {
   @ApiProperty()
   total: number;
 
@@ -104,18 +104,18 @@ export class GeneralAnalyticsDto {
   @Type(() => MetricDto)
   @ValidateNested()
   itemsReturned: MetricDto;
-
-  constructor() {
-    this.itemStockLevel = new StockLevelDto();
-    this.totalItemsSold = new MetricDto();
-    this.totalTransactions = new MetricDto();
-    this.inventoryTurnoverRate = new MetricDto();
-    this.totalRevenue = new MetricDto();
-    this.averageItemsPerTransaction = new MetricDto();
-    this.customers = new MetricDto();
-    this.soonToExpireItems = new MetricDto();
-    this.itemsReturned = new MetricDto();
-  }
+  //
+  // constructor() {
+  //   this.itemStockLevel = new StockLevelDto();
+  //   this.totalItemsSold = new MetricDto();
+  //   this.totalTransactions = new MetricDto();
+  //   this.inventoryTurnoverRate = new MetricDto();
+  //   this.totalRevenue = new MetricDto();
+  //   this.averageItemsPerTransaction = new MetricDto();
+  //   this.customers = new MetricDto();
+  //   this.soonToExpireItems = new MetricDto();
+  //   this.itemsReturned = new MetricDto();
+  // }
 }
 
 export class ItemSalesAnalyticsDto {
@@ -130,7 +130,7 @@ export class ItemSalesAnalyticsDto {
   })
   items: { names: string[]; quantities: number[] };
 
-  constructor(names: string[], quantities: number[], avg) {
+  constructor(names: string[], quantities: number[], avg: number) {
     this.average = avg;
     this.items = {
       names,
