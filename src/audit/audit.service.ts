@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuditDto } from './dto/create.dto';
-import { UpdateAuditDto } from './dto/update.dto';
 import { AuditLog } from './models/audit.model';
 import { InjectModel } from '@nestjs/sequelize';
+import { CreateAuditDto, UpdateAuditDto } from './dto';
 
 @Injectable()
 export class AuditsService {

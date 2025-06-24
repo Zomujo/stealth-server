@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { Sequelize } from 'sequelize-typescript';
 import { AuditsService } from '../audit.service';
 import { AUDIT_METADATA_KEY, AuditOptions } from '../decorators';
 
@@ -15,7 +14,6 @@ export class AuditInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
     private readonly auditsService: AuditsService,
-    private readonly sequelize: Sequelize,
   ) {}
 
   async intercept(
@@ -38,7 +36,7 @@ export class AuditInterceptor implements NestInterceptor {
       userId: user?.sub,
       facilityId: user?.facility,
       departmentId: user?.department,
-      ipAddress: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      ipAddress: req.headers['x-forwarded-for'] ?? req.connection.remoteAddress,
       userAgent: req.headers['user-agent'],
       requestUrl: req.originalUrl,
       method: req.method,
@@ -47,25 +45,27 @@ export class AuditInterceptor implements NestInterceptor {
       correlationId: req.headers['x-correlation-id'],
     };
 
-    const id = req.params?.id || req.body?.id;
+    const id = req.params?.id ?? req.body?.id;
     const modelName = auditOptions?.tableName;
 
     if (req.originalUrl === '/api/v1/auth/login' || shouldSkip) {
       return next.handle();
     }
 
-    const action =
-      req.method === 'POST'
-        ? 'CREATE'
-        : req.method === 'DELETE'
-          ? 'DELETE'
-          : 'UPDATE';
+    let action: 'CREATE' | 'UPDATE' | 'DELETE';
+    if (req.method === 'POST') {
+      action = 'CREATE';
+    } else if (req.method === 'DELETE') {
+      action = 'DELETE';
+    } else {
+      action = 'UPDATE';
+    }
 
     await this.auditsService.create({
       ...baseLog,
       action,
       tableName: modelName || 'unknown',
-      recordId: id || null,
+      recordId: id ?? null,
       before: null,
       after: null,
       description: auditOptions?.description || null,

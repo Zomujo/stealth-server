@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { AuditsService } from './audit.service';
-import { CreateAuditDto } from './dto/create.dto';
-import { UpdateAuditDto } from './dto/update.dto';
+import { CreateAuditDto } from './dto';
 
 @Controller('audits')
 export class AuditsController {
@@ -28,15 +19,5 @@ export class AuditsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.auditsService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateAuditDto) {
-    return this.auditsService.update(id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.auditsService.remove(id);
   }
 }

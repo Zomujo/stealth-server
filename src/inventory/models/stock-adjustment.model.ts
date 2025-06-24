@@ -143,6 +143,13 @@ export class StockAdjustment extends BaseModel {
   @Column
   createdById: string;
 
+  @ApiResponseProperty({
+    type: () => User,
+    example: {
+      id: '1d7d855b-7990-49ae-86a4-ca744ca55884',
+      fullName: 'Ebenezer Domey',
+    },
+  })
   @BelongsTo(() => User)
   createdBy: User;
 
