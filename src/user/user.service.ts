@@ -68,8 +68,12 @@ export class UserService {
     return user;
   }
 
-  @Cron('0 30 10 * * 1-6')
-  // @Cron('45 * * * * *')
+  @Cron('0 30 10 * * 1-6', {
+    disabled: process.env.NODE_ENV != 'development',
+  })
+  // @Cron('45 * * * * *', {
+  //   disabled: process.env.NODE_ENV != 'development',
+  // })
   async fetchExpiredBatches() {
     const [results] = await this.sequelize.query(
       `
