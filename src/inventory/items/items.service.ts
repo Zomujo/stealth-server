@@ -392,29 +392,32 @@ export class ItemService {
     };
 
     if (query.status) {
-      let havingClause =
-        'HAVING COALESCE(SUM(b.quantity), 0) > i.reorder_point';
+      let whereClause = 'total_quantity > reorder_point';
       switch (query.status) {
         case ItemStatus.OUT_OF_STOCK:
-          havingClause = 'HAVING COALESCE(SUM(b.quantity), 0) = 0';
+          whereClause = 'total_quantity = 0';
           break;
         case ItemStatus.LOW:
-          havingClause =
-            'HAVING COALESCE(SUM(b.quantity), 0) > 0 AND COALESCE(SUM(b.quantity), 0) <= i.reorder_point';
+          whereClause =
+            'total_quantity > 0 AND total_quantity <= reorder_point';
           break;
         default:
           break;
       }
 
       const [result] = await this.sequelize.query(
-        `SELECT i.id, i.reorder_point, COALESCE(SUM(b.quantity), 0)
-          FROM batches b
-          RIGHT OUTER JOIN items i
-          ON b.item_id = i.id
-          AND b.facility_id = '${query.facilityId}'
-          ${query.departmentId ? `AND b.department_id = '${query.departmentId}'` : 'AND b.department_id IS NULL'}
-          GROUP BY i.id
-          ${havingClause};
+        `
+          WITH item_quantities AS (
+              SELECT i.id, i.reorder_point, COALESCE(SUM(b.quantity), 0) total_quantity
+              FROM batches b
+              RIGHT OUTER JOIN items i
+              ON b.item_id = i.id
+              AND b.facility_id = '${query.facilityId}'
+              ${query.departmentId ? `AND b.department_id = '${query.departmentId}'` : 'AND b.department_id IS NULL'}
+              GROUP BY i.id
+            )
+          SELECT * FROM item_quantities
+            WHERE ${whereClause};
           `,
       );
       const results = Array.isArray(result) ? result : [result];
