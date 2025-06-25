@@ -60,11 +60,11 @@ ${user.department ? `AND si.department_id = '${user.department}'` : ''}
 ),
 inventory as (
  SELECT
-        COUNT(i.id)  total_items,
+        COUNT(distinct i.id)  total_items,
         SUM(b.quantity) total_stock,
-        COUNT(case when i."status" = 'STOCKED' THEN i.id END) stocked,
-		    COUNT(case when i."status" = 'OUT_OF_STOCK' THEN i.id END) outOfStock,
-		    COUNT(case when i."status" = 'LOW' THEN i.id END) lowStocked,
+        COUNT(distinct case when i."status" = 'STOCKED' THEN i.id END) stocked,
+		    COUNT(distinct case when i."status" = 'OUT_OF_STOCK' THEN i.id END) outOfStock,
+		    COUNT(distinct case when i."status" = 'LOW' THEN i.id END) lowStocked,
         COUNT(distinct CASE WHEN b.validity  BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '60 days' THEN i.id END) AS soon_expiring
     FROM items i
     JOIN batches b ON b.item_id = i.id
