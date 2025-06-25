@@ -12,6 +12,7 @@ import {
   IsUUID,
 } from 'class-validator';
 import { ItemCategoryExists } from '../../../core/shared/validators/item-category-exists.validator';
+import { User } from '../../../auth/models/user.model';
 
 export enum DosageForm {
   SOLIDS = 'SOLIDS',
@@ -152,9 +153,10 @@ export class CreateItemDto {
   categoryId: string;
 
   @ApiResponseProperty({
-    example: 'Kratos',
+    type: () => User,
+    example: { id: '44220956-0962-4dd0-9e65-1564c585563c', fullName: 'Kratos' },
   })
-  createdBy: string;
+  createdBy: User;
 
   @ApiResponseProperty({
     example: '44220956-0962-4dd0-9e65-1564c585563c',

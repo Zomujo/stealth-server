@@ -19,7 +19,7 @@ import { User } from '../../auth/models/user.model';
   timestamps: true,
   paranoid: true,
 })
-export class NotificationModel extends BaseModel {
+export class NotificationModel extends BaseModel<NotificationModel> {
   @Column
   message: string;
 

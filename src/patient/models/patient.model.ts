@@ -18,7 +18,7 @@ import { User } from '../../auth/models/user.model';
   timestamps: true,
   paranoid: true,
 })
-export class Patient extends BaseModel {
+export class Patient extends BaseModel<Patient> {
   @Column
   name: string;
 

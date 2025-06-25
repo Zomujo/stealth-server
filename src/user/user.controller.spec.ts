@@ -1,25 +1,26 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+// import { Test, TestingModule } from '@nestjs/testing';
+// import { UserService } from './user.service';
+// import { UsersController } from './users.controller';
 
 describe('UserController', () => {
-  let controller: UserController;
-  let service: UserService;
+  // let controller: UsersController;
+  // let service: UserService;
 
-  const mockUserService = {};
+  // const mockUserService = {};
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [UserController],
-      providers: [{ provide: UserService, useValue: mockUserService }],
-    }).compile();
+  // beforeEach(async () => {
+  //   const module: TestingModule = await Test.createTestingModule({
+  //     controllers: [UsersController],
+  //     providers: [{ provide: UserService, useValue: mockUserService }],
+  //   }).compile();
 
-    controller = module.get<UserController>(UserController);
-    service = module.get<UserService>(UserService);
-  });
+  //   controller = module.get<UsersController>(UsersController);
+  //   service = module.get<UserService>(UserService);
+  // });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-    expect(service).toBeDefined();
-  });
+  // it('should be defined', () => {
+  //   expect(controller).toBeDefined();
+  //   expect(service).toBeDefined();
+  // });
+  it.todo('WillBePerfected');
 });

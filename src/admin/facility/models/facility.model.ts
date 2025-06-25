@@ -20,7 +20,7 @@ import { StockAdjustment } from 'src/inventory/models/stock-adjustment.model';
   timestamps: true,
   paranoid: true,
 })
-export class Facility extends BaseModel {
+export class Facility extends BaseModel<Facility> {
   @ApiProperty({
     example: 'Hospital A',
     description: 'The name of the hospital',

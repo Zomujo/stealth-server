@@ -37,7 +37,7 @@ export enum StockAdjustmentStatus {
   timestamps: true,
   paranoid: true,
 })
-export class StockAdjustment extends BaseModel {
+export class StockAdjustment extends BaseModel<StockAdjustment> {
   @ApiProperty({
     example: 100,
     description: 'The quantity being adjusted',

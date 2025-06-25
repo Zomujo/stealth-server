@@ -27,7 +27,7 @@ export enum BatchValidityStatus {
   paranoid: true,
   timestamps: true,
 })
-export class Batch extends BaseModel {
+export class Batch extends BaseModel<Batch> {
   @ForeignKey(() => Item)
   @Column
   itemId: string;

@@ -44,6 +44,10 @@ export class AuditLog extends Model<AuditLog> {
   @Column
   userId: string;
 
+  // @BelongsTo(() => User)
+  @Column(DataType.VIRTUAL)
+  user: object;
+
   @Column
   action: 'CREATE' | 'UPDATE' | 'DELETE';
 
@@ -101,10 +105,17 @@ export class AuditLog extends Model<AuditLog> {
   @Column
   facilityId: string;
 
+  @Column(DataType.VIRTUAL)
+  facility: object;
+
   // @ForeignKey(() => Department)
   @AllowNull
   @Column
   departmentId: string;
+
+  // @BelongsTo(() => Department)
+  @Column(DataType.VIRTUAL)
+  department: object;
 
   @CreatedAt
   @Column({ type: DataType.DATE, field: 'created_at' })

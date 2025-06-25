@@ -17,7 +17,7 @@ import { User } from 'src/auth/models/user.model';
   timestamps: true,
   paranoid: true,
 })
-export class ItemOrder extends BaseModel {
+export class ItemOrder extends BaseModel<ItemOrder> {
   @ForeignKey(() => Item)
   @Column
   itemId: string;

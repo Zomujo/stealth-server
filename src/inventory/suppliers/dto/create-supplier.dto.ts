@@ -11,6 +11,7 @@ import {
   IsEmail,
 } from 'class-validator';
 import { GenericResponseDto } from '../../../core/shared/dto/base.dto';
+import { StatusType } from '../models/supplier.model';
 enum PaymentType {
   BANK = 'Bank',
   MOBILE_MONEY = 'Mobile Money',
@@ -217,7 +218,7 @@ export class CreateSupplierDto extends GenericResponseDto {
   @ApiResponseProperty({
     example: 'Active',
   })
-  status: string;
+  status: StatusType;
 
   @ApiResponseProperty({
     example: 'Accra',

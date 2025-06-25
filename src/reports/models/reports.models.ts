@@ -15,7 +15,7 @@ import { Department } from '../../admin/department/models/department.model';
   timestamps: true,
   paranoid: true,
 })
-export class Report extends BaseModel {
+export class Report extends BaseModel<Report> {
   @Column
   reportType: string;
 

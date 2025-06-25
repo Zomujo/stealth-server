@@ -2,22 +2,21 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../auth/models/user.model';
 import { Facility } from '../admin/facility/models/facility.model';
-import { CreateSettingsDto } from './dto';
+import { CreateSettingsDto, FindUserDto } from './dto';
 import { Settings } from './models/setting.model';
 import { buildQuery } from '../core/shared/factory/query-builder.factory';
 import { QueryOptionsDto } from '../core/shared/dto/query-options.dto';
-import { IncludeOptions, Op, QueryTypes } from 'sequelize';
+import { IncludeOptions, Op, QueryTypes, WhereOptions } from 'sequelize';
 import { Department } from '../admin/department/models/department.model';
 import { Sequelize } from 'sequelize-typescript';
 import { ExpiredAlert } from '../inventory/items/batches/dto';
-// import { Cron } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { NotificationService } from '../notification/notification.service';
 import { Features } from '../core/shared/enums/permissions.enum';
 import { CreateNotificationDto } from '../notification/dto';
 import { NotificationStatus } from '../notification/enum';
 import { MailService } from '../notification/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UserService {
@@ -35,6 +34,29 @@ export class UserService {
 
     facility: { model: Facility, attributes: ['id', 'name'] },
   };
+
+  async findNoPaginate(query: FindUserDto) {
+    let whereOptions: WhereOptions<User> = { facilityId: query.facilityId };
+    if (query.departmentId) {
+      whereOptions.departmentId = query.departmentId;
+    }
+    if (query.search) {
+      query.searchFields = ['fullName', 'email', 'phoneNumber'];
+      whereOptions = {
+        [Op.or]: query.searchFields.map((field) => ({
+          [field]: { [Op.iLike]: `%${query.search}%` },
+        })),
+      };
+    }
+    const users = await this.userRepository.findAll({
+      where: {
+        ...whereOptions,
+      },
+      attributes: ['id', 'fullName', 'email'],
+    });
+
+    return users;
+  }
 
   async findOne(userId: string) {
     const user = await this.userRepository.findByPk(userId, {
@@ -125,9 +147,12 @@ export class UserService {
           result.facilityId === user.facilityId &&
           result.departmentId === user.departmentId,
       );
-      modUser.expired = +expiredAlertData.expired;
-      modUser.nearExpiry = +expiredAlertData.nearExpiry;
-      return modUser;
+      const modData = {
+        ...modUser,
+        expired: +expiredAlertData.expired,
+        nearExpiry: +expiredAlertData.nearExpiry,
+      };
+      return modData;
     });
 
     // [{

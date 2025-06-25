@@ -1,5 +1,4 @@
 import {
-  AfterFind,
   AllowNull,
   BelongsTo,
   Column,
@@ -22,7 +21,7 @@ export enum StatusType {
   timestamps: true,
   paranoid: true,
 })
-export class LoginSession extends BaseModel {
+export class LoginSession extends BaseModel<LoginSession> {
   @ForeignKey(() => User)
   @Column
   userId: string;
@@ -66,34 +65,22 @@ export class LoginSession extends BaseModel {
   })
   status: StatusType;
 
-  @Column({ type: DataType.VIRTUAL })
-  activity: string;
-
-  @AfterFind
-  static async afterFindHook(
-    loginSessions: LoginSession | LoginSession[],
-  ): Promise<void> {
-    if (!loginSessions) {
-      return;
-    }
-
-    if (!Array.isArray(loginSessions)) {
-      loginSessions = [loginSessions];
-    }
-
-    loginSessions.forEach((loginSession: LoginSession) => {
-      if (loginSession.status !== StatusType.ACTIVE) {
+  @Column({
+    type: DataType.VIRTUAL,
+    get(this: LoginSession) {
+      if (this.status !== StatusType.ACTIVE) {
         const activityDistance = formatDistance(
-          new Date(loginSession.updatedAt),
+          new Date(this.updatedAt),
           new Date(),
           {
             addSuffix: true,
           },
         );
-        loginSession.activity = activityDistance;
+        return activityDistance;
       } else {
-        loginSession.activity = 'Current Session';
+        return 'Current Session';
       }
-    });
-  }
+    },
+  })
+  activity: string;
 }

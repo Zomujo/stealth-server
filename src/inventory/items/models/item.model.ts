@@ -6,6 +6,7 @@ import {
   Table,
   HasMany,
   AllowNull,
+  AfterFind,
 } from 'sequelize-typescript';
 import { Department } from 'src/admin/department/models/department.model';
 import { Facility } from 'src/admin/facility/models/facility.model';
@@ -14,7 +15,7 @@ import { ItemCategory } from 'src/inventory/items-category/models/items-category
 import { BaseModel } from 'src/core/shared/models/base.model';
 import { Batch } from '.';
 import { StockAdjustment } from '../../models/stock-adjustment.model';
-import { DosageForm } from '../dto';
+import { DosageForm, ItemStatus } from '../dto';
 import { User } from 'src/auth/models/user.model';
 
 @Table({
@@ -23,7 +24,7 @@ import { User } from 'src/auth/models/user.model';
   paranoid: true,
   timestamps: true,
 })
-export class Item extends BaseModel {
+export class Item extends BaseModel<Item> {
   @Column
   name: string;
 
@@ -63,21 +64,21 @@ export class Item extends BaseModel {
   @Column({ type: DataType.INTEGER, allowNull: false, field: 'reorder_point' })
   reorderPoint: number;
 
-  @Column({
-    type: DataType.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'),
-    allowNull: false,
-  })
-  status: string;
+  // @Column({
+  //   type: DataType.ENUM('LOW', 'STOCKED', 'OUT_OF_STOCK'),
+  //   allowNull: false,
+  // })
+  // status: string;
 
   @Column({
     type: DataType.VIRTUAL,
-    get(this: Item) {
-      return this.batches && this.batches.length
-        ? this.batches.reduce((accum, current) => accum + current.quantity, 0)
-        : 0;
-    },
   })
-  totalQuantity: number;
+  totalStock: number;
+
+  @Column({
+    type: DataType.VIRTUAL,
+  })
+  status: ItemStatus;
 
   // relationships
 
@@ -143,4 +144,48 @@ export class Item extends BaseModel {
 
   @BelongsTo(() => User)
   deletedBy: User;
+
+  async getItemStatus(totalStock: number): Promise<ItemStatus> {
+    if (totalStock == 0) {
+      return ItemStatus.OUT_OF_STOCK;
+    } else if (this.totalStock <= this.reorderPoint) {
+      return ItemStatus.LOW;
+    } else {
+      return ItemStatus.STOCKED;
+    }
+  }
+
+  async getTotalQuantity(departmentId?: string): Promise<number> {
+    const whereOptions: Record<string, any> = { itemId: this.id };
+    if (departmentId) {
+      whereOptions.departmentId = departmentId;
+    }
+
+    const batches = await Batch.findAll({
+      where: whereOptions,
+      attributes: ['quantity'],
+    });
+
+    return batches.reduce((accum, current) => accum + current.quantity, 0);
+  }
+
+  @AfterFind
+  static async afterFindHook(
+    this: void,
+    items: Item | Item[],
+    options: any,
+  ): Promise<void> {
+    if (!items) return;
+    const processItem = async (item: Item) => {
+      if (!item) return;
+      const departmentId = options.departmentId as string;
+      item.totalStock = await item.getTotalQuantity(departmentId);
+      item.status = await item.getItemStatus(item.totalStock);
+    };
+    if (Array.isArray(items)) {
+      await Promise.all(items.map(processItem));
+    } else {
+      await processItem(items);
+    }
+  }
 }

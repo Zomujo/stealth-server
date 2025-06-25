@@ -1,116 +1,65 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
 import {
-  IsString,
-  IsEnum,
-  IsOptional,
-  IsObject,
-  IsNumber,
-} from 'class-validator';
-import { GenericResponseDto } from '../../core/shared/dto/base.dto';
+  ApiPropertyOptional,
+  IntersectionType,
+  OmitType,
+  PickType,
+} from '@nestjs/swagger';
+import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
+import { AuditLogDto, DataTables } from './model.dto';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-export class AuditLogDto extends GenericResponseDto {
-  @ApiProperty({
-    description: 'ID of the user who performed the action',
-  })
-  @IsString()
-  userId: string;
-
-  @ApiProperty({
-    description: 'Action performed',
-    enum: ['CREATE', 'UPDATE', 'DELETE'],
-  })
-  @IsEnum(['CREATE', 'UPDATE', 'DELETE'])
-  action: 'CREATE' | 'UPDATE' | 'DELETE';
-
-  @ApiProperty({
+export class FindAuditLogQueryDto extends IntersectionType(
+  PickType(AuditLogDto, [
+    'action',
+    'description',
+    'userId',
+    'startDate',
+    'endDate',
+  ]),
+  OmitType(PaginationRequestDto, ['dateRange', 'search', 'searchFields']),
+) {
+  @ApiPropertyOptional({
     description: 'Name of the table affected',
-  })
-  @IsString()
-  tableName: string;
-
-  @ApiProperty({
-    description: 'ID of the record affected',
-  })
-  @IsString()
-  recordId: string;
-
-  @ApiProperty({
-    description: 'State of the record before the action',
-    type: 'object',
-    additionalProperties: true,
-  })
-  @IsObject()
-  before: object;
-
-  @ApiProperty({
-    description: 'State of the record after the action',
-    type: 'object',
-    additionalProperties: true,
-  })
-  @IsObject()
-  after: object;
-
-  @ApiPropertyOptional({
-    description: 'Description of the action',
+    isArray: true,
+    enum: DataTables,
   })
   @IsOptional()
-  @IsString()
-  description?: string;
+  @IsArray()
+  @IsEnum(DataTables, { each: true })
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  tableNames: string[];
 
-  @ApiPropertyOptional({
-    description: 'IP address of the user',
-  })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  ipAddress?: string;
+  departmentId?: string;
 
-  @ApiPropertyOptional({
-    description: 'User agent string',
-  })
-  @IsOptional()
-  @IsString()
-  userAgent?: string;
+  facilityId?: string;
 
-  @ApiPropertyOptional({
-    description: 'Source of the request',
-  })
-  @IsOptional()
-  @IsString()
-  source?: string;
-
-  @ApiPropertyOptional({
-    description: 'Request URL',
-  })
-  @IsOptional()
-  @IsString()
-  requestUrl?: string;
-
-  @ApiPropertyOptional({
-    description: 'HTTP method used',
-  })
-  @IsOptional()
-  @IsString()
-  method?: string;
-
-  @ApiPropertyOptional({
-    description: 'Context of the request',
-  })
-  @IsOptional()
-  @IsString()
-  context?: string;
-
-  @ApiPropertyOptional({
-    description: 'HTTP status code',
-  })
-  @IsOptional()
-  @IsNumber()
-  statusCode?: number;
-
-  @ApiPropertyOptional({
-    description: 'Correlation ID for tracing',
-  })
-  @IsOptional()
-  @IsString()
-  correlationId?: string;
+  userDepartmentId?: string;
 }
+
+export class AuditLogsResponseDto extends PickType(AuditLogDto, [
+  'id',
+  'userId',
+  'user',
+  'action',
+  'tableName',
+  'description',
+  'recordId',
+  'departmentId',
+  'department',
+  'createdAt',
+  'updatedAt',
+]) {}
+export class AuditLogResponseDto extends OmitType(AuditLogDto, [
+  'ipAddress',
+  'userAgent',
+  'context',
+  'correlationId',
+  'method',
+  'requestUrl',
+  'source',
+  'statusCode',
+]) {}
