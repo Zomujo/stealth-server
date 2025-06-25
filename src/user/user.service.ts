@@ -125,9 +125,12 @@ export class UserService {
           result.facilityId === user.facilityId &&
           result.departmentId === user.departmentId,
       );
-      modUser.expired = +expiredAlertData.expired;
-      modUser.nearExpiry = +expiredAlertData.nearExpiry;
-      return modUser;
+      const modData = {
+        ...modUser,
+        expired: +expiredAlertData.expired,
+        nearExpiry: +expiredAlertData.nearExpiry,
+      };
+      return modData;
     });
 
     // [{

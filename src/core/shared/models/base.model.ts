@@ -14,7 +14,7 @@ import {
 } from 'sequelize-typescript';
 import { AuditLog } from '../../../audit/models/audit.model';
 
-export abstract class BaseModel extends Model {
+export abstract class BaseModel<T = any> extends Model<T> {
   @PrimaryKey
   @Default(DataType.UUIDV4)
   @Column(DataType.UUID)

@@ -60,8 +60,9 @@ export class AuthService {
   async register(dto: AdminSignUpDto, req: Request) {
     const facility = await this.facilityService.create(dto.facility);
     const hashPassword = await bcrypt.hash(dto.password, this.SALT_OR_ROUNDS);
+    const { facility: _facility, ...createDto } = dto;
     const user = await this.userRepository.create({
-      ...dto,
+      ...createDto,
       facilityId: facility.id,
       role: 'Central Admin',
       permissions: [

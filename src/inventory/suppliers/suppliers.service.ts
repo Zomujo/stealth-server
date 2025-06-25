@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { StatusType, Supplier } from './models/supplier.model';
 import { CreateSupplierDto, GetSupplierDto, UpdateSupplierDto } from './dto';
 import { FindAndCountOptions, literal, Op } from 'sequelize';
-import { Batch } from '../items/models';
 import { generateFilter } from '../../core/shared/factory';
 import { IUserPayload } from '../../auth/interface/payload.interface';
 
@@ -90,19 +89,13 @@ export class SuppliersService {
         'city',
         'physicalAddress',
       ],
-      include: { model: Batch, attributes: ['quantity'] },
+
       distinct: true,
     };
     const suppliers = await this.supplierRepo.findAndCountAll(filter);
 
-    const modifiedSuppliers = suppliers.rows.map((supplier) => {
-      const modified: Supplier = supplier.get({ plain: true });
-      delete modified.batches;
-      return modified;
-    });
-
     this.logger.log(`Retrieved ${suppliers.count} supplier(s)`);
-    return [modifiedSuppliers, suppliers.count];
+    return [suppliers.rows, suppliers.count];
   }
 
   async exists(id: string) {
@@ -114,25 +107,13 @@ export class SuppliersService {
     this.logger.log(`Finding supplier with ID: ${id}`);
     const supplier = await this.supplierRepo.findByPk(id, {
       attributes: { exclude: ['status'] },
-      include: { model: Batch, attributes: ['quantity'] },
     });
 
     if (!supplier) {
       throw new NotFoundException(`supplier with id: ${id} not found`);
     }
-    const modifiedSupplier: Supplier = supplier.get({ plain: true });
-    // delete modifiedSupplier.totalItems;
-    delete modifiedSupplier.batches;
-    // if (modifiedSupplier.paymentType == 'Bank') {
-    //   delete modifiedSupplier.provider;
-    //   delete modifiedSupplier.mobileMoneyPhoneNumber;
-    // } else {
-    //   delete modifiedSupplier.bankName;
-    //   delete modifiedSupplier.accountType;
-    //   delete modifiedSupplier.accountNumber;
-    // }
     this.logger.log(`Found suppliier with ID: ${id}`);
-    return modifiedSupplier;
+    return supplier;
   }
 
   async update(id: string, dto: UpdateSupplierDto, userId: string) {

@@ -5,12 +5,7 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import {
-  FindAndCountOptions,
-  IncludeOptions,
-  Op,
-  WhereOptions,
-} from 'sequelize';
+import { FindAndCountOptions, IncludeOptions, Op } from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { BatchService } from './batches/batch.service';
@@ -45,6 +40,7 @@ import { Facility } from '../../admin/facility/models/facility.model';
 import { Department } from '../../admin/department/models/department.model';
 import { QueryOptionsDto } from '../../core/shared/dto/query-options.dto';
 import { buildQuery } from '../../core/shared/factory/query-builder.factory';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class ItemService {
@@ -53,6 +49,7 @@ export class ItemService {
     @InjectModel(Item) private readonly itemRepo: typeof Item,
     private readonly batchService: BatchService,
     private notificationService: NotificationService,
+    private sequelize: Sequelize,
   ) {
     this.logger = new Logger(ItemService.name);
   }
@@ -126,67 +123,18 @@ export class ItemService {
    * @throws Throws an error if there was an issue retrieving the items.
    */
   async findAll(query: ItemPaginationDto) {
-    const filter = this.applyFilter(query);
+    const filter = await this.applyFilter(query);
     const items = await this.itemRepo.findAndCountAll(filter);
-
-    const itemList = await Promise.all(
-      items.rows.map(async (item) => {
-        const modItem: Item = item.get({ plain: true });
-        // const batches = await this.batchService.findAll(modItem.id);
-        const whereOptions: Record<string, any> = { itemId: modItem.id };
-        if (query.departmentId) {
-          whereOptions.departmentId = query.departmentId;
-        }
-        const totalStock =
-          await this.batchService.calculateTotalBatchStock(whereOptions);
-        // delete modItem.status;
-        if (totalStock > modItem.reorderPoint) {
-          modItem.status = ItemStatus.STOCKED;
-        } else if (totalStock === 0) {
-          modItem.status = ItemStatus.OUT_OF_STOCK;
-        } else {
-          modItem.status = ItemStatus.LOW;
-        }
-        return {
-          ...modItem,
-          totalStock,
-        };
-      }),
-    );
-
     this.logger.log(`Retrieved ${items.count} items`);
 
     return new PaginatedDataResponseDto(
-      itemList,
+      items.rows,
       query.page || 1,
       query.pageSize || 10,
       items.count,
     );
   }
 
-  async assignStatus() {
-    const items = await this.itemRepo.findAll({
-      attributes: ['id', 'name', 'status', 'reorderPoint'],
-      include: [{ model: Batch, attributes: ['id', 'quantity'] }],
-    });
-
-    items.forEach((item) => {
-      const totalQuantity = item.batches.reduce(
-        (accum, batch) => accum + batch.quantity,
-        0,
-      );
-
-      if (totalQuantity == 0) {
-        item.status = ItemStatus.OUT_OF_STOCK;
-      } else if (totalQuantity > item.reorderPoint) {
-        item.status = ItemStatus.STOCKED;
-      } else {
-        item.status = ItemStatus.LOW;
-      }
-      item.save();
-    });
-    return 'adjusted';
-  }
   /**
    * Finds a item by its ID.
    *
@@ -216,7 +164,8 @@ export class ItemService {
 
   async fetchAndCountAll(options?: QueryOptionsDto<Item>) {
     const queryOptions = buildQuery<Item>(options, this.populates);
-    return this.itemRepo.findAndCountAll(queryOptions);
+    const items = await this.itemRepo.findAndCountAll(queryOptions);
+    return items;
   }
 
   /**
@@ -436,39 +385,72 @@ export class ItemService {
    * @param query - The ItemPaginationDto object containing the filter options.
    * @returns The FindAndCountOptions object with the applied filter options.
    */
-  private applyFilter(query: ItemPaginationDto): FindAndCountOptions<Item> {
-    // query.departmentId && { departmentId: query.departmentId };
+  private async applyFilter(query: ItemPaginationDto): Promise<any> {
     const queryFilter = generateFilter(query);
-    const whereOptions: WhereOptions<Item> = {
-      [Op.and]: [
-        query.facilityId && { facilityId: query.facilityId },
-        query.search && {
-          [Op.or]: [
-            { name: { [Op.iLike]: `%${query.search}%` } },
-            { brandName: { [Op.iLike]: `%${query.search}` } },
-          ],
-        },
-        query.status && {
-          status: query.status,
-        },
-        query.categories && {
-          categoryId: query.categories,
-        },
-      ],
+    const whereOptions: Record<string, any> = {
+      facilityId: query.facilityId,
     };
+
+    if (query.status) {
+      let havingClause =
+        'HAVING COALESCE(SUM(b.quantity), 0) > i.reorder_point';
+      switch (query.status) {
+        case ItemStatus.OUT_OF_STOCK:
+          havingClause = 'HAVING COALESCE(SUM(b.quantity), 0) = 0';
+          break;
+        case ItemStatus.LOW:
+          havingClause =
+            'HAVING COALESCE(SUM(b.quantity), 0) > 0 AND COALESCE(SUM(b.quantity), 0) <= i.reorder_point';
+          break;
+        default:
+          break;
+      }
+
+      const [result] = await this.sequelize.query(
+        `SELECT i.id, i.reorder_point, COALESCE(SUM(b.quantity), 0)
+          FROM batches b
+          RIGHT OUTER JOIN items i
+          ON b.item_id = i.id
+          AND b.facility_id = '${query.facilityId}'
+          ${query.departmentId ? `AND b.department_id = '${query.departmentId}'` : 'AND b.department_id IS NULL'}
+          GROUP BY i.id
+          ${havingClause};
+          `,
+      );
+      const results = Array.isArray(result) ? result : [result];
+      const itemIds = results.map((res: any) => res.id as string);
+      whereOptions.id = itemIds;
+    }
+
+    if (query.search) {
+      whereOptions.search = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${query.search}%` } },
+          { brandName: { [Op.iLike]: `%${query.search}` } },
+        ],
+      };
+    }
+    if (query.categories) {
+      whereOptions.categoryId = query.categories;
+    }
     return {
-      where: { ...whereOptions, ...queryFilter.searchFilter },
+      where: {
+        ...whereOptions,
+        ...queryFilter.searchFilter,
+      },
       ...queryFilter.pageFilter,
       attributes: [
         'id',
         'name',
-        'status',
         'reorderPoint',
+        'status',
         'createdAt',
         'updatedAt',
+        'totalStock',
       ],
       include: [{ model: ItemCategory, attributes: ['id', 'name'] }],
       distinct: true,
+      departmentId: query.departmentId,
     };
   }
 
@@ -486,17 +468,14 @@ export class ItemService {
       );
     }
     const item = await this.findOne(payload.itemId);
-    let itemStatus: ItemStatus;
     const notification = new CreateNotificationDto();
     notification.status = NotificationStatus.UNREAD;
 
     if (quantity === 0) {
-      itemStatus = ItemStatus.OUT_OF_STOCK;
       notification.message = `${item.name} is out of stock. Restock now`;
       notification.linkName = 'Restock';
       notification.linkRoute = `/items/${item.id}/batches`;
     } else if (quantity < item.reorderPoint) {
-      itemStatus = ItemStatus.LOW;
       notification.message = `${item.name} is almost out of stock. ${quantity} pieces left`;
       notification.linkName = 'Restock';
       notification.linkRoute = `/items/${item.id}/batches`;
@@ -508,10 +487,6 @@ export class ItemService {
       Features.ITEMS,
       { facility: item.facilityId, department: item.departmentId },
     );
-
-    await this.update(payload.itemId, {
-      status: itemStatus,
-    });
   }
 
   @OnEvent('quantity.increased')
@@ -521,7 +496,6 @@ export class ItemService {
     const notification = new CreateNotificationDto();
     notification.status = NotificationStatus.UNREAD;
 
-    const itemStatus: ItemStatus = ItemStatus.STOCKED;
     notification.message = `${item.name} just got stocked`;
     notification.linkName = 'View';
     notification.linkRoute = `/items/${item.id}/batches`;
@@ -531,9 +505,5 @@ export class ItemService {
       Features.ITEMS,
       { facility: item.facilityId, department: item.departmentId },
     );
-
-    await this.update(payload.itemId, {
-      status: itemStatus,
-    });
   }
 }

@@ -19,7 +19,7 @@ import { StockAdjustment } from 'src/inventory/models/stock-adjustment.model';
   timestamps: true,
   paranoid: true,
 })
-export class Department extends BaseModel {
+export class Department extends BaseModel<Department> {
   @ApiProperty({
     example: 'Department A',
     description: 'The name of the department',

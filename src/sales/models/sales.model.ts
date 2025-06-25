@@ -33,7 +33,7 @@ export enum SalePaymentType {
   timestamps: true,
   paranoid: true,
 })
-export class Sale extends BaseModel {
+export class Sale extends BaseModel<Sale> {
   @Unique
   @Column({ type: DataType.STRING })
   saleNumber: string;

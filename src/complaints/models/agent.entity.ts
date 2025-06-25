@@ -7,7 +7,7 @@ import { BaseModel } from '../../core/shared/models/base.model';
   timestamps: true,
   paranoid: true,
 })
-export class CustomerCareAgent extends BaseModel {
+export class CustomerCareAgent extends BaseModel<CustomerCareAgent> {
   @Column
   name: string;
 

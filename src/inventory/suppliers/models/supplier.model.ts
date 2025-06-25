@@ -1,6 +1,6 @@
 import {
-  AfterFind,
   AllowNull,
+  AfterFind,
   BelongsTo,
   Column,
   DataType,
@@ -8,7 +8,7 @@ import {
   HasMany,
   Table,
 } from 'sequelize-typescript';
-import { Batch } from 'src/inventory/items/models';
+import { Batch, Item } from 'src/inventory/items/models';
 import { BaseModel } from 'src/core/shared/models/base.model';
 import { Facility } from '../../../admin/facility/models/facility.model';
 import { User } from 'src/auth/models/user.model';
@@ -23,7 +23,7 @@ export enum StatusType {
   timestamps: true,
   paranoid: true,
 })
-export class Supplier extends BaseModel {
+export class Supplier extends BaseModel<Supplier> {
   @Column
   name: string;
 
@@ -77,7 +77,21 @@ export class Supplier extends BaseModel {
   @Column
   emergencyContactNumber: string;
 
-  @Column({ type: DataType.VIRTUAL })
+  @Column({
+    type: DataType.VIRTUAL,
+    get(this: Supplier) {
+      if (this.physicalAddress) {
+        const addressList = this.physicalAddress.split(',');
+        const city =
+          addressList[
+            addressList.length - 2 < 0 ? 0 : addressList.length - 2
+          ].trim();
+        return city;
+      } else {
+        return null;
+      }
+    },
+  })
   city: string;
 
   @Column
@@ -122,7 +136,9 @@ export class Supplier extends BaseModel {
   @BelongsTo(() => Facility)
   facility: Facility;
 
-  @Column({ type: DataType.VIRTUAL })
+  @Column({
+    type: DataType.VIRTUAL,
+  })
   totalItems: number;
 
   @HasMany(() => Batch)
@@ -152,37 +168,35 @@ export class Supplier extends BaseModel {
   @BelongsTo(() => User)
   deletedBy: User;
 
+  async getTotalItems(): Promise<number> {
+    const itemsCount = await Item.count({
+      include: [
+        {
+          model: Batch,
+          attributes: ['supplierId'],
+          where: { supplierId: this.id },
+        },
+      ],
+      distinct: true,
+    });
+
+    return itemsCount;
+  }
+
   @AfterFind
-  static async afterFindSuppliersHook(
+  static async afterFindHook(
+    this: void,
     suppliers: Supplier | Supplier[],
   ): Promise<void> {
-    if (!suppliers) {
-      return;
+    if (!suppliers) return;
+    const processSupplier = async (supplier: Supplier) => {
+      if (!supplier) return;
+      supplier.totalItems = await supplier.getTotalItems();
+    };
+    if (Array.isArray(suppliers)) {
+      await Promise.all(suppliers.map(processSupplier));
+    } else {
+      await processSupplier(suppliers);
     }
-
-    if (!Array.isArray(suppliers)) {
-      suppliers = [suppliers];
-    }
-
-    suppliers.forEach((supplier: Supplier) => {
-      if (supplier.batches) {
-        const totalItems = supplier.batches
-          ? supplier.batches.reduce((accumulator, batch) => {
-              return accumulator + (batch.quantity || 0);
-            }, 0)
-          : 0;
-
-        supplier.totalItems = totalItems;
-      }
-
-      if (supplier.physicalAddress) {
-        const addressList = supplier.physicalAddress.split(',');
-        const city =
-          addressList[
-            addressList.length - 2 < 0 ? 0 : addressList.length - 2
-          ].trim();
-        supplier.city = city;
-      }
-    });
   }
 }

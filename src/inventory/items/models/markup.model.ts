@@ -19,7 +19,7 @@ import { User } from '../../../auth/models/user.model';
   paranoid: true,
   timestamps: true,
 })
-export class Markup extends BaseModel {
+export class Markup extends BaseModel<Markup> {
   @Column
   type: MarkupType;
 

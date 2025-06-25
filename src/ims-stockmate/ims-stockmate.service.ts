@@ -218,14 +218,18 @@ export class ImsStockmateService {
             items: items.rows.map((row) => {
               const itemJson = row.toJSON();
               if (itemJson.batches) {
-                for (const batch of itemJson.batches) {
+                const newBatches = itemJson.batches.map((batch) => {
+                  const newBatch = { ...batch } as any;
                   if (batch.validity) {
-                    batch.validity = format(
+                    delete newBatch.validity;
+                    newBatch.validity = format(
                       batch.validity,
                       'EEEE, MMMM do, yyyy',
                     );
                   }
-                }
+                  return newBatch;
+                });
+                itemJson.batches = newBatches;
               }
               return itemJson;
             }),

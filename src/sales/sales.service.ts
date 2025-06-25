@@ -201,11 +201,11 @@ export class SalesService {
         dto.total = parseFloat(subTotal.toFixed(2));
       }
 
+      const { saleItems: _saleItems, ...createDto } = dto;
       const sale = await this.saleRepository.create(
         {
-          ...dto,
+          ...createDto,
           createdById: user.sub,
-          saleItems,
           departmentId: user.department,
           facilityId: user.facility,
         },

@@ -98,15 +98,17 @@ export class BatchService {
     });
     if (batch) {
       await batch.restore();
+      const { markup, ...batchDto } = createBatchDto;
       await batch.update({
-        ...createBatchDto,
+        ...batchDto,
         createdAt: new Date(),
         updatedById: null,
         deletedById: null,
       });
       this.logger.log(`Batch reinstated successfully. ID: ${batch.id}`);
     } else {
-      batch = await this.batchRepo.create({ ...createBatchDto });
+      const { markup, ...batchDto } = createBatchDto;
+      batch = await this.batchRepo.create({ ...batchDto });
       this.logger.log(`Batch created successfully. ID: ${batch.id}`);
     }
     this.eventEmitter.emit('quantity.increased', {
@@ -195,7 +197,9 @@ export class BatchService {
       }
     }
 
-    const _result = await batch.update({ ...dto, updatedById: user.sub });
+    const { markup, ...batchDto } = dto;
+
+    const _result = await batch.update({ ...batchDto, updatedById: user.sub });
 
     if (dto.markup) {
       dto.markup.itemId = batch.itemId;

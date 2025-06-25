@@ -29,7 +29,7 @@ export enum AccountState {
   timestamps: true,
   paranoid: true,
 })
-export class User extends BaseModel {
+export class User extends BaseModel<User> {
   @Column
   fullName: string;
 

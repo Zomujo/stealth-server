@@ -15,7 +15,7 @@ import { User } from '../../auth/models/user.model';
   timestamps: true,
   paranoid: true,
 })
-export class Settings extends BaseModel {
+export class Settings extends BaseModel<Settings> {
   @Default(false)
   @Column
   emailDepartmentRequests: boolean;

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import {
+  AfterFind,
   AllowNull,
   BelongsTo,
   Column,
@@ -25,7 +26,7 @@ export enum ItemCategoryStatus {
   timestamps: true,
   paranoid: true,
 })
-export class ItemCategory extends BaseModel {
+export class ItemCategory extends BaseModel<ItemCategory> {
   @Column
   @ApiProperty({
     example: 'laxatives',
@@ -63,9 +64,6 @@ export class ItemCategory extends BaseModel {
   })
   @Column({
     type: DataType.VIRTUAL,
-    get(this: ItemCategory) {
-      return this.items && this.items.length ? this.items.length : 0;
-    },
   })
   itemCount: number;
 
@@ -92,4 +90,26 @@ export class ItemCategory extends BaseModel {
 
   @BelongsTo(() => User)
   deletedBy: User;
+
+  async getItemCount(): Promise<number> {
+    const itemsCount = await Item.count({ where: { categoryId: this.id } });
+    return itemsCount;
+  }
+
+  @AfterFind
+  static async afterFindHook(
+    this: void,
+    categories: ItemCategory | ItemCategory[],
+  ): Promise<void> {
+    if (!categories) return;
+    const processCategory = async (category: ItemCategory) => {
+      if (!category) return;
+      category.itemCount = await category.getItemCount();
+    };
+    if (Array.isArray(categories)) {
+      await Promise.all(categories.map(processCategory));
+    } else {
+      await processCategory(categories);
+    }
+  }
 }

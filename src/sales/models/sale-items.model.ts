@@ -19,7 +19,7 @@ import { User } from '../../auth/models/user.model';
   timestamps: true,
   paranoid: true,
 })
-export class SaleItem extends BaseModel {
+export class SaleItem extends BaseModel<SaleItem> {
   @ForeignKey(() => Sale)
   @Column
   saleId: string;
