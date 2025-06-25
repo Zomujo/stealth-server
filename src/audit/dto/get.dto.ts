@@ -5,13 +5,13 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
-import { AuditLogDto } from './model.dto';
-import { IsOptional, IsString } from 'class-validator';
+import { AuditLogDto, DataTables } from './model.dto';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class FindAuditLogQueryDto extends IntersectionType(
   PickType(AuditLogDto, [
     'action',
-    'tableName',
     'description',
     'userId',
     'startDate',
@@ -19,6 +19,17 @@ export class FindAuditLogQueryDto extends IntersectionType(
   ]),
   OmitType(PaginationRequestDto, ['dateRange', 'search', 'searchFields']),
 ) {
+  @ApiPropertyOptional({
+    description: 'Name of the table affected',
+    isArray: true,
+    enum: DataTables,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(DataTables, { each: true })
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  tableNames: string[];
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

@@ -54,8 +54,8 @@ export class AuditsService {
     if (query.action) {
       whereOptions.action = query.action;
     }
-    if (query.tableName) {
-      whereOptions.tableName = query.tableName;
+    if (query.tableNames) {
+      whereOptions.tableName = query.tableNames;
     }
     if (query.description) {
       whereOptions.description = { [Op.iLike]: `%${query.description}%` };

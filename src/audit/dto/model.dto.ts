@@ -4,6 +4,7 @@ import { IsString, IsEnum, IsOptional, IsUUID } from 'class-validator';
 import { GenericResponseDto } from '../../core/shared/dto/base.dto';
 import { GetNoPaginateDto } from '../../core/shared/dto/get-no_paginate.dto';
 import { GetUsersNoPaginateDto } from '../../user/dto';
+import { Type } from 'class-transformer';
 
 export enum DataTables {
   DEPARTMENT = 'Department',
@@ -65,6 +66,7 @@ export class AuditLogDto extends GenericResponseDto {
     description: 'Start date for filtering',
   })
   @IsOptional()
+  @Type(() => Date)
   startDate?: Date;
 
   @ApiPropertyOptional({
@@ -73,6 +75,7 @@ export class AuditLogDto extends GenericResponseDto {
     description: 'End date for filtering',
   })
   @IsOptional()
+  @Type(() => Date)
   endDate?: Date;
 
   @ApiResponseProperty({ example: 'f1a2b3c4-d5e6-7890-abcd-1234567890ef' })
