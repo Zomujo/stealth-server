@@ -10,14 +10,13 @@ import { IncludeOptions, Op, QueryTypes } from 'sequelize';
 import { Department } from '../admin/department/models/department.model';
 import { Sequelize } from 'sequelize-typescript';
 import { ExpiredAlert } from '../inventory/items/batches/dto';
-// import { Cron } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { NotificationService } from '../notification/notification.service';
 import { Features } from '../core/shared/enums/permissions.enum';
 import { CreateNotificationDto } from '../notification/dto';
 import { NotificationStatus } from '../notification/enum';
 import { MailService } from '../notification/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UserService {
@@ -35,6 +34,15 @@ export class UserService {
 
     facility: { model: Facility, attributes: ['id', 'name'] },
   };
+
+  async findNoPaginate(facilityId: string, departmentId?: string) {
+    const users = await this.userRepository.findAll({
+      where: { facilityId, ...(departmentId && { departmentId }) },
+      attributes: ['id', 'fullName', 'email'],
+    });
+
+    return users;
+  }
 
   async findOne(userId: string) {
     const user = await this.userRepository.findByPk(userId, {

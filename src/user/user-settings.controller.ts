@@ -18,10 +18,10 @@ import {
 } from '../core/shared/responses/success.response';
 import { CreateSettingsDto, GetSettingsDto } from './dto';
 
-@ApiTags('User')
+@ApiTags('User Settings')
 @Controller('user')
-export class UserController {
-  private logger = new Logger(UserController.name);
+export class UserSettingsController {
+  private logger = new Logger(UserSettingsController.name);
   constructor(private readonly userService: UserService) {}
 
   @CustomApiResponse(['successNull', 'notfound', 'authorize'], {

@@ -5,9 +5,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AuditModels } from './models';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuditInterceptor } from './interceptors/audit.interceptor';
+import { User } from '../auth/models/user.model';
+import { Facility } from '../admin/facility/models/facility.model';
+import { Department } from '../admin/department/models/department.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature(AuditModels)],
+  imports: [
+    SequelizeModule.forFeature([...AuditModels, User, Facility, Department]),
+  ],
   controllers: [AuditsController],
   providers: [
     AuditsService,

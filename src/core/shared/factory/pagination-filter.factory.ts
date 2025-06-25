@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { PaginationRequestDto } from '../dto/pagination.dto';
 import { getDateRangeFilter } from './date-filter.factory';
 
@@ -8,6 +9,16 @@ export function generateFilter<T extends Partial<PaginationRequestDto>>(
   pageFilter: { limit: number; offset: number; order: any };
   searchFilter: object;
 } {
+  let searchQuery: Record<string, any> = {};
+
+  if (query.search && query.searchFields.length > 0) {
+    searchQuery = {
+      [Op.or]: query.searchFields.map((field) => ({
+        [field]: { [Op.iLike]: `%${query.search}%` },
+      })),
+    };
+  }
+
   return {
     pageFilter: {
       limit: query.pageSize || 10,
@@ -15,7 +26,7 @@ export function generateFilter<T extends Partial<PaginationRequestDto>>(
       order: [[query.orderBy || 'updatedAt', query.orderDirection || 'DESC']],
     },
     searchFilter: {
-      ...(query.search && searchOption),
+      ...(query.search && query.searchFields ? searchQuery : searchOption),
       ...(query.dateRange && {
         createdAt: getDateRangeFilter(query.dateRange).createdAt,
       }),

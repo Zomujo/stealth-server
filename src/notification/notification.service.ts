@@ -15,6 +15,7 @@ import { NotificationStatus } from './enum';
 import { AccountState, User } from '../auth/models/user.model';
 import { FetchNotificationsQueryDto } from './dto/get.dto';
 import { generateFilter } from '../core/shared/factory';
+import { CreateOptions } from 'sequelize';
 
 @Injectable()
 export class NotificationService {
@@ -35,12 +36,17 @@ export class NotificationService {
     user: Pick<IUserPayload, 'facility' | 'department'>,
     feature: Features,
   ) {
-    const notification = await this.notifcationRepo.create({
-      ...dto,
-      feature,
-      facilityId: user.facility,
-      departmentId: user.department,
-    });
+    const notification = await this.notifcationRepo.create(
+      {
+        ...dto,
+        feature,
+        facilityId: user.facility,
+        departmentId: user.department,
+      },
+      {
+        skipAudit: true,
+      } as CreateOptions,
+    );
     dto.id = notification.id;
     dto.createdAt = notification.createdAt;
     return dto;
@@ -114,6 +120,7 @@ export class NotificationService {
     if (userId) {
       userOptions.userId = userId;
     }
+    userOptions.skipAudit = true;
     const deleted = await this.notifcationRepo.destroy({
       where: { id },
       ...userOptions,

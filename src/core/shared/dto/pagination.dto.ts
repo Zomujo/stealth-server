@@ -22,6 +22,15 @@ export class PaginationRequestDto {
   @IsString()
   search: string;
 
+  // @ApiPropertyOptional({
+  //   type: [String],
+  //   description: 'Fields to search within',
+  // })
+  // @IsOptional()
+  // @IsArray()
+  // @IsString({ each: true })
+  searchFields?: string[];
+
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
