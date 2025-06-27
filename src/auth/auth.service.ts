@@ -116,8 +116,9 @@ export class AuthService {
   }
 
   async verifyAccount(token: string) {
+    const clientUrl = this.configService.get<string>('CLIENT_URL');
     try {
-      const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
+      const payload = await this.jwtService.verifyAsync<IUserPayload>(token, {
         secret: this.jwtConfiguration.secret,
       });
 
@@ -134,10 +135,16 @@ export class AuthService {
         user.fullName,
         user.role,
       );
-      return '<p>Account Verified successfully <a href="https://ims-v2-frontend.vercel.app/auth/login">Proceed to login</a></p>';
+      return `<p>Account Verified successfully <a href="${clientUrl}/auth/login">Proceed to login</a></p>`;
     } catch (error) {
       if (error.name == 'TokenExpiredError') {
-        return '<p>Account verification failed.<br /> Token expired Click <a href="https://ims-v2-frontend.vercel.app/auth/login">here</a> to request a new one</p>';
+        const payload = await this.jwtService.verifyAsync<IUserPayload>(token, {
+          secret: this.jwtConfiguration.secret,
+          ignoreExpiration: true,
+        });
+        const user = await this.retrieveUser(payload.sub);
+        const encodedEmail = btoa(user.email);
+        return `<p>Account verification failed.<br /> Token expired Click <a href="${clientUrl}/token-expired/${encodedEmail}">here</a> to request a new one</p>`;
       }
       throw error;
     }

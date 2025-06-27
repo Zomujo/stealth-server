@@ -203,6 +203,7 @@ export class UserService {
       subject: 'EXPIRY ALERT ‼️‼️ - Stealth',
       template: './expiryReport',
       context: {
+        clientUrl: this.configService.get<string>('CLIENT_URL'),
         fullName: data.fullName,
         expired: data.expired,
         nearExpiry: data.nearExpiry,

@@ -10,7 +10,7 @@ block content
     li #{nearExpiry} item(s) nearing expiry
   p Please take immediate action to review these items and ensure proper handling.
   if linkName && linkRoute
-  - const fullLink = `https://ims-v2-frontend.vercel.app/${linkRoute}`
+  - const fullLink = `${clientUrl}/${linkRoute}`
     p
       a(href=fullLink) #{linkName}
   p Thank you for your attention.

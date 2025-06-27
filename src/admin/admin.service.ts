@@ -224,6 +224,7 @@ export class AdminService {
       subject: 'Welcome 👋 - Stealth',
       template: './userCreated',
       context: {
+        clientUrl: this.configService.get<string>('CLIENT_URL'),
         email: user.email,
         fullName: user.fullName,
         role: user.role,
