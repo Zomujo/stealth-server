@@ -144,7 +144,7 @@ export class AuthService {
         });
         const user = await this.retrieveUser(payload.sub);
         const encodedEmail = btoa(user.email);
-        return `<p>Account verification failed.<br /> Token expired Click <a href="${clientUrl}/token-expired/${encodedEmail}">here</a> to request a new one</p>`;
+        return `<p>Account verification failed.<br /> Token expired Click <a href="${clientUrl}/auth/token-expired/${encodedEmail}">here</a> to request a new one</p>`;
       }
       throw error;
     }
