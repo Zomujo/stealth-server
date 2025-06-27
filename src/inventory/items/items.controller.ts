@@ -163,7 +163,6 @@ export class ItemController {
         'Batches retrieved successfully',
       );
     } catch (error) {
-      this.logger.log(error);
       throwError(this.logger, error);
     }
   }
