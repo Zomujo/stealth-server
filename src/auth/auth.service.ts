@@ -116,19 +116,31 @@ export class AuthService {
   }
 
   async verifyAccount(token: string) {
-    const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
-      secret: this.jwtConfiguration.secret,
-    });
+    try {
+      const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
+        secret: this.jwtConfiguration.secret,
+      });
 
-    const user = await this.retrieveUser(payload.sub);
+      const user = await this.retrieveUser(payload.sub);
 
-    if (user.status !== AccountState.UNVERIFIED) {
-      throw new ForbiddenException('Account cannot be verified');
+      if (user.status !== AccountState.UNVERIFIED) {
+        throw new ForbiddenException('Account cannot be verified');
+      }
+      user.status = AccountState.ACTIVE;
+      user.updatedById = user.id;
+      await user.save();
+      this.sendAccountCreationConfirmation(
+        user.email,
+        user.fullName,
+        user.role,
+      );
+      return '<p>Account Verified successfully <a href="https://ims-v2-frontend.vercel.app/auth/login">Proceed to login</a></p>';
+    } catch (error) {
+      if (error.name == 'TokenExpiredError') {
+        return '<p>Account verification failed.<br /> Token expired Click <a href="https://ims-v2-frontend.vercel.app/auth/login">here</a> to request a new one</p>';
+      }
+      throw error;
     }
-    user.status = AccountState.ACTIVE;
-    await user.save();
-    this.sendAccountCreationConfirmation(user.email, user.fullName, user.role);
-    return '<p>Account Verified successfully <a href="https://ims-v2-frontend.vercel.app/auth/login">Proceed to login</a></p>';
   }
 
   async login(dto: LoginDto) {
@@ -232,6 +244,7 @@ export class AuthService {
         payload.session,
       );
       loginSession.status = StatusType.ACTIVE;
+      loginSession.updatedById = payload.sub;
       await loginSession.save();
 
       return new RefreshTokenDto(
@@ -316,6 +329,7 @@ export class AuthService {
     );
     user.password = newHashedPassword;
     user.resetCodeExpires = null;
+    user.updatedById = user.id;
     await user.save();
 
     this.sendResetPasswordConfirmation(email);
@@ -353,6 +367,7 @@ export class AuthService {
     }
     user.email = email;
     user.resetCodeExpires = null;
+    user.updatedById = user.id;
     await user.save();
     this.sendChangeEmailConfirmation(email, user.fullName);
 
@@ -371,7 +386,7 @@ export class AuthService {
     const uploadImage = await this.cloudinaryService.uploadFile(file);
     user.imageId = uploadImage.public_id;
     user.imageUrl = uploadImage.secure_url;
-
+    user.updatedById = user.id;
     await user.save();
 
     return;
@@ -390,7 +405,7 @@ export class AuthService {
     await this.cloudinaryService.deleteFile(user.imageId);
     user.imageId = null;
     user.imageUrl = null;
-
+    user.updatedById = user.id;
     await user.save();
 
     return;
@@ -425,6 +440,7 @@ export class AuthService {
     if (user.status != AccountState.ACTIVE) {
       user.status = AccountState.ACTIVE;
     }
+    user.updatedById = user.id;
     await user.save();
 
     this.sendchangePasswordEmail(user.email);
@@ -543,6 +559,7 @@ export class AuthService {
     const hashCode = await bcrypt.hash(code.toString(), this.SALT_OR_ROUNDS);
     user.resetCode = hashCode;
     user.resetCodeExpires = add(new Date(), { minutes: 11 });
+    user.updatedById = user.id;
     await user.save();
     return code;
   }

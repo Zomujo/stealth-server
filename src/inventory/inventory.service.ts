@@ -218,6 +218,7 @@ export class StockAdjustmentsService {
     } else {
       throw new BadRequestException('unknown adjustment type');
     }
+    oldBatch.updatedById = userId;
     await oldBatch.save();
     return oldBatch;
   }
