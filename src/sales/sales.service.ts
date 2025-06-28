@@ -60,6 +60,7 @@ export class SalesService {
 
     const filter: FindAndCountOptions<Batch> = {
       where: {
+        validity: { [Op.gt]: startOfToday() },
         departmentId: user.department,
       },
       limit: query.pageSize || 10,
