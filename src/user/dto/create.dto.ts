@@ -16,6 +16,11 @@ import { AccountState } from '../../auth/models/user.model';
 import { PermissionsTypes } from '../../admin/dto';
 
 export class CreateUserDto extends IntersectionType(GenericResponseDto) {
+  @ApiResponseProperty({
+    example: 'j.doe3256',
+  })
+  username: string;
+
   @ApiProperty({
     example: 'Healthcare Worker',
     description: 'The role the user is being registered as',

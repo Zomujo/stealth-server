@@ -15,6 +15,7 @@ export class GetUserDto extends OmitType(CreateUserDto, [
   'deletedAt',
   'deletedBy',
   'facilityId',
+  'username',
 ]) {
   @ApiResponseProperty({
     type: GetNoPaginateDto,
