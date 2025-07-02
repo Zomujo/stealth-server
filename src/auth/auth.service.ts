@@ -699,7 +699,7 @@ export class AuthService {
 
   private async sendForgotPasswordSms(phoneNumber: string, code: number) {
     await this.smsService.sendSms({
-      body: `Your Reset Code is ${code}`,
+      body: `Your Stealth-IMS Reset Code is ${code}. It expires in 30 minutes one-time use only. Inyabon Medsync`,
       to: phoneNumber,
     });
   }
