@@ -181,4 +181,25 @@ export class DashboardController {
       throwError(this.logger, error);
     }
   }
+
+  @CustomApiResponse(['success', 'authorize'], {
+    type: null,
+    message: 'markup sales sent successfully',
+  })
+  @Get('sales/markup')
+  async getMarkupSales(
+    @Query() query: FindAnalyticsQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
+    try {
+      const res = await this.dashboardService.getMarkupSales(query, user);
+      return new ApiSuccessResponseDto(
+        res,
+        HttpStatus.OK,
+        'markup sales send successfully',
+      );
+    } catch (e) {
+      throwError(this.logger, e);
+    }
+  }
 }
