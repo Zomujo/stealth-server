@@ -27,7 +27,11 @@ import { ItemService } from '../inventory/items/items.service';
 import { MarkupService } from '../inventory/items/markup/markup.service';
 import { AmountType } from '../inventory/items/markup/dto';
 
-type BatchSellingPrice = { batchId: string; sellingPrice: number };
+type BatchSellingPrice = {
+  batchId: string;
+  quantity: number;
+  sellingPrice: number;
+};
 @Injectable()
 export class SalesService {
   private logger: Logger = new Logger(SalesService.name);
@@ -177,6 +181,7 @@ export class SalesService {
 
           batchSellingPrices.push({
             batchId: saleItem.batchId,
+            quantity: saleItem.quantity,
             sellingPrice: modBatch.item.sellingPrice,
           });
 
@@ -195,8 +200,7 @@ export class SalesService {
       dto.saleNumber = `S-${new Date().getTime()}`;
       dto.subTotal = parseFloat(subTotal.toFixed(2));
       if (dto.insured) {
-        const [totalMarkup, count] =
-          await this.calculateTotal(batchSellingPrices);
+        const [total, count] = await this.calculateTotal(batchSellingPrices);
 
         if (count === dto.saleItems.length) {
           dto.paymentType = [SalePaymentType.NHIS];
@@ -205,8 +209,7 @@ export class SalesService {
             dto.paymentType = [...dto.paymentType, SalePaymentType.NHIS];
           }
         }
-        const total = totalMarkup + dto.subTotal;
-        dto.total = parseFloat(total.toFixed(2));
+        dto.total = parseFloat((total > 0 ? total : 0).toFixed(2));
       } else {
         dto.total = parseFloat(subTotal.toFixed(2));
       }
@@ -262,10 +265,12 @@ export class SalesService {
           case AmountType.PERCENTAGE: {
             const newCapPercentage = item.sellingPrice * (markup.amount / 100);
             cappedPrice = item.sellingPrice - newCapPercentage;
+            cappedPrice *= item.quantity;
             return cappedPrice >= 0 ? cappedPrice : 0;
           }
           case AmountType.PRICE: {
             cappedPrice = item.sellingPrice - markup.amount;
+            cappedPrice *= item.quantity;
             return cappedPrice >= 0 ? cappedPrice : 0;
           }
           default:
@@ -593,6 +598,7 @@ export class SalesService {
 
           batchSellingPrices.push({
             batchId: saleItem.batchId,
+            quantity: saleItem.quantity,
             sellingPrice: modBatch.item.sellingPrice,
           });
 
@@ -609,8 +615,7 @@ export class SalesService {
 
       dto.subTotal = parseFloat(subTotal.toFixed(2));
       if (dto.insured) {
-        const [totalMarkup, count] =
-          await this.calculateTotal(batchSellingPrices);
+        const [total, count] = await this.calculateTotal(batchSellingPrices);
 
         if (count === dto.saleItems.length) {
           dto.paymentType = [SalePaymentType.NHIS];
@@ -619,7 +624,6 @@ export class SalesService {
             dto.paymentType = [...dto.paymentType, SalePaymentType.NHIS];
           }
         }
-        const total = totalMarkup + dto.subTotal;
         dto.total = parseFloat(total.toFixed(2));
       } else {
         dto.total = parseFloat(subTotal.toFixed(2));
