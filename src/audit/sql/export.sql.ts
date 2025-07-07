@@ -8,7 +8,7 @@ function generateQuerySql(query: ExportAuditsQueryDto) {
     filterClauses.push(`a.action = ${query.action}`);
   }
   if (query.tableNames) {
-    filterClauses.push(`a.table_name IN (${query.tableNames.join(',')})`);
+    filterClauses.push(`a.table_name IN ('${query.tableNames.join(', ')}')`);
   } else {
     filterClauses.push(`
       a.table_name IN (
@@ -63,8 +63,8 @@ export function generateExportQuery(
       a.facility_id = '${user.facility}'
       ${user.department ? `AND a.department_id = '${user.department}'` : ''}
       AND a.table_name <> 'unknown'
-      AND ${filters}
-      AND ${queryFilters.searchFilter}
+      ${filters ? `AND ${filters}` : ''}
+      ${queryFilters.searchFilter ? `AND ${queryFilters.searchFilter}` : ''}
 
     ${queryFilters.pageFilter}
   `;
