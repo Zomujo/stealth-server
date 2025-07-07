@@ -41,7 +41,10 @@ export class FindAuditLogQueryDto extends IntersectionType(
   userDepartmentId?: string;
 }
 
-export class ExportAuditsQueryDto extends ExportQueryDto {}
+export class ExportAuditsQueryDto extends IntersectionType(
+  ExportQueryDto,
+  OmitType(FindAuditLogQueryDto, ['page', 'pageSize']),
+) {}
 
 export class AuditLogsResponseDto extends PickType(AuditLogDto, [
   'id',
