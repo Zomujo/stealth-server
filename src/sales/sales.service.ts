@@ -532,6 +532,7 @@ export class SalesService {
 
     if (dto.saleItems) {
       const sale = await this.fetchOne(id);
+      const batchSellingPrices: BatchSellingPrice[] = [];
       const saleItems = await Promise.all(
         dto.saleItems.map(async (saleItem) => {
           const savedSaleItem = sale.saleItems.find(
@@ -589,6 +590,11 @@ export class SalesService {
 
           const modBatch = batch.get({ plain: true });
 
+          batchSellingPrices.push({
+            batchId: saleItem.batchId,
+            sellingPrice: modBatch.item.sellingPrice,
+          });
+
           return {
             ...modBatch,
             quantity: saleItem.quantity,
@@ -601,7 +607,22 @@ export class SalesService {
       }, 0);
 
       dto.subTotal = parseFloat(subTotal.toFixed(2));
-      dto.total = parseFloat(subTotal.toFixed(2));
+      if (dto.insured) {
+        const [totalMarkup, count] =
+          await this.calculateTotal(batchSellingPrices);
+
+        if (count === dto.saleItems.length) {
+          dto.paymentType = [SalePaymentType.NHIS];
+        } else if (count > 0 && count <= dto.saleItems.length) {
+          if (!dto.paymentType.includes(SalePaymentType.NHIS)) {
+            dto.paymentType = [...dto.paymentType, SalePaymentType.NHIS];
+          }
+        }
+        const total = totalMarkup + dto.subTotal;
+        dto.total = parseFloat(total.toFixed(2));
+      } else {
+        dto.total = parseFloat(subTotal.toFixed(2));
+      }
 
       saleItemsBody.saleItems = saleItems;
     }
