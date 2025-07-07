@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { PaginationRequestDto } from '../dto/pagination.dto';
 import { getDateRangeFilter } from './date-filter.factory';
 
@@ -31,4 +32,32 @@ export function generateFilter<T extends Partial<PaginationRequestDto>>(
       }),
     },
   };
+}
+
+export function sqlGenerateFilter<T extends Partial<PaginationRequestDto>>(
+  tableAlias: string,
+  query: T,
+  searchOption?: string,
+): {
+  pageFilter: string;
+  searchFilter: string;
+} {
+  const pageFilter = `ORDER BY ${tableAlias ? `${tableAlias}.` : ''}${query.orderBy || 'updated_at'} ${query.orderDirection || 'DESC'}`;
+  const searchFilters: string[] = [];
+  if (query.search) {
+    searchFilters.push(searchOption);
+  }
+  if (query.dateRange) {
+    const [startDate, endDate] = getDateRangeFilter(query.dateRange).createdAt[
+      Op.between
+    ];
+
+    searchFilters.push(
+      `${tableAlias ? `${tableAlias}.` : ''}created_at BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+    );
+  }
+
+  const searchFilter = searchFilters.join('\nAND ');
+
+  return { pageFilter, searchFilter };
 }

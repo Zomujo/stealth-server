@@ -8,6 +8,7 @@ import { PaginationRequestDto } from '../../core/shared/dto/pagination.dto';
 import { AuditLogDto, DataTables } from './model.dto';
 import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { ExportQueryDto } from '../../exports/dto';
 
 export class FindAuditLogQueryDto extends IntersectionType(
   PickType(AuditLogDto, [
@@ -39,6 +40,11 @@ export class FindAuditLogQueryDto extends IntersectionType(
 
   userDepartmentId?: string;
 }
+
+export class ExportAuditsQueryDto extends IntersectionType(
+  ExportQueryDto,
+  OmitType(FindAuditLogQueryDto, ['page', 'pageSize']),
+) {}
 
 export class AuditLogsResponseDto extends PickType(AuditLogDto, [
   'id',

@@ -12,6 +12,7 @@ import { AuditsService } from './audit.service';
 import {
   AuditLogResponseDto,
   AuditLogsResponseDto,
+  ExportAuditsQueryDto,
   FindAuditLogQueryDto,
 } from './dto';
 import { GetUser, Permission } from '../auth/decorator';
@@ -27,7 +28,6 @@ import {
   PermissionLevel,
 } from '../core/shared/enums/permissions.enum';
 import { AuditsExportsService } from './exports.service';
-import { ExportQueryDto } from '../exports/dto';
 
 @Controller('audits')
 export class AuditsController {
@@ -43,7 +43,7 @@ export class AuditsController {
   @Permission(Features.REPORTS, PermissionLevel.READ)
   @Get('export')
   async exportAudits(
-    @Query() query: ExportQueryDto,
+    @Query() query: ExportAuditsQueryDto,
     @GetUser() user: IUserPayload,
   ) {
     try {
