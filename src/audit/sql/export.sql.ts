@@ -1,8 +1,12 @@
 import { IUserPayload } from '../../auth/interface/payload.interface';
+import { ExportAuditsQueryDto } from '../dto';
 
 export function generateExportQuery(
+  _query: ExportAuditsQueryDto,
   user: Pick<IUserPayload, 'facility' | 'department'>,
 ) {
+  const _filterClauses = [];
+  // if
   return `
     SELECT 
       a.action AS "Action",

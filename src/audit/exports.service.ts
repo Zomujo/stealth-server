@@ -2,8 +2,8 @@ import { Injectable, NotImplementedException } from '@nestjs/common';
 import { generateExportQuery } from './sql';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { generateExportFilename } from '../core/shared/factory';
-import { ExportQueryDto } from '../exports/dto';
 import { ExportsService } from '../exports/exports.service';
+import { ExportAuditsQueryDto } from './dto';
 
 @Injectable()
 export class AuditsExportsService {
@@ -15,12 +15,12 @@ export class AuditsExportsService {
    * @returns A promise that resolves to the created readable stream.
    * @throws If any error occurs during the creation process.
    */
-  async exportAudits(query: ExportQueryDto, user: IUserPayload) {
+  async exportAudits(query: ExportAuditsQueryDto, user: IUserPayload) {
     switch (query.exportType) {
       case 'csv':
-        return await this.exportAuditsCsv(user);
+        return await this.exportAuditsCsv(query, user);
       case 'xlsx':
-        return await this.exportAuditsExcel(user);
+        return await this.exportAuditsExcel(query, user);
       default:
         throw new NotImplementedException('Not yet implemented');
     }
@@ -33,8 +33,11 @@ export class AuditsExportsService {
    * @returns A promise that resolves to the created readable stream.
    * @throws If any error occurs during the creation process.
    */
-  private async exportAuditsCsv(user: IUserPayload) {
-    const sql = generateExportQuery({
+  private async exportAuditsCsv(
+    query: ExportAuditsQueryDto,
+    user: IUserPayload,
+  ) {
+    const sql = generateExportQuery(query, {
       facility: user.facility,
       department: user.department,
     });
@@ -56,8 +59,11 @@ export class AuditsExportsService {
    * @returns A promise that resolves to the created readable stream.
    * @throws If any error occurs during the creation process.
    */
-  private async exportAuditsExcel(user: IUserPayload) {
-    const sql = generateExportQuery({
+  private async exportAuditsExcel(
+    query: ExportAuditsQueryDto,
+    user: IUserPayload,
+  ) {
+    const sql = generateExportQuery(query, {
       facility: user.facility,
       department: user.department,
     });
