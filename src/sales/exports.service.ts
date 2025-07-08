@@ -3,10 +3,10 @@ import { generateExportQuery } from './sql';
 import { IUserPayload } from '../auth/interface/payload.interface';
 import { generateExportFilename } from '../core/shared/factory';
 import { ExportsService } from '../exports/exports.service';
-import { ExportAuditsQueryDto } from './dto';
+import { ExportSalesQueryDto } from './dto';
 
 @Injectable()
-export class AuditsExportsService {
+export class SalesExportsService {
   constructor(private readonly exportService: ExportsService) {}
   /**
    * Exports Audits.
@@ -15,7 +15,7 @@ export class AuditsExportsService {
    * @returns A promise that resolves to the created readable stream.
    * @throws If any error occurs during the creation process.
    */
-  async exportAudits(query: ExportAuditsQueryDto, user: IUserPayload) {
+  async exportAudits(query: ExportSalesQueryDto, user: IUserPayload) {
     switch (query.exportType) {
       case 'csv':
         return await this.exportAuditsCsv(query, user);
@@ -27,26 +27,33 @@ export class AuditsExportsService {
   }
 
   /**
-   * Exports Audits in csv.
+   * Exports Sales in csv.
    *
    * @param user - The body containing the user's information.
    * @returns A promise that resolves to the created readable stream.
    * @throws If any error occurs during the creation process.
    */
   private async exportAuditsCsv(
-    query: ExportAuditsQueryDto,
+    query: ExportSalesQueryDto,
     user: IUserPayload,
   ) {
     const sql = generateExportQuery(query, {
       facility: user.facility,
       department: user.department,
     });
-    const auditsCsv = await this.exportService.exportStockCsv(sql, {
-      fields: ['Action', 'Module Name', 'User', 'Department', 'Date'],
+    console.log('sales', sql);
+    const salesCsv = await this.exportService.exportStockCsv(sql, {
+      fields: [
+        'Patient ID',
+        'Item(s)',
+        'Total Amount',
+        'Date Created',
+        'Payment Type',
+      ],
     });
-    const fileName = generateExportFilename('Audit_Logs', 'csv');
+    const fileName = generateExportFilename('Sales', 'csv');
     return {
-      data: auditsCsv,
+      data: salesCsv,
       meta: {
         fileName,
         type: 'text/csv',
@@ -55,26 +62,32 @@ export class AuditsExportsService {
   }
 
   /**
-   * Exports Audits in xlsx (excel).
+   * Exports Sales in xlsx (excel).
    *
    * @param user - The body containing the user's information.
    * @returns A promise that resolves to the created readable stream.
    * @throws If any error occurs during the creation process.
    */
   private async exportAuditsExcel(
-    query: ExportAuditsQueryDto,
+    query: ExportSalesQueryDto,
     user: IUserPayload,
   ) {
     const sql = generateExportQuery(query, {
       facility: user.facility,
       department: user.department,
     });
-    const auditsXlsx = await this.exportService.exportStockCsv(sql, {
-      fields: ['Action', 'Module Name', 'User', 'Department', 'Date'],
+    const salesXlsx = await this.exportService.exportStockCsv(sql, {
+      fields: [
+        'Patient ID',
+        'Item(s)',
+        'Total Amount',
+        'Date Created',
+        'Payment Type',
+      ],
     });
-    const fileName = generateExportFilename('Audit_Logs', 'xlsx');
+    const fileName = generateExportFilename('Sales', 'xlsx');
     return {
-      data: auditsXlsx,
+      data: salesXlsx,
       meta: {
         fileName,
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

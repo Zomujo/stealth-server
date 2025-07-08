@@ -274,11 +274,11 @@ export class UserService {
         data.linkRoute = notification.linkRoute;
         data.linkName = notification.linkName;
         this.sendResetPasswordConfirmation(data);
-        console.log(notification);
+        // console.log(notification);
       }
     });
 
-    console.log(userData);
+    // console.log(userData);
     return users;
   }
 

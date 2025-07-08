@@ -31,9 +31,9 @@ export class ImsStockmateService {
   ) {}
 
   async sendSmsResponse(dto: AtskWebhookDto) {
-    console.log(dto);
+    // console.log(dto);
     const data = await this.init({ from: dto.from, command: dto.text });
-    console.log('data length', data.length);
+    // console.log('data length', data.length);
     await this.smsService.sendWithAfricasTalking({ to: dto.from, body: data });
   }
 
@@ -113,7 +113,7 @@ export class ImsStockmateService {
 
       case 'STOCK': {
         const cmd = command.stockOptions;
-        console.log('expiry date', cmd.expiresAt);
+        // console.log('expiry date', cmd.expiresAt);
         const batch = await this.batchService.stock({
           itemName: cmd.item,
           batchNumber: cmd.batch,

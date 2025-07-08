@@ -10,6 +10,7 @@ import {
 import { IsBooleanString, IsEnum, IsOptional } from 'class-validator';
 import { PaymentStatus } from '../models/sales.model';
 import { GenericResponseDto } from '../../core/shared/dto/base.dto';
+import { ExportQueryDto } from '../../exports/dto';
 
 export class ItemDto {
   @ApiResponseProperty({ example: 'Some Item' })
@@ -126,6 +127,11 @@ export class GetSalesPaginationDto extends PaginationRequestDto {
   @IsEnum(PaymentStatus)
   status: PaymentStatus;
 }
+
+export class ExportSalesQueryDto extends IntersectionType(
+  ExportQueryDto,
+  OmitType(GetSalesPaginationDto, ['page', 'pageSize']),
+) {}
 
 export class FindItemDto extends PickType(PaginationRequestDto, [
   'search',

@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Logger,
   ParseUUIDPipe,
+  StreamableFile,
 } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import {
@@ -23,6 +24,7 @@ import {
   GetSalesItemsDto,
   FetchSalesReportDataQueryDto,
   FetchTopSellingReportDataQueryDto,
+  ExportSalesQueryDto,
 } from './dto/';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomApiResponse } from 'src/core/shared/docs/decorators';
@@ -39,13 +41,17 @@ import {
   PermissionLevel,
 } from '../core/shared/enums/permissions.enum';
 import { GetReportDataDto } from '../reports/dto';
+import { SalesExportsService } from './exports.service';
 
 @ApiTags('Sales')
 @Controller('sales')
 export class SalesController {
   private logger = new Logger(SalesController.name);
 
-  constructor(private readonly salesService: SalesService) {}
+  constructor(
+    private readonly salesService: SalesService,
+    private readonly salesExportsService: SalesExportsService,
+  ) {}
 
   @CustomApiResponse(['authorize', 'paginated'], {
     type: GetSalesItemsDto,
@@ -111,6 +117,26 @@ export class SalesController {
         HttpStatus.OK,
         'Sales retrieved successfully',
       );
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
+
+  @CustomApiResponse(['successNull', 'authorize', 'notfound'], {
+    message: 'Sales exported successfully',
+  })
+  @Permission(Features.REPORTS, PermissionLevel.READ)
+  @Get('export')
+  async exportAudits(
+    @Query() query: ExportSalesQueryDto,
+    @GetUser() user: IUserPayload,
+  ) {
+    try {
+      const response = await this.salesExportsService.exportAudits(query, user);
+      return new StreamableFile(response.data, {
+        type: response.meta.type,
+        disposition: `attachment; filename="${response.meta.fileName}"`,
+      });
     } catch (error) {
       throwError(this.logger, error);
     }

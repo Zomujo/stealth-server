@@ -20,7 +20,7 @@ function generateQuerySql(query: ExportStockAdjustmentsQueryDto) {
       `s.created_at <= '${new Date(query.endDate).toISOString()}'`,
     );
   }
-  return filterClauses.join('AND ');
+  return filterClauses.join('\n\tAND ');
 }
 
 export function generateExportQuery(

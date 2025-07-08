@@ -79,7 +79,16 @@ export class StockAdjustmentExportsService {
       facility: user.facility,
       department: user.department,
     });
-    const stockAdjustmentXlsx = await this.exportService.exportStockCsv(sql);
+    const stockAdjustmentXlsx = await this.exportService.exportStockCsv(sql, {
+      fields: [
+        'Item',
+        'Created By',
+        'Adjustment Type',
+        'Quantity',
+        'Date Created',
+        'Status',
+      ],
+    });
     const fileName = generateExportFilename('Stock_Adjustment', 'xlsx');
     return {
       data: stockAdjustmentXlsx,

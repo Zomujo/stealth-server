@@ -22,7 +22,7 @@ function generateQuerySql(query: ExportItemsQueryDto) {
     }
     filterClauses.push(`${whereClause}`);
   }
-  return filterClauses.join('AND ');
+  return filterClauses.join('\n\tAND ');
 }
 
 export function generateExportQuery(

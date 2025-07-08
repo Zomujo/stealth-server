@@ -76,7 +76,7 @@ export class ImsStockQlService {
         const stockMatch = cmd.match(
           /^STOCK "?(.+?)"? (?:INTO|TO) "?(.+?)"? (?:WITH|QUANTITY) (\d+)\s*(?:EXPIRES)*\s*"?(.*?)"?$/,
         );
-        console.log(cmd, stockMatch);
+        // console.log(cmd, stockMatch);
 
         const nlStock = cmd.match(/^ADD (\d+) "?(.+?)"? TO "?(.+?)"?$/);
         if (stockMatch) {
@@ -125,7 +125,7 @@ export class ImsStockQlService {
         const listItemsMatch = cmd.match(
           /^LIST ITEMS\s*"?(.*?)"?\s*(EXPIRE[SD])*\s*(\d+)?$/,
         );
-        console.log(cmd, listItemsMatch);
+        // console.log(cmd, listItemsMatch);
         if (listItemsMatch) {
           results.push({
             action: 'LIST',
@@ -145,7 +145,7 @@ export class ImsStockQlService {
         const listPatientsMatch = cmd.match(
           /^LIST\s+PATIENTS\s*(?:["']?(.*?)["']?)?$/,
         );
-        console.log(cmd, listPatientsMatch);
+        // console.log(cmd, listPatientsMatch);
         if (listPatientsMatch) {
           results.push({
             action: 'LIST',
@@ -184,12 +184,12 @@ export class ImsStockQlService {
         const sellItemsMatch = cmd.match(
           /^SELL\s*(TO\s*"?.*?"?)*\s*(USING\s*"?.*?"?)*\s*(?:WITH\s*ITEMS|AND\s*ITEMS|SELL\s*ITEMS|ITEMS)\s*(.*)$/,
         );
-        console.log(cmd, sellItemsMatch);
+        // console.log(cmd, sellItemsMatch);
 
         if (sellItemsMatch && sellItemsMatch.length > 1) {
           const [_, ...remainder] = sellItemsMatch;
           const sellActionOptions = this.parseAndSerialize(remainder);
-          console.log('sell action options', sellActionOptions);
+          // console.log('sell action options', sellActionOptions);
           results.push({
             action: 'SELL',
             sellOptions: {

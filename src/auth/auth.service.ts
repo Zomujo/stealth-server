@@ -88,8 +88,6 @@ export class AuthService {
       status: AccountState.UNVERIFIED,
     });
 
-    console.log(user.toJSON());
-
     await facility.update({ createdById: user.id });
 
     const token = await this.generateTokens(user, null);
@@ -258,8 +256,7 @@ export class AuthService {
   }
 
   async delete(userId: string) {
-    console.log(userId);
-    return { message: 'user deleted' };
+    return { message: `user ${userId} deleted` };
   }
 
   async refreshToken(token: string) {

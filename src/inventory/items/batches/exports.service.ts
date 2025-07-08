@@ -75,7 +75,15 @@ export class BatchesExportsService {
       facility: user.facility,
       department: user.department,
     });
-    const expiredBatchesXlsx = await this.exportService.exportStockCsv(sql);
+    const expiredBatchesXlsx = await this.exportService.exportStockCsv(sql, {
+      fields: [
+        'Item Name',
+        'Status',
+        'Expiry Date',
+        'Total Stock',
+        'Batch Number',
+      ],
+    });
     const fileName = generateExportFilename('Batches_By_Expiry', 'xlsx');
     return {
       data: expiredBatchesXlsx,
