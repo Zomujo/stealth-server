@@ -31,6 +31,7 @@ type BatchSellingPrice = {
   batchId: string;
   quantity: number;
   sellingPrice: number;
+  nhisCovered: boolean;
 };
 @Injectable()
 export class SalesService {
@@ -165,7 +166,7 @@ export class SalesService {
         );
         dto.patientId = patient.id;
       }
-      const batchSellingPrices: BatchSellingPrice[] = [];
+      let batchSellingPrices: BatchSellingPrice[] = [];
 
       const saleItems = await Promise.all(
         dto.saleItems.map(async (saleItem, index) => {
@@ -183,6 +184,7 @@ export class SalesService {
             batchId: saleItem.batchId,
             quantity: saleItem.quantity,
             sellingPrice: modBatch.item.sellingPrice,
+            nhisCovered: false,
           });
 
           dto.saleItems[index].itemId = modBatch.item.id;
@@ -200,7 +202,10 @@ export class SalesService {
       dto.saleNumber = `S-${new Date().getTime()}`;
       dto.subTotal = parseFloat(subTotal.toFixed(2));
       if (dto.insured) {
-        const [total, count] = await this.calculateTotal(batchSellingPrices);
+        const [total, count, bSellingPrices] =
+          await this.calculateTotal(batchSellingPrices);
+
+        batchSellingPrices = bSellingPrices;
 
         if (count === dto.saleItems.length) {
           dto.paymentType = [SalePaymentType.NHIS];
@@ -226,13 +231,20 @@ export class SalesService {
         { transaction },
       );
 
-      const refinedSaleItems = dto.saleItems.map((saleItem) => ({
-        saleId: sale.id,
-        departmentId: user.department,
-        createdById: user.sub,
-        facilityId: user.facility,
-        ...saleItem,
-      }));
+      const refinedSaleItems = dto.saleItems.map((saleItem) => {
+        const foundBatch = batchSellingPrices.find(
+          (batch) => batch.batchId == saleItem.batchId,
+        );
+
+        return {
+          saleId: sale.id,
+          departmentId: user.department,
+          createdById: user.sub,
+          facilityId: user.facility,
+          nhisCovered: foundBatch.nhisCovered,
+          ...saleItem,
+        };
+      });
 
       const _newItems = await this.saleItemRepository.bulkCreate(
         refinedSaleItems,
@@ -249,16 +261,19 @@ export class SalesService {
 
   async calculateTotal(
     payload: BatchSellingPrice[],
-  ): Promise<[number, number]> {
+  ): Promise<[number, number, BatchSellingPrice[]]> {
     let count = 0;
     const cappedPrices = await Promise.all(
-      payload.map(async (item) => {
+      payload.map(async (item, index) => {
         const markup = await this.markupService.fetchOne({
           query: { batchId: item.batchId, type: 'NHIS' },
         });
         if (!markup) {
-          return item.sellingPrice;
+          return item.quantity * item.sellingPrice;
         }
+
+        payload[index].nhisCovered = true;
+
         count += 1;
         let cappedPrice = 0;
         switch (markup.amountType) {
@@ -285,7 +300,7 @@ export class SalesService {
       (accum, current) => current + accum,
       0,
     );
-    return [finalTotal, count];
+    return [finalTotal, count, payload];
   }
 
   async smsSale(dto: SmsCreateSale) {
@@ -568,11 +583,22 @@ export class SalesService {
                 );
               }
             }
+            const markup = await this.markupService.fetchOne({
+              query: { batchId: batch.id, type: 'NHIS' },
+            });
+            let nhisCovered = false;
+            if (!markup) {
+              nhisCovered = false;
+            } else {
+              nhisCovered = true;
+            }
+
             await this.saleItemRepository.update(
               {
                 ...saleItem,
                 itemId: batch.item.id,
                 updatedById: userId,
+                nhisCovered,
               },
               {
                 where: {
@@ -587,12 +613,24 @@ export class SalesService {
               userId,
             );
             saleItem.itemId = batch.item.id;
+
+            const markup = await this.markupService.fetchOne({
+              query: { batchId: batch.id, type: 'NHIS' },
+            });
+            let nhisCovered = false;
+            if (!markup) {
+              nhisCovered = false;
+            } else {
+              nhisCovered = true;
+            }
+
             await this.saleItemRepository.create({
               ...saleItem,
               saleId: id,
               createdById: userId,
               departmentId: sale.departmentId,
               facilityId: sale.facilityId,
+              nhisCovered,
             });
           }
 
@@ -602,6 +640,7 @@ export class SalesService {
             batchId: saleItem.batchId,
             quantity: saleItem.quantity,
             sellingPrice: modBatch.item.sellingPrice,
+            nhisCovered: false,
           });
 
           return {

@@ -49,6 +49,13 @@ module.exports = {
         allowNull: false,
       },
 
+      nhisCovered: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: 'nhis_covered',
+      },
+
       departmentId: {
         type: Sequelize.UUID,
         allowNull: true,

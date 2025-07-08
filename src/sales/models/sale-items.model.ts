@@ -40,6 +40,9 @@ export class SaleItem extends BaseModel<SaleItem> {
   @Column
   quantity: number;
 
+  @Column
+  nhisCovered: boolean;
+
   @Column({ type: DataType.VIRTUAL })
   totalQuantity: number;
 
