@@ -35,6 +35,7 @@ export function generateExportQuery(
     `i.name ILIKE '%${query.search}%' OR i.brand_name ILIKE '%${query.search}%'`,
   );
   const filters = generateQuerySql(query);
+  // CASE WHEN i.unit_of_measurement IS NOT NULL THEN CONCAT(' ', i.unit_of_measurement) ELSE '' END
   return `
     WITH total_stocks AS (
       SELECT 
@@ -52,7 +53,6 @@ export function generateExportQuery(
           CASE WHEN i.brand_name IS NOT NULL THEN CONCAT(' (', i.brand_name, ')') ELSE '' END,
           CASE WHEN i.dosage_form IS NOT NULL THEN CONCAT(' ', INITCAP(i.dosage_form)) ELSE '' END,
           CASE WHEN i.strength IS NOT NULL THEN CONCAT(' ', i.strength) ELSE '' END,
-          CASE WHEN i.unit_of_measurement IS NOT NULL THEN CONCAT(' ', i.unit_of_measurement) ELSE '' END
         )
       ) AS "Item Name",
       c.name as "Category",

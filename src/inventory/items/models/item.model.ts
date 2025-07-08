@@ -32,7 +32,7 @@ export class Item extends BaseModel<Item> {
   brandName: string;
 
   @Column({ type: DataType.STRING, field: 'dosage_form' })
-  dosageForm: DosageForm;
+  dosageForm: DosageForm | string;
 
   @Column({ type: DataType.DOUBLE, allowNull: false, field: 'cost_price' })
   costPrice: number;
@@ -75,9 +75,9 @@ export class Item extends BaseModel<Item> {
       if (this.strength) {
         nameConsts.push(this.strength);
       }
-      if (this.unitOfMeasurement) {
-        nameConsts.push(this.unitOfMeasurement);
-      }
+      // if (this.unitOfMeasurement) {
+      //   nameConsts.push(this.unitOfMeasurement);
+      // }
       return nameConsts.join(' ');
     },
   })

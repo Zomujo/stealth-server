@@ -18,7 +18,7 @@ import { IUserPayload } from '../../auth/interface/payload.interface';
 import { OnEvent } from '@nestjs/event-emitter';
 import * as itemCategories from 'src/core/database/seeders/categories.json';
 import * as items from 'src/core/database/seeders/items.json';
-import { DosageForm } from '../items/dto';
+// import { DosageForm } from '../items/dto';
 
 @Injectable()
 export class ItemCategoryService {
@@ -215,7 +215,7 @@ export class ItemCategoryService {
       const { categoryName, dosageForm, ...others } = item;
       const creatingItem = {
         ...others,
-        dosageForm: dosageForm as DosageForm,
+        dosageForm: dosageForm,
         facilityId: payload.facilityId,
         createdById: payload.userId,
         categoryId: null,
@@ -229,6 +229,10 @@ export class ItemCategoryService {
     });
 
     await Item.bulkCreate(finalItems, { individualHooks: true });
+    this.logger.debug(
+      'Data seeded successfully for facility: ',
+      payload.facilityId,
+    );
     return;
   }
 }
