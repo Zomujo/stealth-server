@@ -41,7 +41,6 @@ export class SalesExportsService {
       facility: user.facility,
       department: user.department,
     });
-    console.log('sales', sql);
     const salesCsv = await this.exportService.exportStockCsv(sql, {
       fields: [
         'Patient ID',
