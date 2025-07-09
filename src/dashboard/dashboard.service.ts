@@ -302,29 +302,35 @@ from calculations;
     user: IUserPayload,
   ) {
     const { createdAt } = getDateRangeFilter(query.dateRange);
-    const {
-      result: { categories, quantities },
-    }: any = await this.sql.query(
-      `WITH filtered_sales AS (
-    SELECT
-        s.payment_type as name,
-        sum(si.quantity) as total_quantity
-    FROM sale_items si
-		JOIN sales s on s.id = si.sale_id
-		${this.applyWhere(createdAt, user)}
-		GROUP BY name
-    ORDER BY total_quantity desc
-    LIMIT 5
-		)
-		SELECT jsonb_build_object(
-    'categories', jsonb_agg(name),
-    'quantities', jsonb_agg(total_quantity)
-		) as result
-		FROM filtered_sales;`,
-      { plain: true, type: sequelize.QueryTypes.SELECT },
+    const result: any = await this.sql.query(
+      ` WITH base_data AS (
+  SELECT
+    unnest(
+      CASE
+        WHEN payment_type = '{CASH,ONLINE}' OR payment_type = '{ONLINE, CASH}' THEN '{CASH+ONLINE}'
+        ELSE payment_type
+      END
+    ) AS payment_type,
+    si.quantity,
+    si.nhis_covered
+  FROM sale_items si
+  JOIN sales s ON si.sale_id = s.id
+  ${this.applyWhere(createdAt, user)}
+)
+SELECT
+  payment_type AS type,
+  CASE
+    WHEN payment_type = 'NHIS' THEN SUM(quantity) FILTER (WHERE nhis_covered)
+    ELSE SUM(quantity) - COALESCE(SUM(quantity) FILTER (WHERE nhis_covered), 0)
+  END AS quantity
+FROM base_data
+GROUP BY payment_type;
+`,
+      { raw: true, type: sequelize.QueryTypes.SELECT },
     );
+    console.log(result);
 
-    return new SalesPaymentMethodDto(categories, quantities);
+    return new SalesPaymentMethodDto(result);
   }
 
   async getMarkupSales(query: FindAnalyticsQueryDto, user: IUserPayload) {
