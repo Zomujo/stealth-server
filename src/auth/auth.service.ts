@@ -85,7 +85,7 @@ export class AuthService {
         'users:READ_WRITE_DELETE',
       ],
       password: hashPassword,
-      status: AccountState.UNVERIFIED,
+      status: AccountState.ACTIVE,
     });
 
     await facility.update({ createdById: user.id });
@@ -106,9 +106,9 @@ export class AuthService {
 
   async sendVerificationEmail(email: string, req: Request) {
     const user = await this.fetchUserByEmail(email);
-    if (user.status !== AccountState.UNVERIFIED) {
-      throw new ForbiddenException('Account cannot be verified');
-    }
+    // if (user.status !== AccountState.UNVERIFIED) {
+    //   throw new ForbiddenException('Account cannot be verified');
+    // }
     const verificationToken = await this.signToken(user.id, 3600, {});
     const fullUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/verify?token=${verificationToken}`;
     this.sendAccountVerficationMail(

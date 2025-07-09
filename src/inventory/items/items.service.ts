@@ -424,21 +424,23 @@ export class ItemService {
       const itemIds = results.map((res: any) => res.id as string);
       whereOptions.id = itemIds;
     }
-
+    let searchOptions = {};
     if (query.search) {
-      whereOptions.search = {
+      searchOptions = {
         [Op.or]: [
           { name: { [Op.iLike]: `%${query.search}%` } },
-          { brandName: { [Op.iLike]: `%${query.search}` } },
+          { brandName: { [Op.iLike]: `%${query.search}%` } },
         ],
       };
     }
     if (query.categories) {
       whereOptions.categoryId = query.categories;
     }
+
     return {
       where: {
         ...whereOptions,
+        ...searchOptions,
         ...queryFilter.searchFilter,
       },
       ...queryFilter.pageFilter,
