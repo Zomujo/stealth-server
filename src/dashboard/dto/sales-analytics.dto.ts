@@ -59,8 +59,11 @@ export class SalesPaymentMethodDto {
   })
   topSelling: { categories: string[]; quantities: number[] };
 
-  constructor(categories: string[], quantities: number[]) {
-    this.topSelling = { categories, quantities };
+  constructor(data: any[]) {
+    this.topSelling = {
+      categories: data.flatMap((v) => v.type),
+      quantities: data.flatMap((v) => v.quantity),
+    };
   }
 }
 export class MarkupAnalysticsDto {

@@ -33,16 +33,29 @@ module.exports = {
       const updatedAt = faker.date.between({ from: lastMonth, to: new Date() });
       const patientId = uuidv4();
       let total = 0;
-
+      const paymentType = faker.helpers.arrayElements(
+        ['ONLINE', 'CASH', 'NHIS'],
+        {
+          max: 2,
+          min: 1,
+        },
+      );
+      const nhisProb = !paymentType.includes('NHIS')
+        ? 0.0
+        : paymentType.length == 1
+          ? 1.0
+          : 0.5;
       for (let si = 0; si < 5; si++) {
         const item = items[faker.number.int(items.length - 1)];
         total += item.selling_price;
+
         saleItems.push({
           id: uuidv4(),
           sale_id: saleId,
           item_id: item.id,
           batch_id: item.batchid,
           quantity: faker.number.int(item.quantity % 10) + 1,
+          nhis_covered: faker.datatype.boolean(nhisProb),
           facility_id: item.facility_id,
           created_at: createdAt,
           updated_at: updatedAt,
@@ -63,7 +76,7 @@ module.exports = {
 
       sales.push({
         id: saleId,
-        payment_type: faker.helpers.arrayElement(['ONLINE', 'CASH']),
+        payment_type: paymentType,
         sale_number: `S-${faker.number.int({ min: 1000, max: 9999 })}`,
         notes: faker.lorem.sentences(2),
         total: total,
