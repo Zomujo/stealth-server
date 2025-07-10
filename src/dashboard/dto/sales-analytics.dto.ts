@@ -62,7 +62,7 @@ export class SalesPaymentMethodDto {
   constructor(data: any[]) {
     this.topSelling = {
       categories: data.flatMap((v) => v.type),
-      quantities: data.flatMap((v) => v.quantity),
+      quantities: data.flatMap((v) => +v.quantity),
     };
   }
 }
