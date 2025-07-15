@@ -174,7 +174,7 @@ export class AuthService {
       where: {
         [Op.or]: [
           { email: dto.accountIdentifier },
-          { username: dto.accountIdentifier },
+          { username: { [Op.iLike]: dto.accountIdentifier } },
         ],
       },
     });
