@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AtskWebhookDto,
   ParsedImsStockQlCommand,
@@ -150,7 +156,7 @@ export class StockmateSmsService {
         const cmd = command.stockOptions;
         // console.log('expiry date', cmd.expiresAt);
         const batch = await this.batchService.stock({
-          itemName: cmd.item,
+          itemCode: cmd.item,
           batchNumber: cmd.batch,
           quantity: cmd.quantity,
           ...(cmd.expiresAt && { validity: cmd.expiresAt }),
@@ -209,6 +215,9 @@ export class StockmateSmsService {
             { model: ItemCategory, attributes: ['name'] },
           ],
         });
+        if (!item) {
+          throw new NotFoundException(`item not found`);
+        }
         const itemJson = item.toJSON();
         const formatedBatches = itemJson.batches.map((batch: any) => {
           batch.expiresAt = format(batch.validity, 'EEEE, MMMM do, yyyy');

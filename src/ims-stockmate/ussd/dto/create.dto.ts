@@ -41,4 +41,18 @@ export class CreateUssdDto {
   @IsString()
   @IsNotEmpty()
   networkCode: string;
+
+  @IsOptional()
+  name?: string;
+
+  @IsOptional()
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
+  departmentId?: string;
+
+  @IsOptional()
+  @IsString()
+  facilityId?: string;
 }

@@ -130,20 +130,28 @@ export class BatchService {
 
   async stock(dto: StockBatchDto): Promise<Batch> {
     if (dto.supplierName) {
-      const supplier = await this.supplierService.exists(dto.supplierName);
+      const supplier = await this.supplierService.fetchOne({
+        query: {
+          facilityId: dto.facilityId,
+        },
+        fields: ['id', 'facilityId', 'departmentId'],
+        sort: '-updatedAt',
+      });
+
+      // const supplier = await this.supplierService.exists(dto.supplierName);
       if (!supplier) {
-        throw new NotFoundException(`Supplier: ${dto.supplierName} not found`);
+        dto.supplierId = null;
       }
       dto.supplierId = supplier.id;
     }
 
     const item = await this.itemRepo.findOne({
       where: {
-        name: { [Op.iLike]: `%${dto.itemName}%` },
+        code: { [Op.iLike]: `${dto.itemCode}%` },
       },
     });
     if (!item) {
-      throw new NotFoundException(`Item: ${dto.itemName} not found`);
+      throw new NotFoundException(`Item: ${dto.itemCode} not found`);
     }
     dto.itemId = item.id;
 

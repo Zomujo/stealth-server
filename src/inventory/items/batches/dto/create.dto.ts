@@ -103,7 +103,7 @@ export class StockBatchDto {
   validity?: Date;
 
   @IsString()
-  itemName: string;
+  itemCode: string;
 
   @IsString()
   itemId?: string;

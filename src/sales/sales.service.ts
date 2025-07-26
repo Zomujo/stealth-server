@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   GetSalesPaginationDto,
   CreateSaleDto,
@@ -8,35 +8,27 @@ import {
   FetchTopSellingReportDataQueryDto,
   SmsCreateSale,
   CreateSaleItemsDto,
+  BatchSellingPrice,
+  UssdCreateSale,
 } from './dto/';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sale, SalePaymentType } from './models/sales.model';
+import { Sale } from './models/sales.model';
 import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
-import { FindAndCountOptions } from 'sequelize';
+import { DestroyOptions, FindAndCountOptions } from 'sequelize';
 import { Op } from 'sequelize';
 import { BatchService } from '../inventory/items/batches/batch.service';
-import { Patient } from '../patient/models/patient.model';
 import { Batch, Item, Markup } from '../inventory/items/models';
 import { IUserPayload } from '../auth/interface/payload.interface';
-import { PatientService } from '../patient/patient.service';
-import { endOfDay, endOfToday, startOfDay, startOfToday } from 'date-fns';
-import { generateFilter } from '../core/shared/factory';
+import { endOfDay, startOfDay, startOfToday } from 'date-fns';
 import { SaleItem } from './models/sale-items.model';
 import { Sequelize } from 'sequelize-typescript';
 import { ItemService } from '../inventory/items/items.service';
 import { MarkupService } from '../inventory/items/markup/markup.service';
-import { AmountType } from '../inventory/items/markup/dto';
 import { generateSaleReportQuery } from './sql';
+import { SalesHelperService } from './helpers.service';
 
-type BatchSellingPrice = {
-  batchId: string;
-  quantity: number;
-  sellingPrice: number;
-  nhisCovered: boolean;
-};
 @Injectable()
 export class SalesService {
-  private logger: Logger = new Logger(SalesService.name);
   constructor(
     @InjectModel(Sale)
     private saleRepository: typeof Sale,
@@ -44,20 +36,15 @@ export class SalesService {
     private saleItemRepository: typeof SaleItem,
     private sequelize: Sequelize,
     private batchService: BatchService,
-    private patientService: PatientService,
     private itemService: ItemService,
     private markupService: MarkupService,
+    private salesHelperService: SalesHelperService,
   ) {}
 
   async fetchItems(query: FindItemDto, user: IUserPayload) {
     const itemWhereConditions: Record<string, Record<any, any>> = {};
 
     itemWhereConditions.facilityId = { [Op.eq]: user.facility };
-
-    // if (user.department) {
-    //   itemWhereConditions.departmentId = { [Op.eq]: user.department };
-    // }
-
     if (query.search) {
       itemWhereConditions.name = {
         [Op.iLike]: `%${query.search}%`,
@@ -115,6 +102,9 @@ export class SalesService {
           query: { id: saleItem.itemId },
           fields: ['id', 'name', 'sellingPrice'],
         });
+        if (!item) {
+          throw new NotFoundException(`item not found`);
+        }
         return {
           item: item,
           totalQuantity: +saleItem.totalQuantity,
@@ -157,102 +147,44 @@ export class SalesService {
     return { count, rows };
   }
 
-  async create(dto: CreateSaleDto, user: IUserPayload) {
+  async create(dto: CreateSaleDto, user: IUserPayload): Promise<Sale> {
     const transaction = await this.sequelize.transaction();
     try {
-      if (dto.patientCardId) {
-        const patient = await this.patientService.findByCardId(
-          dto.patientCardId,
-          false,
-        );
-        dto.patientId = patient.id;
-      }
-      let batchSellingPrices: BatchSellingPrice[] = [];
+      await this.salesHelperService.attachPatientIfExists(dto);
 
-      const saleItems = await Promise.all(
-        dto.saleItems.map(async (saleItem, index) => {
-          const batch = await this.batchService.findIndividual(
-            saleItem.batchId,
-          );
-          await this.batchService.removeStock(
-            saleItem.batchId,
-            saleItem.quantity,
-            user.sub,
-          );
-          const modBatch = batch.get({ plain: true });
-
-          batchSellingPrices.push({
-            batchId: saleItem.batchId,
-            quantity: saleItem.quantity,
-            sellingPrice: modBatch.item.sellingPrice,
-            nhisCovered: false,
-          });
-
-          dto.saleItems[index].itemId = modBatch.item.id;
-          return {
-            ...modBatch,
-            quantity: saleItem.quantity,
-          };
-        }),
+      const batchSellingPrices: BatchSellingPrice[] = [];
+      const saleItems = await this.salesHelperService.processSaleItems(
+        dto,
+        user,
+        batchSellingPrices,
       );
 
-      const subTotal = saleItems.reduce((total: number, saleItem: any) => {
-        return total + saleItem.item.sellingPrice * saleItem.quantity;
-      }, 0);
+      dto.saleNumber = `S-${Date.now()}`;
+      dto.subTotal = this.salesHelperService.calculateSubTotal(saleItems);
 
-      dto.saleNumber = `S-${new Date().getTime()}`;
-      dto.subTotal = parseFloat(subTotal.toFixed(2));
       if (dto.insured) {
-        const [total, count, bSellingPrices] =
-          await this.calculateTotal(batchSellingPrices);
-
-        batchSellingPrices = bSellingPrices;
-
-        if (count === dto.saleItems.length) {
-          dto.paymentType = [SalePaymentType.NHIS];
-        } else if (count > 0 && count <= dto.saleItems.length) {
-          if (!dto.paymentType.includes(SalePaymentType.NHIS)) {
-            dto.paymentType = [...dto.paymentType, SalePaymentType.NHIS];
-          }
-        }
-        dto.total = parseFloat((total > 0 ? total : 0).toFixed(2));
+        await this.salesHelperService.handleInsuredCalculations(
+          dto,
+          batchSellingPrices,
+        );
       } else {
-        dto.total = parseFloat(subTotal.toFixed(2));
+        dto.total = dto.subTotal;
       }
 
-      const { saleItems: _saleItems, ...createDto } = dto;
-
-      const sale = await this.saleRepository.create(
-        {
-          ...createDto,
-          createdById: user.sub,
-          departmentId: user.department,
-          facilityId: user.facility,
-        },
-        { transaction },
+      const sale = await this.salesHelperService.createSaleRecord(
+        dto,
+        user,
+        transaction,
+      );
+      await this.salesHelperService.createSaleItems(
+        sale,
+        dto,
+        user,
+        batchSellingPrices,
+        transaction,
       );
 
-      const refinedSaleItems = dto.saleItems.map((saleItem) => {
-        const foundBatch = batchSellingPrices.find(
-          (batch) => batch.batchId == saleItem.batchId,
-        );
-
-        return {
-          saleId: sale.id,
-          departmentId: user.department,
-          createdById: user.sub,
-          facilityId: user.facility,
-          nhisCovered: foundBatch.nhisCovered,
-          ...saleItem,
-        };
-      });
-
-      const _newItems = await this.saleItemRepository.bulkCreate(
-        refinedSaleItems,
-        { transaction, individualHooks: true },
-      );
       await transaction.commit();
-
       return sale;
     } catch (error) {
       await transaction.rollback();
@@ -260,48 +192,44 @@ export class SalesService {
     }
   }
 
-  async calculateTotal(
-    payload: BatchSellingPrice[],
-  ): Promise<[number, number, BatchSellingPrice[]]> {
-    let count = 0;
-    const cappedPrices = await Promise.all(
-      payload.map(async (item, index) => {
-        const markup = await this.markupService.fetchOne({
-          query: { batchId: item.batchId, type: 'NHIS' },
-        });
-        if (!markup) {
-          return item.quantity * item.sellingPrice;
-        }
+  async ussdSale(dto: UssdCreateSale) {
+    const saleItems: CreateSaleItemsDto[] = [];
+    const responses: string[] = [];
 
-        payload[index].nhisCovered = true;
+    for (const saleItem of dto.saleItems) {
+      const [batchSaleItems, batchResponses] =
+        await this.salesHelperService.fifoDeductItemStock(
+          saleItem.itemCode,
+          saleItem.quantity,
+          dto.departmentId,
+          dto.facilityId,
+        );
 
-        count += 1;
-        let cappedPrice = 0;
-        switch (markup.amountType) {
-          case AmountType.PERCENTAGE: {
-            const newCapPercentage = item.sellingPrice * (markup.amount / 100);
-            cappedPrice = item.sellingPrice - newCapPercentage;
-            // cappedPrice *= item.quantity;
-            cappedPrice = 0;
-            return cappedPrice >= 0 ? cappedPrice : 0;
-          }
-          case AmountType.PRICE: {
-            cappedPrice = item.sellingPrice - markup.amount;
-            // cappedPrice *= item.quantity;
-            cappedPrice = 0;
-            return cappedPrice >= 0 ? cappedPrice : 0;
-          }
-          default:
-            return 0;
-        }
-      }),
-    );
+      responses.push(...batchResponses);
+      saleItems.push(...batchSaleItems);
+    }
 
-    const finalTotal = cappedPrices.reduce(
-      (accum, current) => current + accum,
-      0,
-    );
-    return [finalTotal, count, payload];
+    const saleDto: CreateSaleDto = {
+      patientCardId: dto.patientCardId,
+      paymentType: dto.paymentType,
+      insured: true,
+      saleItems,
+    };
+
+    const user: IUserPayload = {
+      sub: dto.createdById,
+      facility: dto.facilityId,
+      department: dto.departmentId,
+    };
+    const sale = await this.create(saleDto, user);
+    return {
+      responses,
+      saleMeta: {
+        subTotal: sale.subTotal,
+        total: sale.total,
+        patientId: sale.patientId,
+      },
+    };
   }
 
   async smsSale(dto: SmsCreateSale) {
@@ -313,11 +241,13 @@ export class SalesService {
             departmentId: dto.departmentId,
             facilityId: dto.facilityId,
           },
-          fields: ['id', 'itemId'],
+          fields: ['id', 'itemId', 'batchNumber'],
         });
         return {
           batchId: batch.id,
+          batchNumber: batch.batchNumber,
           itemId: batch.itemId,
+          quantity: saleItem.quantity,
         } as CreateSaleItemsDto;
       }),
     );
@@ -331,143 +261,31 @@ export class SalesService {
       sub: dto.createdById,
       facility: dto.facilityId,
       department: dto.departmentId,
-      email: null,
-      username: null,
-      role: null,
-      permissions: null,
-      session: null,
     };
     return await this.create(saleDto, user);
   }
 
   async fetchAll(query: GetSalesPaginationDto, user: IUserPayload) {
-    const whereConditions: Record<string, Record<any, any>> = {};
-    const queryFilter = generateFilter(query);
-
-    whereConditions.facilityId = {
-      [Op.eq]: user.facility,
-    };
-
-    const dayStart = startOfToday();
-    const dayEnd = endOfToday();
-
-    const todaySales = query.todaySales === 'true';
-
-    if (todaySales) {
-      whereConditions.createdAt = {
-        [Op.between]: [dayStart, dayEnd],
-      };
-    }
-
-    if (user.department) {
-      whereConditions.departmentId = { [Op.eq]: user.department };
-    }
-    if (query.search) {
-      whereConditions.saleNumber = {
-        [Op.like]: `%${query.search}%`,
-      };
-    }
-
-    if (query.status) {
-      whereConditions.status = { [Op.eq]: query.status };
-    }
-
-    const filter: FindAndCountOptions<Sale> = {
-      where: { ...whereConditions, ...queryFilter.searchFilter },
-      ...queryFilter.pageFilter,
-      attributes: [
-        'id',
-        'saleNumber',
-        'total',
-        'createdAt',
-        'status',
-        'paymentType',
-        'updatedAt',
-      ],
-      include: [
-        {
-          model: Patient,
-          attributes: ['id', 'cardIdentificationNumber', 'name'],
-        },
-        {
-          model: SaleItem,
-          attributes: ['batchId', 'quantity'],
-          include: [
-            {
-              model: Item,
-              attributes: ['name', 'brandName', 'sellingPrice'],
-            },
-            {
-              model: Batch,
-              attributes: ['batchNumber'],
-              paranoid: false,
-            },
-          ],
-        },
-      ],
-      distinct: true,
-    };
-
+    const filter = this.salesHelperService.fetchAllFilter(query, user);
     const { rows, count } = await this.saleRepository.findAndCountAll(filter);
-    let modRows: object[] = [];
 
-    if (rows.length != 0) {
-      modRows = rows.map((sale) => {
-        const modSale: Sale = sale.get({ plain: true });
-        const saleItem: any = modSale.saleItems[0];
-        const remainderItems =
-          modSale.saleItems.length > 0 ? modSale.saleItems.length - 1 : 0;
-        const totalQuantity = modSale.saleItems.reduce(
-          (total, saleItem: any) => total + saleItem.quantity,
-          0,
-        );
-        delete modSale.saleItems;
-        delete saleItem.quantity;
-        saleItem.batchNumber = saleItem.batch.batchNumber;
-        delete saleItem.batch;
-        return {
-          ...modSale,
-          saleItem,
-          remainderItems,
-          totalQuantity,
-        };
-      });
-    }
+    const modRows = rows.map((sale) =>
+      this.salesHelperService.transformSale(sale),
+    );
 
-    const response = new PaginatedDataResponseDto<object[]>(
+    return new PaginatedDataResponseDto(
       modRows,
       query.page || 1,
       query.pageSize,
       count,
     );
-
-    return response;
   }
 
   async fetchData(whereConditions: Record<string, Record<any, any>>) {
     const filter: FindAndCountOptions<Sale> = {
       where: { ...whereConditions },
       attributes: ['id', 'saleNumber', 'total', 'createdAt', 'status'],
-      include: [
-        {
-          model: Patient,
-          attributes: ['id', 'cardIdentificationNumber', 'name'],
-        },
-        {
-          model: SaleItem,
-          attributes: ['id', 'batchId', 'quantity'],
-          include: [
-            {
-              model: Item,
-              attributes: ['name', 'brandName', 'sellingPrice'],
-            },
-            {
-              model: Batch,
-              attributes: ['batchNumber'],
-            },
-          ],
-        },
-      ],
+      include: this.salesHelperService.defaultIncludes,
       order: [['createdAt', 'ASC']],
       distinct: true,
     };
@@ -500,57 +318,10 @@ export class SalesService {
     return (results[0] as any).result;
   }
 
-  async oldFetchPeriodicSales(
-    query: FetchSalesReportDataQueryDto,
-    user: IUserPayload,
-  ) {
-    const { facility, department } = user;
-    const whereConditions: Record<string, any> = {
-      facilityId: facility,
-      ...(department && { departmentId: department }),
-    };
-
-    if (query.startDate && query.endDate) {
-      whereConditions.createdAt = {
-        [Op.between]: [query.startDate, query.endDate],
-      };
-    }
-
-    if (query.specificDate) {
-      const specificDateStart = startOfDay(query.specificDate);
-      const specificDateEnd = endOfDay(query.specificDate);
-      whereConditions.createdAt = {
-        [Op.between]: [specificDateStart, specificDateEnd],
-      };
-    }
-
-    const { rows, count } = await this.fetchData(whereConditions);
-    return { count, rows };
-  }
-
   async fetchOne(id: string) {
     const sale = await this.saleRepository.findByPk(id, {
       attributes: { exclude: ['patientId', 'deletedAt', 'deletedBy'] },
-      include: [
-        {
-          model: Patient,
-          attributes: ['id', 'cardIdentificationNumber', 'name'],
-        },
-        {
-          model: SaleItem,
-          attributes: ['id', 'batchId', 'quantity'],
-          include: [
-            {
-              model: Item,
-              attributes: ['name', 'brandName', 'sellingPrice'],
-            },
-            {
-              model: Batch,
-              attributes: ['batchNumber'],
-            },
-          ],
-        },
-      ],
+      include: this.salesHelperService.defaultIncludes,
     });
     if (!sale) {
       throw new NotFoundException('Sale not found');
@@ -564,148 +335,98 @@ export class SalesService {
     return refinedSale;
   }
 
-  async update(id: string, dto: UpdateSalesDto, userId: string) {
-    const saleItemsBody: any = {};
-
-    if (dto.saleItems) {
-      const sale = await this.fetchOne(id);
-      const batchSellingPrices: BatchSellingPrice[] = [];
-      const saleItems = await Promise.all(
-        dto.saleItems.map(async (saleItem) => {
-          const savedSaleItem = sale.saleItems.find(
-            (savedSaleItem) => savedSaleItem.batchId === saleItem.batchId,
-          );
-          const batch = await this.batchService.findIndividual(
-            saleItem.batchId,
-          );
-
-          if (savedSaleItem) {
-            if (savedSaleItem.quantity !== saleItem.quantity) {
-              if (saleItem.quantity > savedSaleItem.quantity) {
-                const deductBy = saleItem.quantity - savedSaleItem.quantity;
-                await this.batchService.removeStock(
-                  saleItem.batchId,
-                  deductBy,
-                  userId,
-                );
-              } else {
-                const increaseBy = savedSaleItem.quantity - saleItem.quantity;
-                await this.batchService.increaseStock(
-                  saleItem.batchId,
-                  increaseBy,
-                  userId,
-                );
-              }
-            }
-            const markup = await this.markupService.fetchOne({
-              query: { batchId: batch.id, type: 'NHIS' },
-            });
-            let nhisCovered = false;
-            if (!markup) {
-              nhisCovered = false;
-            } else {
-              nhisCovered = true;
-            }
-
-            await this.saleItemRepository.update(
-              {
-                ...saleItem,
-                itemId: batch.item.id,
-                updatedById: userId,
-                nhisCovered,
-              },
-              {
-                where: {
-                  id: savedSaleItem.id,
-                },
-              },
-            );
-          } else {
-            await this.batchService.removeStock(
-              saleItem.batchId,
-              saleItem.quantity,
-              userId,
-            );
-            saleItem.itemId = batch.item.id;
-
-            const markup = await this.markupService.fetchOne({
-              query: { batchId: batch.id, type: 'NHIS' },
-            });
-            let nhisCovered = false;
-            if (!markup) {
-              nhisCovered = false;
-            } else {
-              nhisCovered = true;
-            }
-
-            await this.saleItemRepository.create({
-              ...saleItem,
-              saleId: id,
-              createdById: userId,
-              departmentId: sale.departmentId,
-              facilityId: sale.facilityId,
-              nhisCovered,
-            });
-          }
-
-          const modBatch = batch.get({ plain: true });
-
-          batchSellingPrices.push({
-            batchId: saleItem.batchId,
-            quantity: saleItem.quantity,
-            sellingPrice: modBatch.item.sellingPrice,
-            nhisCovered: false,
-          });
-
-          return {
-            ...modBatch,
-            quantity: saleItem.quantity,
-          };
-        }),
-      );
-
-      const subTotal = saleItems.reduce((total: number, saleItem: any) => {
-        return total + saleItem.item.sellingPrice * saleItem.quantity;
-      }, 0);
-
-      dto.subTotal = parseFloat(subTotal.toFixed(2));
-      if (dto.insured) {
-        const [total, count] = await this.calculateTotal(batchSellingPrices);
-
-        if (count === dto.saleItems.length) {
-          dto.paymentType = [SalePaymentType.NHIS];
-        } else if (count > 0 && count <= dto.saleItems.length) {
-          if (!dto.paymentType.includes(SalePaymentType.NHIS)) {
-            dto.paymentType = [...dto.paymentType, SalePaymentType.NHIS];
-          }
-        }
-        dto.total = parseFloat(total.toFixed(2));
-      } else {
-        dto.total = parseFloat(subTotal.toFixed(2));
-      }
-
-      saleItemsBody.saleItems = saleItems;
-    }
+  async update(id: string, dto: UpdateSalesDto, userId: string): Promise<void> {
+    const sale = await this.fetchOne(id);
 
     if (dto.patientCardId) {
-      const patient = await this.patientService.findByCardId(
-        dto.patientCardId,
-        false,
-      );
-      dto.patientId = patient.id;
+      await this.salesHelperService.attachPatientIfExists(dto);
     }
+
+    if (dto.saleItems) {
+      const batchSellingPrices: BatchSellingPrice[] = [];
+      const saleItems = [];
+
+      for (const saleItem of dto.saleItems) {
+        const savedSaleItem = sale.saleItems.find(
+          (s) => s.batchId === saleItem.batchId,
+        );
+        const batch = await this.batchService.findIndividual(saleItem.batchId);
+        if (!batch) {
+          throw new Error(`Batch with ID ${saleItem.batchId} not found`);
+        }
+
+        await this.salesHelperService.updateBatchStockBasedOnQuantityChange(
+          savedSaleItem,
+          saleItem,
+          userId,
+        );
+
+        const markup = await this.markupService.fetchOne({
+          query: { batchId: batch.id, type: 'NHIS' },
+        });
+
+        const nhisCovered = !!markup;
+        const batchItemId = batch.item.id;
+
+        if (savedSaleItem) {
+          await this.saleItemRepository.update(
+            {
+              ...saleItem,
+              itemId: batchItemId,
+              updatedById: userId,
+              nhisCovered,
+            },
+            { where: { id: savedSaleItem.id } },
+          );
+        } else {
+          await this.batchService.removeStock(
+            saleItem.batchId,
+            saleItem.quantity,
+            userId,
+          );
+
+          await this.saleItemRepository.create({
+            ...saleItem,
+            saleId: id,
+            createdById: userId,
+            departmentId: sale.departmentId,
+            facilityId: sale.facilityId,
+            itemId: batchItemId,
+            nhisCovered,
+          });
+        }
+
+        const modBatch = batch.get({ plain: true });
+        batchSellingPrices.push({
+          batchId: saleItem.batchId,
+          quantity: saleItem.quantity,
+          sellingPrice: modBatch.item.sellingPrice,
+          nhisCovered,
+        });
+
+        saleItems.push({ ...modBatch, quantity: saleItem.quantity });
+      }
+
+      dto.subTotal = this.salesHelperService.calculateSubTotal(saleItems);
+
+      if (dto.insured) {
+        await this.salesHelperService.handleInsuredCalculations(
+          dto,
+          batchSellingPrices,
+        );
+      } else {
+        dto.total = dto.subTotal;
+      }
+    }
+    const { saleItems, ...others } = dto;
     const [rowsUpdated] = await this.saleRepository.update(
-      { ...dto, ...saleItemsBody, updatedById: userId },
-      {
-        where: { id },
-      },
+      { ...others, updatedById: userId },
+      { where: { id } },
     );
 
-    if (rowsUpdated == 0) {
-      throw new NotFoundException(`Sale not found`);
+    if (rowsUpdated === 0) {
+      throw new NotFoundException('Sale not found');
     }
-
-    return;
   }
 
   async removeOne(id: string, userId: string) {
@@ -719,10 +440,10 @@ export class SalesService {
     const destroyedRows = await this.saleRepository.destroy({
       where: { id },
       userId,
-    } as any);
+    } as DestroyOptions);
 
     if (destroyedRows == 0) {
-      throw new NotFoundException(`Sale not found`);
+      throw new NotFoundException('Sale not found');
     }
 
     return;

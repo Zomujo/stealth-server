@@ -6,6 +6,7 @@ import { SalesModels } from './models';
 import { ItemsModule } from '../inventory/items/items.module';
 import { PatientModule } from '../patient/patient.module';
 import { SalesExportsService } from './exports.service';
+import { SalesHelperService } from './helpers.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { SalesExportsService } from './exports.service';
     PatientModule,
   ],
   controllers: [SalesController],
-  providers: [SalesService, SalesExportsService],
+  providers: [SalesService, SalesExportsService, SalesHelperService],
   exports: [SalesService],
 })
 export class SalesModule {}
