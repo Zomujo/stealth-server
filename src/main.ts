@@ -27,9 +27,6 @@ async function bootstrap() {
   };
 
   switch (process.env.NODE_ENV) {
-    case 'staging':
-      corsOptions.origin = [process.env.CLIENT_URL];
-      break;
     case 'production':
       corsOptions.origin = [
         process.env.CLIENT_URL,
