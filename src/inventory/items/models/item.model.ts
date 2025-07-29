@@ -58,6 +58,9 @@ export class Item extends BaseModel<Item> {
   @Column({ field: 'unit_of_measurement' })
   unitOfMeasurement: string;
 
+  @Column
+  nhisCovered: boolean;
+
   @Column({
     type: DataType.VIRTUAL,
     get(this: Item) {

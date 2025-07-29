@@ -26,6 +26,7 @@ import { buildQuery } from '../../../core/shared/factory/query-builder.factory';
 import { IUserPayload } from '../../../auth/interface/payload.interface';
 import { addDays, endOfDay, startOfDay, startOfToday } from 'date-fns';
 import { MarkupService } from '../markup/markup.service';
+import { AmountType, CreateMarkupDto, MarkupType } from '../markup/dto';
 
 @Injectable()
 export class BatchService {
@@ -129,74 +130,48 @@ export class BatchService {
   }
 
   async stock(dto: StockBatchDto): Promise<Batch> {
-    if (dto.supplierName) {
-      const supplier = await this.supplierService.fetchOne({
-        query: {
-          facilityId: dto.facilityId,
-        },
-        fields: ['id', 'facilityId', 'departmentId'],
-        sort: '-updatedAt',
-      });
+    const supplier = await this.supplierService.fetchOne({
+      query: {
+        facilityId: dto.facilityId,
+      },
+      fields: ['id', 'facilityId'],
+      sort: '-updatedAt',
+    });
 
-      // const supplier = await this.supplierService.exists(dto.supplierName);
-      if (!supplier) {
-        dto.supplierId = null;
-      }
-      dto.supplierId = supplier.id;
+    if (!supplier) {
+      dto.supplierId = null;
     }
+    dto.supplierId = supplier.id;
 
     const item = await this.itemRepo.findOne({
       where: {
         code: { [Op.iLike]: `${dto.itemCode}%` },
       },
+      attributes: ['id', 'code', 'nhisCovered'],
     });
+
     if (!item) {
       throw new NotFoundException(`Item: ${dto.itemCode} not found`);
     }
-    dto.itemId = item.id;
 
-    let batch: Batch;
-    batch = await this.batchRepo.findOne<Batch>({
-      where: {
-        [Op.or]: [
-          {
-            batchNumber: {
-              [Op.iLike]: `%${dto.batchNumber}%`,
-            },
-            itemId: dto.itemId,
-            facilityId: dto.facilityId,
-            departmentId: dto.departmentId,
-          },
-          { deletedAt: { [Op.not]: null } },
-        ],
-      },
-      paranoid: false,
-    });
+    const { supplierName, supplierId, validity, itemCode, ...others } = dto;
+    const newBatch: CreateBatchDto = {
+      itemId: item.id,
+      supplierId: dto.supplierId,
+      validity: dto.validity,
+      ...others,
+    };
 
-    if (batch) {
-      if (batch.deletedAt) {
-        await batch.restore();
-        await batch.update({
-          deletedById: null,
-        });
-      } else {
-        dto.quantity = batch.quantity + dto.quantity;
-      }
-      await batch.update({
-        ...dto,
-        createdAt: new Date(),
-        updatedById: dto.createdById,
-        deletedById: null,
-      });
-    } else {
-      batch = await this.batchRepo.create({ ...dto });
+    if (item.nhisCovered) {
+      const markup: CreateMarkupDto = {
+        type: MarkupType.NHIS,
+        amountType: AmountType.PERCENTAGE,
+        amount: 100,
+      };
+      newBatch.markup = markup;
     }
-    this.eventEmitter.emit('quantity.increased', {
-      itemId: dto.itemId,
-      facilityId: dto.facilityId,
-      departmentId: dto.departmentId,
-    });
-    return batch;
+
+    return this.create(newBatch);
   }
 
   async update(id: string, dto: UpdateBatchDto, user: IUserPayload) {

@@ -218,6 +218,7 @@ export class ItemCategoryService {
         dosageForm: dosageForm,
         facilityId: payload.facilityId,
         createdById: payload.userId,
+        nhisCovered: true,
         categoryId: null,
       };
       const category = finalCategories.find(

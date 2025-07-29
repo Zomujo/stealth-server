@@ -51,6 +51,12 @@ module.exports = {
         type: Sequelize.STRING,
         field: 'unit_of_measurement',
       },
+      nhisCovered: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: 'nhis_covered',
+      },
       storageReq: {
         type: Sequelize.TEXT,
         field: 'storage_req',
