@@ -37,25 +37,25 @@ export class MarkupDto extends GenericResponseDto {
   @ApiResponseProperty({
     example: '98b2c442-6935-45d7-a0bb-a8add269b1f1',
   })
-  batchId: string;
+  batchId?: string;
 
   @ApiResponseProperty({
     example: 'db527030-8d20-4a72-a103-2870294563ad',
   })
-  itemId: string;
+  itemId?: string;
 
   @ApiResponseProperty({
     example: '9ac7594b-fbbc-48ec-91d4-e2f865f74423',
   })
-  createdById: string;
+  createdById?: string;
 
   @ApiResponseProperty({
     example: 'e90cc676-fee0-4441-b27a-c475647ff4d5',
   })
-  departmentId: string;
+  departmentId?: string;
 
   @ApiResponseProperty({
     example: '8195dd04-6e29-4f8f-b84f-3c3edb619982',
   })
-  facilityId: string;
+  facilityId?: string;
 }

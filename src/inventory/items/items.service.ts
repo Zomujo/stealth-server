@@ -156,9 +156,6 @@ export class ItemService {
   async fetchOne(options?: QueryOptionsDto<Item>) {
     const queryOptions = buildQuery<Item>(options, this.populates);
     const item = await this.itemRepo.findOne(queryOptions);
-    if (!item) {
-      throw new NotFoundException(`item not found`);
-    }
     return item;
   }
 

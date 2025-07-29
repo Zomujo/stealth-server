@@ -52,17 +52,17 @@ export class SyncDto extends GenericResponseDto {
   @ApiResponseProperty({
     example: 'UPDATE',
   })
-  action: string;
+  action?: string;
 
   @ApiResponseProperty({
     example: 'User not found',
   })
-  message: string;
+  message?: string;
 
   @ApiResponseProperty({
     example: 404,
   })
-  statusCode: number;
+  statusCode?: number;
 
   @ApiResponseProperty({
     example: '938409e3-f01f-4e25-b6a8-11abc823f4c4',
@@ -72,10 +72,10 @@ export class SyncDto extends GenericResponseDto {
   @ApiResponseProperty({
     example: '44072b38-f12a-4b76-b40d-fdfeb9d7a3b2',
   })
-  facilityId: string;
+  facilityId?: string;
 
   @ApiResponseProperty({
     example: '70b3bab4-9756-4181-a660-f8957d7d116f',
   })
-  createdById: string;
+  createdById?: string;
 }

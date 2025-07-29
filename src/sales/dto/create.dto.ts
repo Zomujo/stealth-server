@@ -109,18 +109,13 @@ export class CreateSaleDto {
   total?: number;
 }
 
-export class SmsCreateSale extends PartialType(
+export class BaseCreateSale<T> extends PartialType(
   OmitType(CreateSaleDto, ['notes', 'saleItems']),
 ) {
   @IsNotEmpty()
   @IsArray()
   @ArrayMinSize(1)
-  saleItems: {
-    batchNumber: string;
-    batchId?: string;
-    quantity: number;
-    itemId?: string;
-  }[];
+  saleItems: T[];
 
   @IsOptional()
   createdById?: string;
@@ -131,6 +126,17 @@ export class SmsCreateSale extends PartialType(
   @IsNotEmpty()
   facilityId: string;
 }
+
+export class SmsCreateSale extends BaseCreateSale<{
+  batchNumber: string;
+  batchId?: string;
+  quantity: number;
+  itemId?: string;
+}> {}
+export class UssdCreateSale extends BaseCreateSale<{
+  itemCode: string;
+  quantity: number;
+}> {}
 
 export class CreateSaleResponseDto extends IntersectionType(
   GenericResponseDto,
@@ -158,3 +164,10 @@ export class CreateSaleResponseDto extends IntersectionType(
 }
 
 export class UpdateSalesDto extends PartialType(CreateSaleDto) {}
+
+export type BatchSellingPrice = {
+  batchId: string;
+  quantity: number;
+  sellingPrice: number;
+  nhisCovered: boolean;
+};

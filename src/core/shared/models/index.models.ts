@@ -11,6 +11,7 @@ import { UserSecondaryModels } from '../../../user/models';
 import { ComplaintsModels } from '../../../complaints/models';
 import { AuditModels } from '../../../audit/models';
 import { SyncModels } from '../../../sync/models';
+import { StockmateModels } from '../../../ims-stockmate/models';
 
 export const IndexModels = [
   ...AdminModels,
@@ -26,4 +27,5 @@ export const IndexModels = [
   ...ComplaintsModels,
   ...AuditModels,
   ...SyncModels,
+  ...StockmateModels,
 ];

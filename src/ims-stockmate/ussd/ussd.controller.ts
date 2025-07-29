@@ -11,8 +11,16 @@ export class StockmateUssdController {
 
   @Post('webhook/dev-test')
   testWithoutSandbox(@Body() dto: CreateUssdDto) {
-    this.logger.log('webhook data:', dto);
-    return this.stockmateUssdService.createDevTest(dto);
+    try {
+      this.logger.log('webhook data:', dto);
+      return this.stockmateUssdService.createDevTest(dto);
+    } catch (error) {
+      this.logger.error(
+        `An error occured: ${error.name} :: ${error.message}`,
+        error.stack,
+      );
+      return 'END An error occured. Please try again.';
+    }
   }
 
   @Header('Content-Type', 'text/plain')
@@ -20,12 +28,28 @@ export class StockmateUssdController {
   testWithSandbox(@Body() dto: CreateUssdDto) {
     this.logger.log('webhook data:', dto);
     return this.stockmateUssdService.createDev(dto);
+    // try {
+    // } catch (error) {
+    //   this.logger.error(
+    //     `An error occured: ${error.name} :: ${error.message}`,
+    //     error.stack,
+    //   );
+    //   return 'END An error occured. Please try again.';
+    // }
   }
 
   @Header('Content-Type', 'text/plain')
   @Post('webhook')
   webhook(@Body() dto: CreateUssdDto) {
-    this.logger.log('webhook data:', dto);
-    return this.stockmateUssdService.create(dto);
+    try {
+      this.logger.log('webhook data:', dto);
+      return this.stockmateUssdService.create(dto);
+    } catch (error) {
+      this.logger.error(
+        `An error occured: ${error.name} :: ${error.message}`,
+        error.stack,
+      );
+      return 'END An error occured. Please try again.';
+    }
   }
 }
