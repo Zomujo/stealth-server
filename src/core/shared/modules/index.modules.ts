@@ -16,6 +16,7 @@ import { SyncModule } from '../../../sync/sync.module';
 import { AuditsModule } from '../../../audit/audit.module';
 import { ExportsModule } from '../../../exports/exports.module';
 import { HealthModule } from '../../../health/health.module';
+import { ImsCacheModule } from './cache/cache.module';
 
 export const IndexModules = [
   NotificationModule,
@@ -36,4 +37,5 @@ export const IndexModules = [
   AuditsModule,
   ExportsModule,
   SyncModule,
+  ImsCacheModule,
 ];

@@ -1013,6 +1013,20 @@
   dependencies:
     "@json2csv/plainjs" "^7.0.6"
 
+"@keyv/redis@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@keyv/redis/-/redis-5.1.0.tgz#c30686dbe4ccfa9698b2b6a259c54d1112169423"
+  integrity sha512-89qUAT0+5m3/w/n438yR8fmrWvy0cWTbwp+hKAQrw52otaKalogag+Cj3uOUV4qAly5iusmeCSD/hyepFsHgdw==
+  dependencies:
+    "@redis/client" "^5.7.0"
+    cluster-key-slot "^1.1.2"
+    hookified "^1.11.0"
+
+"@keyv/serialize@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@keyv/serialize/-/serialize-1.1.0.tgz#08f5d89096110fdcf778e5337362e1cd5afad70a"
+  integrity sha512-RlDgexML7Z63Q8BSaqhXdCYNBy/JQnqYIwxofUrNLGCblOMHp+xux2Q8nLMLlPpgHQPoU0Do8Z6btCpRBEqZ8g==
+
 "@logtail/core@^0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@logtail/core/-/core-0.5.4.tgz#e6b956b42b93725d583d29226c10c650c47a5f8a"
@@ -1143,6 +1157,11 @@
   dependencies:
     "@nestjs/bull-shared" "^11.0.2"
     tslib "2.8.1"
+
+"@nestjs/cache-manager@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/cache-manager/-/cache-manager-3.0.1.tgz#893abd4fb8450d2fe6c6692bd71688c45b2d5128"
+  integrity sha512-4UxTnR0fsmKL5YDalU2eLFVnL+OBebWUpX+hEduKGncrVKH4PPNoiRn1kXyOCjmzb0UvWgqubpssNouc8e0MCw==
 
 "@nestjs/cli@^11.0.5":
   version "11.0.7"
@@ -1353,6 +1372,13 @@
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.2.7.tgz#eb5014dfd0b03e7f3ba2eeeff506eed89b028058"
   integrity sha512-YLT9Zo3oNPJoBjBc4q8G2mjU4tqIbf5CEOORbUUr48dCD9q3umJ3IPlVqOqDakPfd2HuwccBaqlGhN4Gmr5OWg==
+
+"@redis/client@^5.7.0":
+  version "5.8.1"
+  resolved "https://registry.yarnpkg.com/@redis/client/-/client-5.8.1.tgz#26a4278c2067f2739796dad1d65f7de0c2b853de"
+  integrity sha512-hD5Tvv7G0t8b3w8ao3kQ4jEPUmUUC6pqA18c8ciYF5xZGfUGBg0olQHW46v6qSt4O5bxOuB3uV7pM6H5wEjBwA==
+  dependencies:
+    cluster-key-slot "1.1.2"
 
 "@scarf/scarf@=1.4.0":
   version "1.4.0"
@@ -2569,6 +2595,13 @@ bytes@3.1.2, bytes@^3.1.2:
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.2.tgz#8b0beeb98605adf1b128fa4386403c009e0221a5"
   integrity sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==
 
+cache-manager@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/cache-manager/-/cache-manager-7.1.1.tgz#0b231defef6ad06060ffe88b5622ae8201fb16e1"
+  integrity sha512-YZ5CXZ4cNOcVH5bokYE1Bo5NARvJhOkYAAwImGf7DozC0uyrT5Jqd5AWfPnSRavlHTPiHp2yZL3Q3ZEWBfkQvQ==
+  dependencies:
+    keyv "^5.5.0"
+
 call-bind-apply-helpers@^1.0.1, call-bind-apply-helpers@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz#4b5428c222be985d79c3d82657479dbe0b59b2d6"
@@ -2821,7 +2854,7 @@ cloudinary@^2.6.0:
     lodash "^4.17.21"
     q "^1.5.1"
 
-cluster-key-slot@^1.1.0:
+cluster-key-slot@1.1.2, cluster-key-slot@^1.1.0, cluster-key-slot@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/cluster-key-slot/-/cluster-key-slot-1.1.2.tgz#88ddaa46906e303b5de30d3153b7d9fe0a0c19ac"
   integrity sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==
@@ -4252,6 +4285,11 @@ he@1.2.0, he@^1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
+hookified@^1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/hookified/-/hookified-1.11.0.tgz#085a8f1e196ffe31905d5122b40a8e547c69e660"
+  integrity sha512-aDdIN3GyU5I6wextPplYdfmWCo+aLmjjVbntmX6HLD5RCi/xKsivYEBhnRD+d9224zFf008ZpLMPlWF0ZodYZw==
+
 html-escaper@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/html-escaper/-/html-escaper-2.0.2.tgz#dfd60027da36a36dfcbe236262c00a5822681453"
@@ -5181,6 +5219,13 @@ keyv@^4.5.4:
   integrity sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==
   dependencies:
     json-buffer "3.0.1"
+
+keyv@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/keyv/-/keyv-5.5.0.tgz#0ad5037484a7e01b033df7018033b5cc9ca7884f"
+  integrity sha512-QG7qR2tijh1ftOvClut4YKKg1iW6cx3GZsKoGyJPxHkGWK9oJhG9P3j5deP0QQOGDowBMVQFaP+Vm4NpGYvmIQ==
+  dependencies:
+    "@keyv/serialize" "^1.1.0"
 
 kleur@^3.0.3:
   version "3.0.3"
