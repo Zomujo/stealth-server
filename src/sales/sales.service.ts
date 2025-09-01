@@ -269,9 +269,13 @@ export class SalesService {
     const filter = this.salesHelperService.fetchAllFilter(query, user);
     const { rows, count } = await this.saleRepository.findAndCountAll(filter);
 
-    const modRows = rows.map((sale) =>
-      this.salesHelperService.transformSale(sale),
-    );
+    const modRows = rows.map((sale) => {
+      const transformed = this.salesHelperService.transformSale(sale);
+      if ((transformed as any).notFound) {
+        return;
+      }
+      return transformed;
+    });
 
     return new PaginatedDataResponseDto(
       modRows,

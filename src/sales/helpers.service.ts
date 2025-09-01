@@ -48,6 +48,7 @@ export class SalesHelperService {
         {
           model: Batch,
           attributes: ['batchNumber'],
+          paranoid: false,
         },
       ],
     },
@@ -263,6 +264,10 @@ export class SalesHelperService {
     );
 
     const remainderItems = restItems.length;
+
+    if (!firstItem || !firstItem.batch || !firstItem.batch.batchNumber) {
+      return { notFound: true };
+    }
 
     const transformedItem = {
       ...firstItem,
