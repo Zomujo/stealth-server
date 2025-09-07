@@ -1,10 +1,10 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { NotificationsGateway } from './gateway/notification.gateway';
-import { Role } from '../auth/interface/roles.enum';
 import { Observable, Subject } from 'rxjs';
 import { Features } from '../core/shared/enums/permissions.enum';
 import { InjectModel } from '@nestjs/sequelize';
@@ -26,6 +26,7 @@ export class NotificationService {
     @InjectModel(User) private userRepository: typeof User,
   ) {}
 
+  private logger = new Logger(NotificationService.name);
   private notificationSubject = new Subject<any>();
   private itemNotificationSubject = new Subject<any>();
   private departmentRequestNotificationSubject = new Subject<any>();
@@ -184,10 +185,26 @@ export class NotificationService {
     user: Pick<IUserPayload, 'facility' | 'department'>,
   ) {
     await this.create(notification, user, feature);
-    this.pushNotification(notification, feature);
+    await this.pushNotification(user, notification, feature);
+    // this.pushNotification(notification, feature);
   }
 
-  pushNotification(
+  async pushNotification(
+    user: Pick<IUserPayload, 'facility' | 'department'>,
+    notification: CreateNotificationDto,
+    feature: Features,
+  ): Promise<void> {
+    const deptPart = user.department ? `:${user.department}:` : '';
+    const topic = `${user.facility}${deptPart}`;
+
+    const notificationBody = { feature, ...notification };
+    await this.notificationsGateway.sendNotificationToTopic(
+      topic,
+      notificationBody,
+    );
+  }
+
+  oldPushNotification(
     notification: CreateNotificationDto,
     feature: Features,
   ): void {
@@ -243,27 +260,7 @@ export class NotificationService {
     return !!permissions.find((permission) => permission.includes(feature));
   }
 
-  notifyAdmins(roles: Role[], payload: any) {
-    for (const role of roles) {
-      this.notificationsGateway.sendNotificationToRole(role, payload);
-    }
-  }
-
   notifyAdmin(payload: any) {
-    this.notificationsGateway.sendNotificationToRole(
-      Role.HospitalAdmin,
-      payload,
-    );
-  }
-
-  notifyWorkers(payload: any) {
-    this.notificationsGateway.sendNotificationToRole(
-      Role.HealthcareWorker,
-      payload,
-    );
-  }
-
-  notifyAllUsers(payload: any) {
-    this.notificationsGateway.sendNotification(payload);
+    this.logger.log('Notifying Admins', payload);
   }
 }

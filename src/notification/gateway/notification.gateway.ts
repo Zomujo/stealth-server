@@ -1,55 +1,98 @@
+import { Logger } from '@nestjs/common';
 import {
-  WebSocketGateway,
-  WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
+import Redis from 'ioredis';
 import { Server, Socket } from 'socket.io';
-import { Inject } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import jwtConfig from '../../auth/interface/jwt.config';
-import { ConfigType } from '@nestjs/config';
-import { IUserPayload } from '../../auth/interface/payload.interface';
 
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({
+  cors: {
+    origin: '*', // Adjust for your frontend URL
+  },
+})
 export class NotificationsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private jwtService: JwtService,
-    @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-  ) {}
-  @WebSocketServer() server: Server;
+  private sub: Redis;
+  private pub: Redis;
 
-  async handleConnection(client: Socket) {
-    const bearerToken = client.handshake?.headers?.authorization;
-    let role = 'all';
-    if (bearerToken) {
-      const [_type, token] = bearerToken ? bearerToken.split(' ') : [];
-      const user = await this.decodeToken(token);
-      role = user.role ?? 'null';
-      client.join(role);
-    }
-
-    console.log(`Client connected: ${client.id} with role ${role}`);
+  constructor() {
+    this.sub = new Redis(process.env.REDIS_URL);
+    this.pub = new Redis(process.env.REDIS_URL);
   }
 
-  handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
-  }
+  @WebSocketServer()
+  server: Server;
 
-  sendNotification(payload: any) {
-    this.server.emit('newNotification', payload);
-  }
+  private readonly logger = new Logger(NotificationsGateway.name);
+  private NOTIFICATIONS_NEW = 'notification.new';
 
-  sendNotificationToRole(role: string, message: any) {
-    this.server.to(role).emit('newNotification', message);
-  }
-  async decodeToken(token: string) {
-    const payload: IUserPayload = await this.jwtService.verifyAsync(token, {
-      secret: this.jwtConfiguration.secret,
+  afterInit() {
+    this.sub.subscribe(this.NOTIFICATIONS_NEW, (err, count) => {
+      if (err) {
+        this.logger.error('Failed to subscribe: ' + err.message);
+      } else {
+        this.logger.log(
+          `Subscribed successfully! This client is currently subscribed to ${count as number} channels.`,
+        );
+      }
     });
-    return payload;
+
+    this.sub.on('message', (channel, message) => {
+      this.logger.log(`Received message from ${channel}: ${message}`);
+      const data = JSON.parse(message);
+      this.server.to(data.topic).emit(channel, data.notification);
+    });
+
+    this.logger.log('🚀 Notifications Gateway initialized');
+  }
+
+  // Handles new client connections
+  handleConnection(client: Socket) {
+    this.logger.log(`Client connected: ${client.id}`);
+  }
+
+  // Handles client disconnections
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+  }
+
+  @SubscribeMessage('subscribe')
+  handleSubscribeToTopic(
+    @MessageBody('topic') topic: string,
+    @ConnectedSocket() client: Socket,
+  ): { topic: string; message: string } {
+    client.join(topic);
+
+    this.logger.log('I am subscribed to topic: ' + topic);
+
+    return {
+      topic: topic,
+      message: `You are now subscribed to ${topic}`,
+    };
+  }
+
+  async handleNewNotification(event: string, data: any) {
+    const newData = data as { topic: string; notification: any };
+    this.logger.log(`📩 Redis event [${event}] on ${newData.topic}`);
+    this.server.to(newData.topic).emit(event, data.notification);
+  }
+
+  async sendNotificationToTopic(topic: string, notification: any) {
+    console.log(
+      `Sending notification to topic '${topic}': ${JSON.stringify(notification)}`,
+    );
+
+    await this.pub.publish(
+      this.NOTIFICATIONS_NEW,
+      JSON.stringify({ topic, notification }),
+    );
   }
 }
