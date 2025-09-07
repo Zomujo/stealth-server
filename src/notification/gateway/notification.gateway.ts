@@ -24,8 +24,8 @@ export class NotificationsGateway
   private pub: Redis;
 
   constructor() {
-    this.sub = new Redis(process.env.REDIS_URL);
-    this.pub = new Redis(process.env.REDIS_URL);
+    this.sub = new Redis(process.env.REDIS_URL, { family: 0 });
+    this.pub = new Redis(process.env.REDIS_URL, { family: 0 });
   }
 
   @WebSocketServer()
