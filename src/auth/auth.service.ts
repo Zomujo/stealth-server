@@ -301,7 +301,10 @@ export class AuthService {
       }
     } else if (dto.phoneNumber) {
       user = await this.userRepository.findOne({
-        where: { username: dto.username, phoneNumber: dto.phoneNumber },
+        where: {
+          username: { [Op.iLike]: dto.username },
+          phoneNumber: dto.phoneNumber,
+        },
       });
       if (!user) {
         throw new NotFoundException('user with this phone number not found');
@@ -339,7 +342,7 @@ export class AuthService {
   async checkCode(dto: ValidateCodeDto) {
     const { username, code } = dto;
     const user = await this.userRepository.findOne({
-      where: { username },
+      where: { username: { [Op.iLike]: username } },
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -360,7 +363,7 @@ export class AuthService {
     const { username, newPassword } = dto;
 
     const user = await this.userRepository.findOne({
-      where: { username },
+      where: { username: { [Op.iLike]: username } },
     });
     if (!user) {
       throw new NotFoundException('user with this email not found');
