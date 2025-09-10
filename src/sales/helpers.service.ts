@@ -388,7 +388,7 @@ export class SalesHelperService {
       if (batches.length === 0) {
         batchesPresent = false;
         const item = await this.itemService.fetchOne({
-          query: { code: itemCode, facilityId },
+          query: { code: { [Op.iLike]: `${itemCode}%` }, facilityId },
           fields: ['id', 'name'],
         });
 
