@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { AccountState, User } from '../auth/models/user.model';
 import { literal } from 'sequelize';
-import { ChangeRoleDto, FindUserQueryDto } from './dto';
+import { AdminChangePasswordDto, ChangeRoleDto, FindUserQueryDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../notification/mail/mail.service';
 import { Department } from './department/models/department.model';
@@ -155,6 +155,20 @@ export class AdminService {
       );
     }
     return;
+  }
+
+  async resetUserPassword(dto: AdminChangePasswordDto, adminId: string) {
+    const personnel = await this.userRepository.findByPk(dto.userId);
+    if (!personnel) {
+      throw new NotFoundException('User not found');
+    }
+    const hashPassword = await bcrypt.hash(
+      dto.newPassword,
+      this.SALT_OR_ROUNDS,
+    );
+    personnel.password = hashPassword;
+    personnel.updatedById = adminId;
+    await personnel.save();
   }
 
   async deactivateUser(personnelId: string, adminId: string) {

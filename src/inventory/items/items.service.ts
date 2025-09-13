@@ -126,6 +126,7 @@ export class ItemService {
     const filter = await this.applyFilter(query);
     const items = await this.itemRepo.findAndCountAll(filter);
     this.logger.log(`Retrieved ${items.count} items`);
+    items.rows.sort((a, b) => b.totalStock - a.totalStock);
 
     return new PaginatedDataResponseDto(
       items.rows,

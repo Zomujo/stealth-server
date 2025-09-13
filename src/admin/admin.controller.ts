@@ -20,7 +20,12 @@ import {
 } from '../core/shared/responses/success.response';
 import { throwError } from '../core/shared/responses/error.response';
 import { User } from '../auth/models/user.model';
-import { ChangeRoleDto, FindUserQueryDto, GetAdminUserDto } from './dto';
+import {
+  AdminChangePasswordDto,
+  ChangeRoleDto,
+  FindUserQueryDto,
+  GetAdminUserDto,
+} from './dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Features,
@@ -113,6 +118,24 @@ export class AdminController {
     return new ApiSuccessResponseNoData(
       HttpStatus.OK,
       'user role updated successfully',
+    );
+  }
+
+  @CustomApiResponse(['successNull', 'authorize', 'notfound'], {
+    message: 'User password changed successfully',
+  })
+  @Permission(Features.USERS, PermissionLevel.READ_WRITE)
+  @Patch('users/:id/password')
+  async changePassword(
+    @Param('id', ParseUUIDPipe) personnelId: string,
+    @Body() dto: AdminChangePasswordDto,
+    @GetUser('sub', ParseUUIDPipe) adminId: string,
+  ) {
+    dto.userId = personnelId;
+    await this.adminService.resetUserPassword(dto, adminId);
+    return new ApiSuccessResponseNoData(
+      HttpStatus.OK,
+      'user password changed successfully',
     );
   }
 
