@@ -59,7 +59,7 @@ export class SalesService {
       limit: query.pageSize || 10,
       offset: query.pageSize * (query.page - 1) || 0,
       order: [
-        ['quantity', 'ASC'],
+        ['quantity', 'DESC'],
         ['validity', 'ASC'],
       ],
       attributes: [['id', 'batchId'], 'batchNumber', 'validity', 'quantity'],
