@@ -275,13 +275,15 @@ export class SalesService {
     const modRows = rows.map((sale) => {
       const transformed = this.salesHelperService.transformSale(sale);
       if (!transformed || (transformed as any).notFound) {
-        return;
+        return null;
       }
       return transformed;
     });
 
+    const finalRows = modRows.filter((sale) => sale);
+
     return new PaginatedDataResponseDto(
-      modRows,
+      finalRows,
       query.page || 1,
       query.pageSize,
       count,

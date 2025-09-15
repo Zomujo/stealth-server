@@ -4,8 +4,8 @@ import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
 @Injectable()
 export class CustomCacheInterceptor extends CacheInterceptor {
   private logger = new Logger(CustomCacheInterceptor.name);
+
   protected trackBy(context: ExecutionContext): string {
-    // const request: Request = context.switchToHttp().getRequest();
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const isHttpApp = httpAdapter && !!httpAdapter.getRequestMethod;
     const cacheMetadata = this.reflector.get(
@@ -18,17 +18,26 @@ export class CustomCacheInterceptor extends CacheInterceptor {
     }
 
     const request = context.getArgByIndex(0);
+
     if (!this.isRequestCacheable(context)) {
       return undefined;
     }
+
     const protocol = request.protocol;
     const host = httpAdapter.getRequestHostname(request);
     const url = httpAdapter.getRequestUrl(request);
     const fullUrl = `${protocol}://${host}${url}`;
-    return this.buildCacheKeyFrom(fullUrl);
+
+    // Extract Authorization token without "Bearer "
+    const authHeader = request.headers?.authorization || '';
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.substring(7).trim()
+      : authHeader.trim();
+
+    return this.buildCacheKeyFrom(fullUrl, token || 'no-auth');
   }
 
-  private buildCacheKeyFrom(fullUrl: string): string {
+  private buildCacheKeyFrom(fullUrl: string, token: string): string {
     try {
       const url = new URL(fullUrl);
 
@@ -43,7 +52,8 @@ export class CustomCacheInterceptor extends CacheInterceptor {
         .map(([key, value]) => `${key}=${value}`)
         .join(':');
 
-      return `${normalizedPath}${queryString ? `:${queryString}` : ''}`;
+      // Include token (without Bearer) in the cache key
+      return `${normalizedPath}${queryString ? `:${queryString}` : ''}:token=${token}`;
     } catch (error) {
       this.logger.error(`Invalid URL passed: ${error.message}`, error.stack);
       return '';
