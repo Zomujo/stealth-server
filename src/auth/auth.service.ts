@@ -173,7 +173,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: {
         [Op.or]: [
-          { email: dto.accountIdentifier },
+          { email: { [Op.iLike]: dto.accountIdentifier } },
           { username: { [Op.iLike]: dto.accountIdentifier } },
         ],
       },
