@@ -209,7 +209,7 @@ export class AuthController {
   })
   @ApiBearerAuth('access-token')
   @Authorize()
-  @CacheTTL(null)
+  @CacheTTL(0)
   @Get('user')
   async getUser(@GetUser('sub', ParseUUIDPipe) id: string) {
     try {
