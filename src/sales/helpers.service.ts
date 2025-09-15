@@ -42,10 +42,12 @@ export class SalesHelperService {
     {
       model: SaleItem,
       attributes: ['id', 'batchId', 'quantity'],
+      paranoid: false,
       include: [
         {
           model: Item,
           attributes: ['name', 'brandName', 'sellingPrice'],
+          paranoid: false,
         },
         {
           model: Batch,

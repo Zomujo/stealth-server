@@ -274,7 +274,7 @@ export class SalesService {
 
     const modRows = rows.map((sale) => {
       const transformed = this.salesHelperService.transformSale(sale);
-      if ((transformed as any).notFound) {
+      if (!transformed || (transformed as any).notFound) {
         return;
       }
       return transformed;
