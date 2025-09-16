@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { StatusType, Supplier } from './models/supplier.model';
 import { CreateSupplierDto, GetSupplierDto, UpdateSupplierDto } from './dto';
-import { FindAndCountOptions, IncludeOptions, literal, Op } from 'sequelize';
+import { FindAndCountOptions, IncludeOptions, Op } from 'sequelize';
 import { buildQuery, generateFilter } from '../../core/shared/factory';
 import { IUserPayload } from '../../auth/interface/payload.interface';
 import { QueryOptionsDto } from '../../core/shared/dto/query-options.dto';
@@ -76,39 +76,21 @@ export class SuppliersService {
   ): Promise<[Supplier[], number]> {
     // todo: refactor filter
     const queryFilter = generateFilter(query);
-    const paginateObject = query
-      ? {
-          where: {
-            [Op.and]: [
-              { facilityId },
-              query.search && {
-                name: { [Op.iLike]: `%${query.search}%` },
-              },
-              query.status && {
-                status: query.status,
-              },
-              queryFilter.searchFilter,
-            ],
-          },
-          ...queryFilter.pageFilter,
-        }
-      : {};
+    const whereOptions: Record<string, any> = {
+      facilityId,
+    };
+
+    if (query.search) {
+      whereOptions.name = { [Op.iLike]: `%${query.search}%` };
+    }
+
+    if (query.status) {
+      whereOptions.status = query.status;
+    }
 
     const filter: FindAndCountOptions<Supplier> = {
-      ...paginateObject,
-      order: query
-        ? query.orderBy && [[query.orderBy, 'ASC']]
-        : [
-            [
-              literal(`
-        CASE 
-          WHEN status = 'Deactivated' THEN 1
-          WHEN status = 'Active' THEN 2
-        END
-      `),
-              'ASC',
-            ],
-          ],
+      where: { ...whereOptions, ...queryFilter.searchFilter },
+      ...queryFilter.pageFilter,
       attributes: [
         'id',
         'name',
