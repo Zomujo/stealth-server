@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -75,6 +76,14 @@ export class ItemService {
    * @throws If any error occurs during the creation process.
    */
   async create(createItemDto: CreateItemDto): Promise<OneItem> {
+    const existingItem = await this.itemRepo.findOne({
+      where: { name: createItemDto.name, facilityId: createItemDto.facilityId },
+    });
+    if (existingItem) {
+      throw new BadRequestException(
+        `Item: ${createItemDto.name} already exists`,
+      );
+    }
     const createdItem = await this.itemRepo.create({
       ...createItemDto,
       status: ItemStatus.OUT_OF_STOCK,
