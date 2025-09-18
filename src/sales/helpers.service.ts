@@ -320,6 +320,7 @@ export class SalesHelperService {
       ...queryFilter.pageFilter,
       attributes: [
         'id',
+        'icd_code',
         'saleNumber',
         'total',
         'createdAt',

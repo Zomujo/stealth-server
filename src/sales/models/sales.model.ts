@@ -60,6 +60,10 @@ export class Sale extends BaseModel<Sale> {
   insured: boolean;
 
   @AllowNull
+  @Column
+  icdCode: string;
+
+  @AllowNull
   @Column(DataType.TEXT)
   notes: string;
 

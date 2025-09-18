@@ -13,6 +13,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsString,
   Min,
 } from 'class-validator';
 import { GenericResponseDto } from 'src/core/shared/dto/base.dto';
@@ -65,6 +66,14 @@ export class CreateSaleDto {
   @IsNotEmpty()
   @IsBoolean()
   insured: boolean;
+
+  @ApiPropertyOptional({
+    example: 'A00',
+    description: 'ICD code for the diagnosis',
+  })
+  @IsOptional()
+  @IsString()
+  icdCode?: string;
 
   @ApiProperty({
     type: [CreateSaleItemsDto],

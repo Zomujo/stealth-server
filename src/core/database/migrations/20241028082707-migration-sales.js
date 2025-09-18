@@ -50,6 +50,12 @@ module.exports = {
         allowNull: false,
       },
 
+      icdCode: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        field: 'icd_code',
+      },
+
       notes: {
         type: Sequelize.TEXT,
         allowNull: true,
