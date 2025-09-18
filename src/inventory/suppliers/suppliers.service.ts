@@ -61,7 +61,7 @@ export class SuppliersService {
     const filter: FindAndCountOptions<Supplier> = {
       where: { facilityId, status: StatusType.ACTIVE },
       attributes: ['id', 'name'],
-      order: [['updatedAt', 'DESC']],
+      order: [['name', 'DESC']],
       distinct: true,
     };
     const suppliers = await this.supplierRepo.findAndCountAll(filter);
