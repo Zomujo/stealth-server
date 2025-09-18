@@ -106,7 +106,7 @@ export class ItemCategoryService {
     const filter: FindAndCountOptions<ItemCategory> = {
       where: { facilityId },
       attributes: ['id', 'name'],
-      order: [['name', 'DESC']],
+      order: [['name', 'ASC']],
     };
     const categories = await this.itemCategoryRepo.findAndCountAll(filter);
     this.logger.log(`Retrieved ${categories.count} items categories`);
