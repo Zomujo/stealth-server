@@ -65,7 +65,10 @@ export abstract class BaseModel<T = any> extends Model<T> {
         source: 'api',
       },
       defaults: {
-        userId: instance.createdById || null,
+        userId:
+          instance.constructor.name == 'User'
+            ? instance.id
+            : instance.createdById || null,
         action: 'CREATE',
         tableName: instance.constructor.name,
         recordId: instance.id,
