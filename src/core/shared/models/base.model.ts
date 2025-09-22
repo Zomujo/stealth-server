@@ -57,6 +57,13 @@ export abstract class BaseModel<T = any> extends Model<T> {
       ownershipOptions.departmentId = extendedInstance.departmentId;
     }
 
+    let userId = null;
+    if (instance.constructor.name === 'User') {
+      userId = instance.id;
+    } else if (instance.createdById) {
+      userId = instance.createdById;
+    }
+
     const [auditLog, created] = await AuditLog.findOrCreate({
       where: {
         userId: instance.createdById,
@@ -65,10 +72,7 @@ export abstract class BaseModel<T = any> extends Model<T> {
         source: 'api',
       },
       defaults: {
-        userId:
-          instance.constructor.name == 'User'
-            ? instance.id
-            : instance.createdById || null,
+        userId: userId,
         action: 'CREATE',
         tableName: instance.constructor.name,
         recordId: instance.id,
