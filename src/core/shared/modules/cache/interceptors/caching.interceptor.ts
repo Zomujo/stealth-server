@@ -28,11 +28,7 @@ export class CustomCacheInterceptor extends CacheInterceptor {
     const url = httpAdapter.getRequestUrl(request);
     const fullUrl = `${protocol}://${host}${url}`;
 
-    // Extract Authorization token without "Bearer "
-    const authHeader = request.headers?.authorization || '';
-    const token = authHeader.startsWith('Bearer ')
-      ? authHeader.substring(7).trim()
-      : authHeader.trim();
+    const token = request.user.sub;
 
     return this.buildCacheKeyFrom(fullUrl, token || 'no-auth');
   }
@@ -53,7 +49,7 @@ export class CustomCacheInterceptor extends CacheInterceptor {
         .join(':');
 
       // Include token (without Bearer) in the cache key
-      return `${normalizedPath}${queryString ? `:${queryString}` : ''}:token=${token}`;
+      return `${normalizedPath}${queryString ? `:${queryString}` : ''}:facility=${token}`;
     } catch (error) {
       this.logger.error(`Invalid URL passed: ${error.message}`, error.stack);
       return '';
