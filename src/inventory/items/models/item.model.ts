@@ -179,6 +179,32 @@ export class Item extends BaseModel<Item> {
   @BelongsTo(() => User)
   deletedBy: User;
 
+  async getItemFullName(itemId: string): Promise<string> {
+    const item = await Item.findByPk(itemId, {
+      attributes: ['name', 'brandName', 'dosageForm', 'name', 'strength'],
+    });
+    if (!item) return '';
+
+    const nameConsts = [item.name];
+    if (item.brandName) {
+      nameConsts.push(`(${item.brandName})`);
+    }
+    if (item.dosageForm) {
+      const lowercased = item.dosageForm.toLowerCase();
+
+      const capitalized =
+        lowercased.charAt(0).toUpperCase() + lowercased.slice(1);
+      nameConsts.push(capitalized);
+    }
+    if (item.strength) {
+      nameConsts.push(item.strength);
+    }
+    // if (item.unitOfMeasurement) {
+    //   nameConsts.push(item.unitOfMeasurement);
+    // }
+    return nameConsts.join(' ');
+  }
+
   async getItemStatus(totalStock: number): Promise<ItemStatus> {
     if (totalStock == 0) {
       return ItemStatus.OUT_OF_STOCK;
@@ -209,14 +235,34 @@ export class Item extends BaseModel<Item> {
     items: Item | Item[],
     options: any,
   ): Promise<void> {
+    // if (Array.isArray(items)) {
+    //   await Promise.all(
+    //     items.map(async (item) => {
+    //       item.itemFullName = await item.getItemFullName(item.id);
+    //     }),
+    //   );
+    // } else {
+    //   items.itemFullName = await items.getItemFullName(items.id);
+    // }
+
     if (options.skipStatus) return;
     if (!items) return;
     const processItem = async (item: Item) => {
       if (!item) return;
-      const departmentId = options.departmentId as string;
-      item.totalStock = await item.getTotalQuantity(departmentId);
-      item.status = await item.getItemStatus(item.totalStock);
+
+      if (!options.skipStatus) {
+        const departmentId = options.departmentId as string;
+        item.totalStock = await item.getTotalQuantity(departmentId);
+      }
+
+      if (!options.skipStatus) {
+        item.status = await item.getItemStatus(item.totalStock);
+      }
+      // console.log('after find hook', options.attributes);
+
+      // item.itemFullName = await item.getItemFullName(item.id);
     };
+
     if (Array.isArray(items)) {
       await Promise.all(items.map(processItem));
     } else {

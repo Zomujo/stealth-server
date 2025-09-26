@@ -6,7 +6,12 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FindAndCountOptions, IncludeOptions, Op } from 'sequelize';
+import {
+  FindAndCountOptions,
+  FindOptions,
+  IncludeOptions,
+  Op,
+} from 'sequelize';
 import { PaginatedDataResponseDto } from 'src/core/shared/responses/success.response';
 import { ItemCategory } from '../items-category/models/items-category.model';
 import { BatchService } from './batches/batch.service';
@@ -107,16 +112,29 @@ export class ItemService {
    * @throws Throws an error if there was an issue retrieving the items.
    */
   async findWithNoPaginate(facilityId: string) {
-    const items = await this.itemRepo.findAndCountAll({
+    const items = await this.itemRepo.findAll({
       where: {
         facilityId,
       },
-      attributes: ['id', 'name'],
+      attributes: [
+        'id',
+        'name',
+        'brandName',
+        'dosageForm',
+        'strength',
+        'itemFullName',
+      ],
       order: [['name', 'ASC']],
-    });
+      skipStatus: true,
+    } as FindOptions);
 
-    this.logger.log(`Retrieved ${items.count} items`);
-    return items.rows;
+    const modItems = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      itemFullName: item.itemFullName,
+    }));
+
+    return modItems;
   }
 
   async fetchItemsWithValidity(
