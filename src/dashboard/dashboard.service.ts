@@ -26,6 +26,7 @@ export class DashboardService {
       startDate,
       differenceInDays(endDate, startDate),
     );
+
     const comparisonEndDate = subDays(startDate, 1);
     const { res }: any = await this.sql.query(
       `
@@ -70,7 +71,7 @@ inventory as (
   FROM items i
   LEFT JOIN batches b
       ON b.item_id = i.id
-      ${user.department ? `AND i.department_id = '${user.department}'` : ''}
+      ${user.department ? `AND b.department_id = '${user.department}'` : ''}
   WHERE ${user.facility ? `i.facility_id = '${user.facility}'` : ''}
 	GROUP BY i.id, i.cost_price
 ),
