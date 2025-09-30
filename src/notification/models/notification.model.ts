@@ -53,6 +53,9 @@ export class NotificationModel extends BaseModel<NotificationModel> {
   @Column
   departmentId: string;
 
+  @BelongsTo(() => Department)
+  department: Department;
+
   @AllowNull
   @ForeignKey(() => User)
   @Column

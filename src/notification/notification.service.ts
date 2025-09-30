@@ -65,8 +65,11 @@ export class NotificationService {
     const whereOptions: any = {
       facilityId: user.facility,
       feature: features,
-      departmentId: user.department,
     };
+
+    if (user.department) {
+      whereOptions.departmentId = user.department;
+    }
 
     const notifications = await this.notifcationRepo.findAndCountAll({
       where: {
@@ -81,6 +84,7 @@ export class NotificationService {
         'createdAt',
         'status',
       ],
+      include: [{ model: Department, attributes: ['id', 'name'] }],
       ...queryFilter.pageFilter,
     });
 
