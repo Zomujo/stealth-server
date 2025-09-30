@@ -59,6 +59,7 @@ export class ItemController {
     type: OneItem,
     message: 'Item created successfully',
   })
+  // @CacheTTL(0.00001)
   @Permission(Features.ITEMS, PermissionLevel.READ_WRITE)
   @Post()
   async create(@Body() dto: CreateItemDto, @GetUser() user: IUserPayload) {

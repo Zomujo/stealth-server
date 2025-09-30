@@ -509,6 +509,7 @@ export class ItemService {
           attributes: [],
           where: { departmentId: query.departmentId || null },
           duplicating: false,
+          required: false,
         },
         { model: ItemCategory, attributes: ['id', 'name'] },
       ],
