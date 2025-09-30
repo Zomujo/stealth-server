@@ -41,4 +41,9 @@ export class CreateNotificationDto {
     example: new Date(),
   })
   createdAt: Date;
+
+  @ApiResponseProperty({
+    example: 'Department A',
+  })
+  departmentName?: string;
 }

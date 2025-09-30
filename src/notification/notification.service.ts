@@ -16,6 +16,7 @@ import { AccountState, User } from '../auth/models/user.model';
 import { FetchNotificationsQueryDto } from './dto/get.dto';
 import { generateFilter } from '../core/shared/factory';
 import { CreateOptions } from 'sequelize';
+import { Department } from 'src/admin/department/models/department.model';
 
 @Injectable()
 export class NotificationService {
@@ -24,6 +25,7 @@ export class NotificationService {
     @InjectModel(NotificationModel)
     private notifcationRepo: typeof NotificationModel,
     @InjectModel(User) private userRepository: typeof User,
+    @InjectModel(Department) private departmentRepository: typeof Department,
   ) {}
 
   private logger = new Logger(NotificationService.name);
@@ -194,10 +196,31 @@ export class NotificationService {
     notification: CreateNotificationDto,
     feature: Features,
   ): Promise<void> {
-    const deptPart = user.department ? `:${user.department}:` : '';
-    const topic = `${user.facility}${deptPart}`;
-
     const notificationBody = { feature, ...notification };
+    let topic = `${user.facility}`;
+
+    if (user.department) {
+      const department = await this.departmentRepository.findByPk(
+        user.department,
+        { attributes: ['name'] },
+      );
+
+      if (!department) {
+        throw new NotFoundException('Department not found');
+      }
+
+      const deptPart = `:${user.department}:`;
+      topic = `${user.facility}${deptPart}`;
+
+      await this.notificationsGateway.sendNotificationToTopic(
+        topic,
+        notificationBody,
+      );
+
+      topic = user.facility;
+      notificationBody.departmentName = department.name;
+    }
+
     await this.notificationsGateway.sendNotificationToTopic(
       topic,
       notificationBody,

@@ -10,11 +10,12 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { NotificationModel } from './models/notification.model';
 import { User } from '../auth/models/user.model';
 import { SmsModule } from './sms/sms.module';
+import { Department } from 'src/admin/department/models/department.model';
 
 @Global()
 @Module({
   imports: [
-    SequelizeModule.forFeature([NotificationModel, User]),
+    SequelizeModule.forFeature([NotificationModel, User, Department]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     MailModule,
