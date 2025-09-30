@@ -507,6 +507,7 @@ export class ItemService {
           model: Batch,
           as: 'batches',
           attributes: [],
+          where: { departmentId: query.departmentId || null },
           duplicating: false,
           required: false,
         },
