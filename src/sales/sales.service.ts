@@ -446,6 +446,19 @@ export class SalesService {
       },
     );
 
+    const saleItems = await this.saleItemRepository.findAll({
+      where: { saleId: id },
+      attributes: ['batchId', 'quantity'],
+    });
+
+    for (const item of saleItems) {
+      await this.salesHelperService.restoreStock(
+        item.batchId,
+        item.quantity,
+        userId,
+      );
+    }
+
     const destroyedRows = await this.saleRepository.destroy({
       where: { id },
       userId,

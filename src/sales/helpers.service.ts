@@ -356,6 +356,14 @@ export class SalesHelperService {
     });
   }
 
+  async restoreStock(batchId: string, quantity: number, userId: string) {
+    const oldBatch = await this.batchService.findOne(batchId);
+    await this.batchService.increaseStock(batchId, quantity, userId);
+    oldBatch.updatedById = userId;
+    await oldBatch.save();
+    return oldBatch;
+  }
+
   async fifoDeductItemStock(
     itemCode: string,
     requestedQuantity: number,
