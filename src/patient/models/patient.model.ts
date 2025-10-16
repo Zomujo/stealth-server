@@ -28,6 +28,7 @@ export class Patient extends BaseModel<Patient> {
   @Column
   name: string;
 
+  @AllowNull
   @Unique
   @Column
   cardIdentificationNumber: string;

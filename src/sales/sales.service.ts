@@ -62,11 +62,20 @@ export class SalesService {
         ['quantity', 'DESC'],
         ['validity', 'ASC'],
       ],
+
       attributes: [['id', 'batchId'], 'batchNumber', 'validity', 'quantity'],
       include: [
         {
           model: Item,
-          attributes: ['id', 'name', 'brandName', 'sellingPrice'],
+          attributes: [
+            'id',
+            'name',
+            'brandName',
+            'sellingPrice',
+            'dosageForm',
+            'strength',
+            'itemFullName',
+          ],
           where: itemWhereConditions,
         },
         {

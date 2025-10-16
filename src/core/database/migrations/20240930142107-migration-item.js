@@ -132,6 +132,8 @@ module.exports = {
           model: 'suppliers',
           key: 'id',
         },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
         field: 'supplier_id',
       },
       departmentId: {
