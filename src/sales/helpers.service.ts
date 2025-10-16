@@ -46,7 +46,14 @@ export class SalesHelperService {
       include: [
         {
           model: Item,
-          attributes: ['name', 'brandName', 'sellingPrice'],
+          attributes: [
+            'name',
+            'brandName',
+            'sellingPrice',
+            'dosageForm',
+            'strength',
+            'itemFullName',
+          ],
           paranoid: false,
         },
         {
