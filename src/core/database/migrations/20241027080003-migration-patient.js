@@ -16,7 +16,7 @@ module.exports = {
 
       cardIdentificationNumber: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true,
         field: 'card_identification_number',
       },

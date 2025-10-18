@@ -26,6 +26,8 @@ module.exports = {
         key: 'id',
       },
       type: Sequelize.UUID,
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
       field: 'facility_id',
     });
   },

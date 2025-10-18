@@ -25,7 +25,7 @@ module.exports = {
         allowNull: true,
         type: Sequelize.UUID,
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
         field: 'facility_id',
       },
       orderNumber: {
@@ -41,6 +41,8 @@ module.exports = {
         },
         type: Sequelize.UUID,
         allowNull: false,
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
         field: 'supplier_id',
       },
       quantity: {

@@ -27,6 +27,8 @@ module.exports = {
           model: 'facilities',
           key: 'id',
         },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
 
       departmentId: {

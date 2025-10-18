@@ -57,6 +57,7 @@ export class GetSalesDto extends IntersectionType(
   @ApiResponseProperty({
     example: {
       item: {
+        itemFullName: 'Some Item (Brand Item) Solids 597mg',
         name: 'Some Item',
         brandName: 'Some Item Brand',
         sellingPrice: 85.01,
@@ -162,6 +163,7 @@ export class GetSalesItemsDto {
 
   @ApiResponseProperty({
     example: {
+      itemFullName: 'Some Item (Brand Item) Solids 597mg',
       id: 'e7f7424f-04d6-4027-b9af-a25be14c4703',
       name: 'Some Item',
       brandName: 'Some Item brand',

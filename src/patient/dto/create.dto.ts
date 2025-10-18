@@ -17,11 +17,11 @@ export class CreatePatientDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'gh-56387082875',
     description: 'Primary Identification number of patient',
   })
-  @IsNotEmpty()
+  @IsOptional()
   cardIdentificationNumber: string;
 
   @ApiPropertyOptional({

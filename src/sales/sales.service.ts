@@ -62,11 +62,20 @@ export class SalesService {
         ['quantity', 'DESC'],
         ['validity', 'ASC'],
       ],
+
       attributes: [['id', 'batchId'], 'batchNumber', 'validity', 'quantity'],
       include: [
         {
           model: Item,
-          attributes: ['id', 'name', 'brandName', 'sellingPrice'],
+          attributes: [
+            'id',
+            'name',
+            'brandName',
+            'sellingPrice',
+            'dosageForm',
+            'strength',
+            'itemFullName',
+          ],
           where: itemWhereConditions,
         },
         {
@@ -153,7 +162,9 @@ export class SalesService {
   async create(dto: CreateSaleDto, user: IUserPayload): Promise<Sale> {
     const transaction = await this.sequelize.transaction();
     try {
-      await this.salesHelperService.attachPatientIfExists(dto);
+      if (!dto.patientId && dto.patientCardId) {
+        await this.salesHelperService.attachPatientIfExists(dto);
+      }
 
       const batchSellingPrices: BatchSellingPrice[] = [];
       const saleItems = await this.salesHelperService.processSaleItems(
