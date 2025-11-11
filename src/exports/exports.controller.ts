@@ -5,9 +5,11 @@ import {
   Delete,
   StreamableFile,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { ExportsService } from './exports.service';
 import { throwError } from '../core/shared/responses/error.response';
+import { LocationQueryDto } from './dto';
 
 @Controller('exports')
 export class ExportsController {
@@ -27,10 +29,20 @@ export class ExportsController {
     }
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.exportsService.findAll();
-  // }
+  @Get('performance')
+  async findAll(@Query() query: LocationQueryDto) {
+    try {
+      const response =
+        await this.exportsService.exportLocationPerformanceData(query);
+
+      return new StreamableFile(response.file, {
+        type: 'application/pdf',
+        disposition: `attachment; filename=${response.fileName}`,
+      });
+    } catch (error) {
+      throwError(this.logger, error);
+    }
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
