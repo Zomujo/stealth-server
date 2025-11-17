@@ -17,6 +17,7 @@ import { AuditsModule } from '../../../audit/audit.module';
 import { ExportsModule } from '../../../exports/exports.module';
 import { HealthModule } from '../../../health/health.module';
 import { ImsCacheModule } from './cache/cache.module';
+import { ImsSentryModule } from './sentry/ims-sentry.module';
 
 export const IndexModules = [
   NotificationModule,
@@ -38,4 +39,5 @@ export const IndexModules = [
   ExportsModule,
   SyncModule,
   ImsCacheModule,
+  ImsSentryModule,
 ];
