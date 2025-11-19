@@ -37,7 +37,7 @@ export class CreatePatientDto {
   })
   @IsNotEmpty()
   @Type(() => Date)
-  @MaxDate(new Date())
+  @MaxDate(new Date(Date.now()))
   dateOfBirth: Date;
 }
 
