@@ -410,6 +410,7 @@ export class BatchService {
           attributes: ['id', 'name', 'brandName', 'sellingPrice'],
         },
       ],
+      paranoid: false,
     });
     if (!batch) {
       throw new NotFoundException(`Batch not found`);
