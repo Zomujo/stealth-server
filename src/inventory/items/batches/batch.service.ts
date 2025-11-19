@@ -393,6 +393,7 @@ export class BatchService {
     }
     const batch = await this.batchRepo.findByPk(id, {
       ...options,
+      paranoid: false,
     });
     if (!batch) {
       throw new NotFoundException(`Batch with ID ${id} not found`);
