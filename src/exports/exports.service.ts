@@ -38,7 +38,6 @@ export class ExportsService {
     const client = await this.dbPool.connect();
 
     try {
-      console.log('query', query);
       await client.query('BEGIN');
 
       const queryStream = new QueryStream(query);
