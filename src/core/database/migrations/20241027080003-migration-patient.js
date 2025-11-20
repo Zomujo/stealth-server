@@ -17,7 +17,6 @@ module.exports = {
       cardIdentificationNumber: {
         type: Sequelize.STRING,
         allowNull: true,
-        unique: true,
         field: 'card_identification_number',
       },
 
@@ -32,6 +31,29 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
         field: 'date_of_birth',
+      },
+
+      departmentId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'departments',
+          key: 'id',
+        },
+        field: 'department_id',
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+
+      facilityId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'facilities',
+          key: 'id',
+        },
+        field: 'facility_id',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
     });
   },

@@ -12,6 +12,7 @@ import {
 import { User } from '../auth/models/user.model';
 import { buildQuery } from '../core/shared/factory/query-builder.factory';
 import { QueryOptionsDto } from '../core/shared/dto/query-options.dto';
+import { IUserPayload } from 'src/auth/interface/payload.interface';
 
 @Injectable()
 export class PatientService {
@@ -27,10 +28,12 @@ export class PatientService {
     },
     sales: { model: Sale, attributes: ['id', 'saleNumber', 'status'] },
   };
-  async create(dto: CreatePatientDto, createdBy: string) {
+  async create(dto: CreatePatientDto, user: IUserPayload) {
     const patient = await this.patientRepository.create({
       ...dto,
-      createdById: createdBy,
+      createdById: user.sub,
+      departmentId: user.department,
+      facilityId: user.facility,
     });
     return patient;
   }
@@ -122,6 +125,8 @@ export class PatientService {
   private applyFilter(query: FindPatientDto): FindAndCountOptions<Patient> {
     const whereOptions: WhereOptions<Patient> = {
       [Op.and]: [
+        { facilityId: query.facilityId },
+        query.departmentId && { departmentId: query.departmentId },
         query.search && {
           [Op.or]: [
             { cardIdentificationNumber: { [Op.iLike]: `%${query.search}%` } },

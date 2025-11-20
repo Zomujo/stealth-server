@@ -17,6 +17,8 @@ import { BaseModel } from '../../core/shared/models/base.model';
 import { Sale } from '../../sales/models/sales.model';
 import { User } from '../../auth/models/user.model';
 import { deleteByPattern } from 'src/core/shared/modules/cache/utils/delete-prefix.util';
+import { Department } from 'src/admin/department/models/department.model';
+import { Facility } from 'src/admin/facility/models/facility.model';
 
 @Table({
   tableName: 'patients',
@@ -34,7 +36,6 @@ export class Patient extends BaseModel<Patient> {
   cardIdentificationNumber: string;
 
   @AllowNull
-  @Unique
   @Column
   secondaryIdentificationNumber: string;
 
@@ -43,6 +44,21 @@ export class Patient extends BaseModel<Patient> {
 
   @HasMany(() => Sale)
   sales: Sale[];
+
+  @ForeignKey(() => Facility)
+  @Column
+  facilityId: string;
+
+  @BelongsTo(() => Facility)
+  facility: Facility;
+
+  @AllowNull
+  @ForeignKey(() => Department)
+  @Column
+  departmentId: string;
+
+  @BelongsTo(() => Department)
+  department?: Department;
 
   @AllowNull
   @ForeignKey(() => User)

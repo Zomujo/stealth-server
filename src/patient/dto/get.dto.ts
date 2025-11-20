@@ -11,6 +11,7 @@ export class RetrievePatientsDto extends IntersectionType(
 ) {}
 export class RetrievePatientDto extends CreatePatientResponseDto {}
 
-export class FindPatientDto extends PickType(PaginationRequestDto, [
-  'search',
-]) {}
+export class FindPatientDto extends PickType(PaginationRequestDto, ['search']) {
+  facilityId: string;
+  departmentId?: string;
+}

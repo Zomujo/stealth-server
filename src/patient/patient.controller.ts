@@ -32,6 +32,7 @@ import {
 } from '../core/shared/enums/permissions.enum';
 import { throwError } from '../core/shared/responses/error.response';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { IUserPayload } from 'src/auth/interface/payload.interface';
 
 @ApiTags('Patients')
 @Controller('patients')
@@ -45,12 +46,9 @@ export class PatientController {
   })
   @Permission(Features.SALES, PermissionLevel.READ_WRITE)
   @Post()
-  async create(
-    @Body() dto: CreatePatientDto,
-    @GetUser('sub', ParseUUIDPipe) createdBy: string,
-  ) {
+  async create(@Body() dto: CreatePatientDto, @GetUser() user: IUserPayload) {
     try {
-      const response = await this.patientService.create(dto, createdBy);
+      const response = await this.patientService.create(dto, user);
       return new ApiSuccessResponseDto(
         response,
         HttpStatus.CREATED,
@@ -68,8 +66,13 @@ export class PatientController {
   })
   @Permission(Features.SALES, PermissionLevel.READ)
   @Get()
-  async findPatients(@Query() query: FindPatientDto) {
+  async findPatients(
+    @Query() query: FindPatientDto,
+    @GetUser() user: IUserPayload,
+  ) {
     try {
+      query.facilityId = user.facility;
+      query.departmentId = user.department;
       const response = await this.patientService.findAll(query);
       return new ApiSuccessResponseDto(
         response,
