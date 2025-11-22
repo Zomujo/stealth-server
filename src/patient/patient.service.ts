@@ -37,7 +37,7 @@ export class PatientService {
       where: {
         [Op.and]: [
           { facilityId: user.facility },
-          user.department && { departmentId: user.department },
+          { departmentId: user.department },
           {
             [Op.or]: [
               {
@@ -157,7 +157,7 @@ export class PatientService {
     const whereOptions: WhereOptions<Patient> = {
       [Op.and]: [
         { facilityId: query.facilityId },
-        query.departmentId && { departmentId: query.departmentId },
+        { departmentId: query.departmentId },
         query.search && {
           [Op.or]: [
             { cardIdentificationNumber: { [Op.iLike]: `%${query.search}%` } },
