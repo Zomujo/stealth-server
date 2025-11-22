@@ -35,6 +35,7 @@ export class PatientService {
   async create(dto: CreatePatientDto, user: IUserPayload) {
     const samePatient = await this.patientRepository.findOne({
       where: {
+        facilityId: user.facility,
         [Op.or]: [
           {
             cardIdentificationNumber: {
