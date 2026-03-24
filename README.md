@@ -90,7 +90,7 @@ Stealth Server is a comprehensive backend solution built with NestJS, providing 
 2. Install dependencies:
 
    ```bash
-   npm install
+   yarn install
    ```
 
 3. Set up environment variables:
@@ -106,34 +106,69 @@ Stealth Server is a comprehensive backend solution built with NestJS, providing 
 The application uses environment variables for configuration. Key variables include:
 
 ```env
-# Database
-DB_HOST=
-DB_PORT=
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
+# APP CONFIGURATION
+NODE_ENV=development
+PORT=
+CLIENT_URL=
+STAGING_URL=
+# SENTRY_DSN=
 
-# JWT
+# JWT CONFIGURATION
 JWT_SECRET=
 JWT_TOKEN_AUDIENCE=
 JWT_TOKEN_ISSUER=
 JWT_ACCESS_TOKEN_TTL=
 JWT_REFRESH_TOKEN_TTL=
 
-# Email
+# DATABASE CONFIGURATION
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_DIALECT=postgres
+DATABASE_URL=
+
+# EMAIL CONFIGURATION
 EMAIL_HOST=
 EMAIL_USERNAME=
 EMAIL_PASSWORD=
 EMAIL_FROM=
+EMAIL_PORT=
+CUSTOMER_SERVICE_MAIL=
 
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=
+# TWILIO CONFIGURATION
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=
+
+# ATSK CONFIGURATION
+ATSK_API_KEY=
+ATSK_USERNAME=
+ATSK_SHORT_CODE=
+ATSK_SENDER=
+ATSK_DEV_API_KEY=
+ATSK_DEV_USERNAME=
+
+# ARKESEL CONFIGURATION
+ARK_API_KEY=
+ARK_SENDER=
+
+# CLOUDINARY CONFIGURATION
+CLOUDINARY_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
-# Server
-PORT=
-NODE_ENV=
+# REDIS & QUEUE CONFIGURATION
+REDIS_URL=
+QUEUE_URL=
+QUEUE_TLS=
+
+# LOGTAIL CONFIGURATION
+# (Add your Logtail config here)
+
+# MISCELLANEOUS
+NANOID_GEN=AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890%
 ```
 
 ## API Documentation
@@ -172,28 +207,24 @@ The API documentation is available at `/docs` when running the server. It provid
 The application implements several security measures:
 
 1. **Authentication**
-
    - JWT-based authentication
    - Token refresh mechanism
    - Session management
    - Multi-device support
 
 2. **Authorization**
-
    - Role-based access control
    - Permission-based authorization
    - Route protection
    - Resource-level access control
 
 3. **Data Security**
-
    - Password hashing with bcrypt
    - Input validation
    - SQL injection prevention
    - XSS protection
 
 4. **API Security**
-
    - Rate limiting
    - CORS protection
    - Request validation
@@ -218,10 +249,10 @@ The server will be available at `http://localhost:${PORT}` and the API documenta
 
 ## Contributing
 
-1. Fork the repository
+1. Clone the repository
 2. Create your feature branch
 3. Commit your changes
-4. Push to the branch
+4. Push the feature branch
 5. Create a new Pull Request
 
 ## License
