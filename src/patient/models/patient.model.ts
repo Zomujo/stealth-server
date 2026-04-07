@@ -12,6 +12,7 @@ import {
   AfterCreate,
   AfterDestroy,
   AfterUpdate,
+  Default,
 } from 'sequelize-typescript';
 import { BaseModel } from '../../core/shared/models/base.model';
 import { Sale } from '../../sales/models/sales.model';
@@ -45,6 +46,14 @@ export class Patient extends BaseModel<Patient> {
 
   @Column(DataType.DATE)
   dateOfBirth: Date;
+
+  @Default(true)
+  @Column
+  consented: boolean;
+
+  @Default(new Date())
+  @Column(DataType.DATE)
+  consentDate: Date;
 
   @HasMany(() => Sale)
   sales: Sale[];
