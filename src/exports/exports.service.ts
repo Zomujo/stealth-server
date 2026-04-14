@@ -13,7 +13,13 @@ import {
   generateTotalQuantityDataQuery,
 } from './sql/export-general.sql';
 import { generateExportFilename } from 'src/core/shared/factory';
-import { format } from 'date-fns';
+import {
+  differenceInCalendarDays,
+  endOfDay,
+  format,
+  startOfDay,
+  subDays,
+} from 'date-fns';
 
 @Injectable()
 export class ExportsService {
@@ -87,8 +93,57 @@ export class ExportsService {
     }
   }
 
+  private createDate(query: LocationQueryDto) {
+    // If lastXDays is provided, it takes precedence
+    console.log('original query', query);
+    if (query.lastXDays) {
+      const now = new Date();
+      const start = startOfDay(subDays(now, query.lastXDays));
+      const end = endOfDay(now);
+      query.startDate = start;
+      query.endDate = end;
+      return query;
+    }
+
+    // If both startDate and endDate are provided
+    if (query.startDate && query.endDate) {
+      query.startDate = startOfDay(query.startDate);
+      query.endDate = endOfDay(query.endDate);
+      // Ensure startDate is not after endDate
+      if (query.startDate > query.endDate) {
+        // Swap dates if needed
+        const temp = query.startDate;
+        query.startDate = query.endDate;
+        query.endDate = temp;
+      }
+      return query;
+    }
+
+    // If only startDate is provided
+    if (query.startDate && !query.endDate) {
+      query.startDate = startOfDay(query.startDate);
+      query.endDate = endOfDay(query.startDate);
+      return query;
+    }
+
+    // If only endDate is provided
+    if (!query.startDate && query.endDate) {
+      query.startDate = startOfDay(query.endDate);
+      query.endDate = endOfDay(query.endDate);
+      return query;
+    }
+
+    // If none are provided, set both to today
+    const today = new Date();
+    query.startDate = startOfDay(subDays(today, 30));
+    query.endDate = endOfDay(today);
+    return query;
+  }
+
   async exportLocationPerformanceData(query: LocationQueryDto) {
     const doc = new PDFDocument({ margin: 30, size: 'A1' });
+    query = this.createDate(query);
+    console.log('query', query);
     const readable = new Readable({
       read() {},
     });
@@ -144,13 +199,13 @@ export class ExportsService {
           dbQuery = generateGeneralDataQuery(query.location);
           break;
         case 'saleAndStockingActivity':
-          dbQuery = generateSaleAndStockingActivityDataQuery(query.location);
+          dbQuery = generateSaleAndStockingActivityDataQuery(query);
           break;
         case 'systemUsage':
-          dbQuery = generateSystemUsageDataQuery(query.location);
+          dbQuery = generateSystemUsageDataQuery(query);
           break;
         case 'totalQuantity':
-          dbQuery = generateTotalQuantityDataQuery(query.location);
+          dbQuery = generateTotalQuantityDataQuery(query);
           break;
         default:
           throw new NotFoundException('Invalid pdfSection');
@@ -164,9 +219,14 @@ export class ExportsService {
         });
       doc.moveDown(0.5);
 
+      const lastXDays = differenceInCalendarDays(
+        query.endDate,
+        query.startDate,
+      );
       await doc.table(
         {
-          headers: PerformanceExportSchema.sections[pdfSection].headers,
+          headers:
+            PerformanceExportSchema.sections[pdfSection].headers(lastXDays),
           datas: rows,
         },
         {

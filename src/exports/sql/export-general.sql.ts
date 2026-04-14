@@ -1,5 +1,9 @@
-import { startOfMonth } from 'date-fns';
-import { IMSLocations, PerformanceExportSchema } from '../dto';
+import { differenceInCalendarDays } from 'date-fns';
+import {
+  IMSLocations,
+  LocationQueryDto,
+  PerformanceExportSchema,
+} from '../dto';
 
 export function generateGeneralDataQuery(location: IMSLocations) {
   return `
@@ -27,11 +31,9 @@ export function generateGeneralDataQuery(location: IMSLocations) {
 }
 
 export function generateSaleAndStockingActivityDataQuery(
-  location: IMSLocations,
+  dto: LocationQueryDto,
 ) {
-  // const today = new Date('2025-10-01');
-  // const month = startOfMonth(today);
-  // const end = endOfMonth(addMonths(today, 2));
+  const { location, startDate: start, endDate: end } = dto;
   return `
     WITH facility_ids AS (
       SELECT id
@@ -68,9 +70,9 @@ export function generateSaleAndStockingActivityDataQuery(
     WHERE
       a.facility_id IN (SELECT id FROM facility_ids)
       ${location !== IMSLocations.SAVANNAH ? 'AND d.name IS NOT NULL' : ''}
+			AND a.created_at BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
     GROUP BY a.facility_id, d.name, f.name;
 `;
-  // AND a.created_at BETWEEN '${month.toISOString()}' AND '${end.toISOString()}'
 }
 
 // COUNT(CASE WHEN a.description = 'Created Item' THEN 1 END) AS "itemsAdded",
@@ -82,11 +84,10 @@ export function generateSaleAndStockingActivityDataQuery(
 //     'N/A'
 //           ) AS "timeOfRecentlyAddedItem"
 
-export function generateSystemUsageDataQuery(location: IMSLocations) {
-  const today = new Date();
-  // const month = subMonths(today, 1);
-  const month = startOfMonth(today);
-  // const end = endOfMonth(addMonths(today, 2));
+export function generateSystemUsageDataQuery(dto: LocationQueryDto) {
+  const { location, startDate: start, endDate: end } = dto;
+
+  const numberOfDays = differenceInCalendarDays(end, start);
 
   return `
     WITH facility_ids AS (
@@ -109,7 +110,7 @@ export function generateSystemUsageDataQuery(location: IMSLocations) {
       COALESCE(d.name, 'N/A') AS "healthCenters",
       COUNT(DISTINCT DATE_TRUNC('day', a.created_at)) AS "usageDaysInTheMonth",
       TO_CHAR(
-          (COUNT(DISTINCT DATE_TRUNC('day', a.created_at))::NUMERIC / 30) * 100,
+          (COUNT(DISTINCT DATE_TRUNC('day', a.created_at))::NUMERIC / ${numberOfDays}) * 100,
           'FM999990.00'
       ) || '%' AS "percentageUsage"
       
@@ -117,22 +118,20 @@ export function generateSystemUsageDataQuery(location: IMSLocations) {
     FROM facility_ids f
     LEFT JOIN audit_logs a
       ON a.facility_id = f.id
-			AND a.created_at > '${month.toISOString()}'
-     AND a.table_name NOT IN ('SaleItem', 'Patient')
+			AND a.created_at BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
+			AND a.table_name NOT IN ('SaleItem', 'Patient')
     LEFT JOIN departments d
       ON a.department_id = d.id
      ${location !== IMSLocations.SAVANNAH ? 'AND d.name IS NOT NULL' : ''}
-
     GROUP BY f.id, f.name, d.name;
 
 `;
-  // AND a.created_at BETWEEN '${month.toISOString()}' AND '${end.toISOString()}'
+  // AND a.created_at > '${start.toISOString()}'
 }
 
-export function generateTotalQuantityDataQuery(location: string) {
-  // const today = new Date('2025-10-01');
-  // const month = startOfMonth(today);
-  // const end = endOfMonth(addMonths(today, 2));
+export function generateTotalQuantityDataQuery(dto: LocationQueryDto) {
+  const { location, startDate: start, endDate: end } = dto;
+
   return `
     WITH facility_ids AS (
       SELECT id
@@ -152,7 +151,7 @@ export function generateTotalQuantityDataQuery(location: string) {
     LEFT JOIN departments d ON b.department_id = d.id
     LEFT JOIN facilities f ON b.facility_id = f.id
     WHERE b.facility_id IN (SELECT id FROM facility_ids)
+		AND b.created_at BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
     GROUP BY b.facility_id, d.name, f.name;
 `;
-  // AND b.created_at BETWEEN '${month.toISOString()}' AND '${end.toISOString()}'
 }
