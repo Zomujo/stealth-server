@@ -27,7 +27,7 @@ export const PerformanceExportSchema: Record<string, any> = {
   sections: {
     general: {
       title: 'GENERAL DATA FOR ALL HEALTH CENTERS',
-      headers: [
+      headers: (_: any) => [
         {
           label: 'Health Directorates',
           property: 'healthDirectorates',
@@ -75,7 +75,7 @@ export const PerformanceExportSchema: Record<string, any> = {
 
     saleAndStockingActivity: {
       title: 'HEALTH CENTER SALES AND STOCKING AUDITS',
-      headers: [
+      headers: (_: any) => [
         {
           label: 'Health Directorates',
           property: 'healthDirectorates',
@@ -129,7 +129,7 @@ export const PerformanceExportSchema: Record<string, any> = {
 
     systemUsage: {
       title: 'SYSTEM USAGE BY HEALTH CENTERS',
-      headers: [
+      headers: (days: number) => [
         {
           label: 'Health Directorates',
           property: 'healthDirectorates',
@@ -143,9 +143,9 @@ export const PerformanceExportSchema: Record<string, any> = {
           renderer: null,
         },
         {
-          label: 'Usage Days In The Month',
+          label: `Usage Days In The Last ${days} Days`,
           property: 'usageDaysInTheMonth',
-          width: 250,
+          width: 300,
           renderer: null,
         },
         {
@@ -159,7 +159,7 @@ export const PerformanceExportSchema: Record<string, any> = {
 
     totalQuantity: {
       title: 'INVENTORY LEVELS OF HEALTH CENTERS',
-      headers: [
+      headers: (_: any) => [
         {
           label: 'Health Directorates',
           property: 'healthDirectorates',
