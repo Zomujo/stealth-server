@@ -29,7 +29,7 @@ export class AuditsService {
   @Cron('0 0 2 1 * *', { timeZone: 'UTC' })
   async purgeOldAuditLogs(): Promise<void> {
     if (process.env.NODE_ENV !== 'production') return;
-    const cutoff = startOfMonth(subMonths(new Date(), 2));
+    const cutoff = startOfMonth(subMonths(new Date(), 4));
     const deleted = await this.auditLogRepository.destroy({
       where: { createdAt: { [Op.lt]: cutoff } },
     });
