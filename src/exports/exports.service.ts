@@ -95,7 +95,6 @@ export class ExportsService {
 
   private createDate(query: LocationQueryDto) {
     // If lastXDays is provided, it takes precedence
-    console.log('original query', query);
     if (query.lastXDays) {
       const now = new Date();
       const start = startOfDay(subDays(now, query.lastXDays));
@@ -143,7 +142,6 @@ export class ExportsService {
   async exportLocationPerformanceData(query: LocationQueryDto) {
     const doc = new PDFDocument({ margin: 30, size: 'A1' });
     query = this.createDate(query);
-    console.log('query', query);
     const readable = new Readable({
       read() {},
     });
