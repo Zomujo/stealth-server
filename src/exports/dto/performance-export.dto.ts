@@ -10,6 +10,7 @@ export const PerformanceExportSchema: Record<string, any> = {
         "'NANUMBA SOUTH DHD'",
         "'KUMBUNGU DHD'",
         "'KARAGA DHA'",
+        "'KARAGA DISTRICT HOSPITAL'",
       ],
     },
 
