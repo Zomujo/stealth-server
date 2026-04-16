@@ -65,6 +65,7 @@ export class PatientService {
       createdById: user.sub,
       departmentId: user.department,
       facilityId: user.facility,
+      consentDate: new Date(),
     });
     return patient;
   }

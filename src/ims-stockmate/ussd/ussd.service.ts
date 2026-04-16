@@ -403,6 +403,7 @@ export class StockmateUssdService {
           const { name, dOB } = this.extractNameAndDob(inputs[2]);
           const newPatient = await this.patientRepository.create(
             {
+              consentDate: new Date(),
               cardIdentificationNumber: inputs[0],
               dateOfBirth: dOB,
               createdById: dto.userId,
