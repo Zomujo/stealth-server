@@ -51,6 +51,18 @@ export class Patient extends BaseModel<Patient> {
   @Column
   consented: boolean;
 
+  @AllowNull
+  @Column
+  diagnosis: string;
+
+  @AllowNull
+  @Column
+  gender: string;
+
+  @AllowNull
+  @Column
+  weight: number;
+
   @Default(new Date())
   @Column(DataType.DATE)
   consentDate: Date;

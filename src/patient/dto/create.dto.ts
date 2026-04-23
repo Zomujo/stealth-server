@@ -5,7 +5,22 @@ import {
   IntersectionType,
 } from '@nestjs/swagger';
 import { GenericResponseDto } from '../../core/shared/dto/base.dto';
-import { IsNotEmpty, IsOptional, IsUUID, MaxDate } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+  MaxDate,
+  MinLength,
+} from 'class-validator';
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}
 import { Type } from 'class-transformer';
 import { format } from 'date-fns';
 
@@ -47,6 +62,33 @@ export class CreatePatientDto {
   @Type(() => Date)
   @MaxDate(new Date(Date.now()))
   dateOfBirth: Date;
+
+  @ApiPropertyOptional({
+    example: 'Hypertension',
+    description: 'Diagnosis of the patient',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  diagnosis: string;
+
+  @ApiPropertyOptional({
+    enum: Gender,
+    example: Gender.MALE,
+    description: 'Gender of the patient',
+  })
+  @IsOptional()
+  @IsEnum(Gender)
+  gender: Gender;
+
+  @ApiPropertyOptional({
+    example: 70,
+    description: 'Weight of the patient in kg',
+  })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  weight: number;
 }
 
 export class CreatePatientResponseDto extends IntersectionType(

@@ -7,6 +7,7 @@ export class RetrievePatientsDto extends IntersectionType(
     'id',
     'name',
     'cardIdentificationNumber',
+    'gender',
   ]),
 ) {}
 export class RetrievePatientDto extends CreatePatientResponseDto {}

@@ -179,6 +179,7 @@ export class PatientService {
       attributes: [
         'id',
         'name',
+        'gender',
         'cardIdentificationNumber',
         'secondaryIdentificationNumber',
       ],
