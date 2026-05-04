@@ -204,6 +204,7 @@ export class ExportsService {
           break;
         case 'totalQuantity':
           dbQuery = generateTotalQuantityDataQuery(query);
+          console.log('dbquery', dbQuery);
           break;
         default:
           throw new NotFoundException('Invalid pdfSection');

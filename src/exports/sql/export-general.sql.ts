@@ -130,7 +130,7 @@ export function generateSystemUsageDataQuery(dto: LocationQueryDto) {
 }
 
 export function generateTotalQuantityDataQuery(dto: LocationQueryDto) {
-  const { location, startDate: start, endDate: end } = dto;
+  const { location } = dto;
 
   return `
     WITH facility_ids AS (
@@ -151,7 +151,7 @@ export function generateTotalQuantityDataQuery(dto: LocationQueryDto) {
     LEFT JOIN departments d ON b.department_id = d.id
     LEFT JOIN facilities f ON b.facility_id = f.id
     WHERE b.facility_id IN (SELECT id FROM facility_ids)
-		AND b.created_at BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
     GROUP BY b.facility_id, d.name, f.name;
 `;
+  // AND b.created_at BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
 }
