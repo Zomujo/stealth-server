@@ -69,10 +69,10 @@ export function generateSaleAndStockingActivityDataQuery(
     LEFT JOIN facilities f ON a.facility_id = f.id
     WHERE
       a.facility_id IN (SELECT id FROM facility_ids)
-      ${location !== IMSLocations.SAVANNAH ? 'AND d.name IS NOT NULL' : ''}
 			AND a.created_at BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
     GROUP BY a.facility_id, d.name, f.name;
 `;
+  // ${location !== IMSLocations.SAVANNAH ? 'AND d.name IS NOT NULL' : ''}
 }
 
 // COUNT(CASE WHEN a.description = 'Created Item' THEN 1 END) AS "itemsAdded",
@@ -122,7 +122,6 @@ export function generateSystemUsageDataQuery(dto: LocationQueryDto) {
 			AND a.table_name NOT IN ('SaleItem', 'Patient')
     LEFT JOIN departments d
       ON a.department_id = d.id
-     ${location !== IMSLocations.SAVANNAH ? 'AND d.name IS NOT NULL' : ''}
     GROUP BY f.id, f.name, d.name;
 
 `;
