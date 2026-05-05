@@ -21,6 +21,8 @@ export const PerformanceExportSchema: Record<string, any> = {
         "'SANKUMPE-CENTRAL GONJA DHD'",
         "'DAASHEI CHPS - North-East Gonja'",
         "'CENTRAL GONJA DHD'",
+        "'North Gonja DHD'",
+        "'North Gonja DHA'",
       ],
     },
   },
